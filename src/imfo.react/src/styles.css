@@ -1,0 +1,32 @@
+:root{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --muted:#6b7280;
+  --accent:#0b5fff;
+  --danger:#ef4444;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#0f172a}
+.app-header{background:linear-gradient(90deg,#09203f 0%,#537895 100%);color:white;padding:28px 24px}
+.app-header h1{margin:0;font-weight:700}
+.app-header .muted{margin:4px 0 0;opacity:0.9}
+.container{display:flex;gap:20px;padding:24px;max-width:1100px;margin:24px auto}
+.left{flex:2}
+.right{flex:1}
+.card{background:var(--card);padding:16px;border-radius:8px;box-shadow:0 6px 18px rgba(12,24,40,0.06)}
+.list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.list-item{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px;border-radius:6px;border:1px solid #eef2f7}
+.list-item .title{font-weight:600}
+.list-item .meta{font-size:12px;color:var(--muted)}
+.amount{font-weight:700;align-self:center}
+.amount.pos{color:green}
+.amount.neg{color:var(--danger)}
+.form label{display:block;margin-bottom:10px;font-size:14px}
+.form input{width:100%;padding:8px;border:1px solid #e6eef8;border-radius:6px}
+.form-actions{display:flex;justify-content:flex-end;margin-top:10px}
+.btn{padding:8px 12px;border-radius:6px;border:none;background:#e6eef8}
+.btn.primary{background:var(--accent);color:white}
+
+@media (max-width:800px){
+  .container{flex-direction:column;padding:12px}
+}

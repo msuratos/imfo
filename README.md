@@ -24,4 +24,4 @@ Notes
 
 ## Architecture
 
-[Architecture](./architecture.md)
+[Architecture](./docs/architecture.md)

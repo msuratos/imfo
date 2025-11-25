@@ -1,4 +1,4 @@
-namespace Budgetor.WebApi.Models;
+namespace Imfo.WebApi.Models;
 
 public class BudgetItem
 {

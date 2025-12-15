@@ -1,6 +1,6 @@
-using Budgetor.WebApi.Models;
+using Imfo.WebApi.Models;
 
-namespace Budgetor.WebApi.Repositories;
+namespace Imfo.WebApi.Repositories;
 
 public interface IBudgetRepository
 {

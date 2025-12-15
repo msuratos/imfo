@@ -1,8 +1,8 @@
-using Budgetor.WebApi.Models;
-using Budgetor.WebApi.Repositories;
+using Imfo.WebApi.Models;
+using Imfo.WebApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Budgetor.WebApi.Controllers;
+namespace Imfo.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

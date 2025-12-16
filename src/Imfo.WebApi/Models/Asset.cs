@@ -7,4 +7,8 @@ public class Asset
     public decimal Value { get; set; }
     public string Type { get; set; } = string.Empty;
     public DateTime AcquiredDate { get; set; }
+
+    // EF Core: owner user
+    public Guid UserId { get; set; }
+    public User? User { get; set; }
 }

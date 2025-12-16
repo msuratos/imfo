@@ -1,49 +1,80 @@
+using Imfo.WebApi.Data;
 using Imfo.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Imfo.WebApi.Models.Dtos;
 
 namespace Imfo.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Microsoft.AspNetCore.Authorization.Authorize]
 public class BudgetController : ControllerBase
 {
-    private static readonly List<BudgetItem> _items = new();
+    private readonly ImfoDbContext _db;
 
-    static BudgetController()
+    public BudgetController(ImfoDbContext db)
     {
-        _items.Add(new BudgetItem { Id = Guid.NewGuid(), Title = "Salary", Amount = 5000, Category = "Income", Date = DateTime.UtcNow });
-        _items.Add(new BudgetItem { Id = Guid.NewGuid(), Title = "Rent", Amount = -1200, Category = "Housing", Date = DateTime.UtcNow });
-        _items.Add(new BudgetItem { Id = Guid.NewGuid(), Title = "Groceries", Amount = -300, Category = "Food", Date = DateTime.UtcNow });
+        _db = db;
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<BudgetItem>> Get()
+    public async Task<ActionResult<IEnumerable<BudgetItem>>> Get()
     {
-        return Ok(_items.OrderByDescending(x => x.Date));
+        var userId = GetCurrentUserId();
+        return Ok(await _db.BudgetItems.Where(b => b.UserId == userId).OrderByDescending(x => x.Date).ToListAsync());
     }
 
     [HttpGet("{id}")]
-    public ActionResult<BudgetItem> Get(Guid id)
+    public async Task<ActionResult<BudgetItem>> Get(Guid id)
     {
-        var item = _items.FirstOrDefault(x => x.Id == id);
+        var userId = GetCurrentUserId();
+        var item = await _db.BudgetItems.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
         if (item == null) return NotFound();
         return Ok(item);
     }
 
     [HttpPost]
-    public ActionResult<BudgetItem> Post([FromBody] BudgetItem item)
+    public async Task<ActionResult<BudgetItemReadDto>> Post([FromBody] BudgetItemCreateDto item)
     {
-        item.Id = Guid.NewGuid();
-        _items.Add(item);
-        return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
+        var userId = GetCurrentUserId();
+        var entity = new BudgetItem
+        {
+            Id = Guid.NewGuid(),
+            Title = item.Title,
+            Amount = item.Amount,
+            Category = item.Category,
+            Date = item.Date,
+            UserId = userId
+        };
+        _db.BudgetItems.Add(entity);
+        await _db.SaveChangesAsync();
+        var read = new BudgetItemReadDto
+        {
+            Id = entity.Id,
+            Title = entity.Title,
+            Amount = entity.Amount,
+            Category = entity.Category,
+            Date = entity.Date,
+            UserId = entity.UserId
+        };
+        return CreatedAtAction(nameof(Get), new { id = entity.Id }, read);
     }
 
     [HttpDelete("{id}")]
-    public ActionResult Delete(Guid id)
+    public async Task<ActionResult> Delete(Guid id)
     {
-        var it = _items.FirstOrDefault(x => x.Id == id);
+        var userId = GetCurrentUserId();
+        var it = await _db.BudgetItems.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
         if (it == null) return NotFound();
-        _items.Remove(it);
+        _db.BudgetItems.Remove(it);
+        await _db.SaveChangesAsync();
         return NoContent();
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var idClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(idClaim, out var id) ? id : Guid.Empty;
     }
 }

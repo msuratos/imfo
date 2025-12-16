@@ -1,55 +1,95 @@
+using Imfo.WebApi.Data;
 using Imfo.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Imfo.WebApi.Models.Dtos;
 
 namespace Imfo.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Microsoft.AspNetCore.Authorization.Authorize]
 public class AssetController : ControllerBase
 {
-    private static readonly List<Asset> _items = new();
+    private readonly ImfoDbContext _db;
 
-    static AssetController()
+    public AssetController(ImfoDbContext db)
     {
-        _items.Add(new Asset { Id = Guid.NewGuid(), Name = "Laptop", Value = 1200m, Type = "Electronics", AcquiredDate = DateTime.UtcNow });
-        _items.Add(new Asset { Id = Guid.NewGuid(), Name = "Bike", Value = 300m, Type = "Transport", AcquiredDate = DateTime.UtcNow });
+        _db = db;
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Asset>> Get() => Ok(_items.OrderByDescending(x => x.AcquiredDate));
+    public async Task<ActionResult<IEnumerable<Asset>>> Get()
+    {
+        var userId = GetCurrentUserId();
+        return Ok(await _db.Assets.Where(a => a.UserId == userId).OrderByDescending(x => x.AcquiredDate).ToListAsync());
+    }
 
     [HttpGet("{id}")]
-    public ActionResult<Asset> Get(Guid id)
+    public async Task<ActionResult<Asset>> Get(Guid id)
     {
-        var it = _items.FirstOrDefault(x => x.Id == id);
+        var userId = GetCurrentUserId();
+        var it = await _db.Assets.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
         if (it == null) return NotFound();
         return Ok(it);
     }
 
     [HttpPost]
-    public ActionResult<Asset> Post([FromBody] Asset a)
+    public async Task<ActionResult<AssetReadDto>> Post([FromBody] AssetCreateDto a)
     {
-        a.Id = Guid.NewGuid();
-        _items.Add(a);
-        return CreatedAtAction(nameof(Get), new { id = a.Id }, a);
+        var userId = GetCurrentUserId();
+        var entity = new Asset
+        {
+            Id = Guid.NewGuid(),
+            Name = a.Name,
+            Value = a.Value,
+            Type = a.Type,
+            AcquiredDate = a.AcquiredDate,
+            UserId = userId
+        };
+        _db.Assets.Add(entity);
+        await _db.SaveChangesAsync();
+        var read = new AssetReadDto
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            Value = entity.Value,
+            Type = entity.Type,
+            AcquiredDate = entity.AcquiredDate,
+            UserId = entity.UserId
+        };
+        return CreatedAtAction(nameof(Get), new { id = entity.Id }, read);
     }
 
     [HttpPut("{id}")]
-    public ActionResult<Asset> Put(Guid id, [FromBody] Asset updated)
+    public async Task<ActionResult<Asset>> Put(Guid id, [FromBody] Asset updated)
     {
-        var idx = _items.FindIndex(x => x.Id == id);
-        if (idx == -1) return NotFound();
-        updated.Id = id;
-        _items[idx] = updated;
-        return Ok(updated);
+        var userId = GetCurrentUserId();
+        var existing = await _db.Assets.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        if (existing == null) return NotFound();
+        existing.Name = updated.Name;
+        existing.Value = updated.Value;
+        existing.Type = updated.Type;
+        existing.AcquiredDate = updated.AcquiredDate;
+        // UserId remains the authenticated user
+        await _db.SaveChangesAsync();
+        return Ok(existing);
     }
 
     [HttpDelete("{id}")]
-    public ActionResult Delete(Guid id)
+    public async Task<ActionResult> Delete(Guid id)
     {
-        var it = _items.FirstOrDefault(x => x.Id == id);
+        var userId = GetCurrentUserId();
+        var it = await _db.Assets.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
         if (it == null) return NotFound();
-        _items.Remove(it);
+        _db.Assets.Remove(it);
+        await _db.SaveChangesAsync();
         return NoContent();
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var idClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(idClaim, out var id) ? id : Guid.Empty;
     }
 }

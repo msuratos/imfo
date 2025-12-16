@@ -1,5 +1,4 @@
 using Imfo.WebApi.Models;
-using Imfo.WebApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Imfo.WebApi.Controllers;
@@ -8,23 +7,25 @@ namespace Imfo.WebApi.Controllers;
 [Route("api/[controller]")]
 public class BudgetController : ControllerBase
 {
-    private readonly IBudgetRepository _repo;
+    private static readonly List<BudgetItem> _items = new();
 
-    public BudgetController(IBudgetRepository repo)
+    static BudgetController()
     {
-        _repo = repo;
+        _items.Add(new BudgetItem { Id = Guid.NewGuid(), Title = "Salary", Amount = 5000, Category = "Income", Date = DateTime.UtcNow });
+        _items.Add(new BudgetItem { Id = Guid.NewGuid(), Title = "Rent", Amount = -1200, Category = "Housing", Date = DateTime.UtcNow });
+        _items.Add(new BudgetItem { Id = Guid.NewGuid(), Title = "Groceries", Amount = -300, Category = "Food", Date = DateTime.UtcNow });
     }
 
     [HttpGet]
     public ActionResult<IEnumerable<BudgetItem>> Get()
     {
-        return Ok(_repo.GetAll());
+        return Ok(_items.OrderByDescending(x => x.Date));
     }
 
     [HttpGet("{id}")]
     public ActionResult<BudgetItem> Get(Guid id)
     {
-        var item = _repo.Get(id);
+        var item = _items.FirstOrDefault(x => x.Id == id);
         if (item == null) return NotFound();
         return Ok(item);
     }
@@ -32,14 +33,17 @@ public class BudgetController : ControllerBase
     [HttpPost]
     public ActionResult<BudgetItem> Post([FromBody] BudgetItem item)
     {
-        var created = _repo.Create(item);
-        return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+        item.Id = Guid.NewGuid();
+        _items.Add(item);
+        return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
     }
 
     [HttpDelete("{id}")]
     public ActionResult Delete(Guid id)
     {
-        if (!_repo.Delete(id)) return NotFound();
+        var it = _items.FirstOrDefault(x => x.Id == id);
+        if (it == null) return NotFound();
+        _items.Remove(it);
         return NoContent();
     }
 }

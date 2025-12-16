@@ -6,11 +6,11 @@ namespace Imfo.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class BudgetsController : ControllerBase
+public class BudgetController : ControllerBase
 {
     private readonly IBudgetRepository _repo;
 
-    public BudgetsController(IBudgetRepository repo)
+    public BudgetController(IBudgetRepository repo)
     {
         _repo = repo;
     }

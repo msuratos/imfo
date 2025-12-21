@@ -1,14 +1,15 @@
 using Imfo.WebApi.Data;
 using Imfo.WebApi.Models;
+using Imfo.WebApi.Models.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Imfo.WebApi.Models.Dtos;
 
 namespace Imfo.WebApi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-[Microsoft.AspNetCore.Authorization.Authorize]
 public class TransactionController : ControllerBase
 {
     private readonly ImfoDbContext _db;
@@ -30,6 +31,7 @@ public class TransactionController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var it = await _db.Transactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
         if (it == null) return NotFound();
         return Ok(it);
     }
@@ -47,8 +49,10 @@ public class TransactionController : ControllerBase
             Date = t.Date,
             UserId = userId
         };
+
         _db.Transactions.Add(entity);
         await _db.SaveChangesAsync();
+
         var read = new TransactionReadDto
         {
             Id = entity.Id,
@@ -58,6 +62,7 @@ public class TransactionController : ControllerBase
             Date = entity.Date,
             UserId = entity.UserId
         };
+
         return CreatedAtAction(nameof(Get), new { id = entity.Id }, read);
     }
 
@@ -66,11 +71,14 @@ public class TransactionController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var existing = await _db.Transactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
         if (existing == null) return NotFound();
+
         existing.Description = updated.Description;
         existing.Amount = updated.Amount;
         existing.Category = updated.Category;
         existing.Date = updated.Date;
+
         await _db.SaveChangesAsync();
         return Ok(existing);
     }
@@ -80,8 +88,10 @@ public class TransactionController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var it = await _db.Transactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        
         if (it == null) return NotFound();
         _db.Transactions.Remove(it);
+        
         await _db.SaveChangesAsync();
         return NoContent();
     }

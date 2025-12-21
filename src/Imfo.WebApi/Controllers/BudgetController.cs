@@ -1,14 +1,15 @@
 using Imfo.WebApi.Data;
 using Imfo.WebApi.Models;
+using Imfo.WebApi.Models.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Imfo.WebApi.Models.Dtos;
 
 namespace Imfo.WebApi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-[Microsoft.AspNetCore.Authorization.Authorize]
 public class BudgetController : ControllerBase
 {
     private readonly ImfoDbContext _db;
@@ -30,6 +31,7 @@ public class BudgetController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var item = await _db.BudgetItems.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
         if (item == null) return NotFound();
         return Ok(item);
     }
@@ -47,8 +49,10 @@ public class BudgetController : ControllerBase
             Date = item.Date,
             UserId = userId
         };
+
         _db.BudgetItems.Add(entity);
         await _db.SaveChangesAsync();
+
         var read = new BudgetItemReadDto
         {
             Id = entity.Id,
@@ -58,6 +62,7 @@ public class BudgetController : ControllerBase
             Date = entity.Date,
             UserId = entity.UserId
         };
+
         return CreatedAtAction(nameof(Get), new { id = entity.Id }, read);
     }
 
@@ -66,9 +71,12 @@ public class BudgetController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var it = await _db.BudgetItems.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+
         if (it == null) return NotFound();
+
         _db.BudgetItems.Remove(it);
         await _db.SaveChangesAsync();
+        
         return NoContent();
     }
 

@@ -1,8 +1,13 @@
 using Imfo.WebApi.Data;
 using Imfo.WebApi.Models;
+using Imfo.WebApi.Models.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Imfo.WebApi.Controllers;
 
@@ -11,35 +16,58 @@ namespace Imfo.WebApi.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly ImfoDbContext _db;
+    private readonly IConfiguration _config;
 
-    public AuthController(ImfoDbContext db)
+    public AuthController(ImfoDbContext db, IConfiguration config)
     {
         _db = db;
+        _config = config;
     }
 
 
     [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<ActionResult<Models.Dtos.UserReadDto>> Register([FromBody] Models.Dtos.UserCreateDto u)
+    public async Task<ActionResult<UserReadDto>> Register([FromBody] UserCreateDto u)
     {
         if (await _db.Users.AnyAsync(x => x.Username == u.Username)) return Conflict("User already exists");
+
         var entity = new User { Id = Guid.NewGuid(), Username = u.Username, Password = u.Password };
         _db.Users.Add(entity);
         await _db.SaveChangesAsync();
-        var read = new Models.Dtos.UserReadDto { Id = entity.Id, Username = entity.Username };
+
+        var read = new UserReadDto { Id = entity.Id, Username = entity.Username };
         return CreatedAtAction(nameof(GetUser), new { id = entity.Id }, read);
     }
 
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<ActionResult> Login([FromBody] Models.Dtos.UserCreateDto credentials)
+    public async Task<ActionResult> Login([FromBody] UserCreateDto credentials)
     {
         var found = await _db.Users.FirstOrDefaultAsync(x => x.Username == credentials.Username && x.Password == credentials.Password);
         if (found == null) return Unauthorized();
-        // generate a simple token and store it on the user for demo purposes
-        found.Token = Guid.NewGuid().ToString();
+
+        var jwtKey = _config["Jwt:Key"] ?? throw new Exception("Failed to get JWT signing key.");
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[] {
+            new Claim(ClaimTypes.NameIdentifier, found.Id.ToString()),
+            new Claim(ClaimTypes.Name, found.Username)
+        };
+
+        var token = new JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(2),
+            signingCredentials: creds
+        );
+
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+        // (optional) persist token for demo compatibility
+        found.Token = tokenString;
         await _db.SaveChangesAsync();
-        return Ok(new { token = found.Token, user = found.Username });
+
+        return Ok(new { token = tokenString, user = found.Username });
     }
 
     [Authorize]

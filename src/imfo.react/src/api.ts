@@ -3,8 +3,12 @@ import { BudgetItem } from './types'
 
 const api = axios.create();
 
-export async function getBudgets(): Promise<BudgetItem[]> {
-  const r = await api.get('/api/budget')
+export async function getBudgets(token: string): Promise<BudgetItem[]> {
+  const r = await api.get('/api/budget', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
   return r.data
 }
 

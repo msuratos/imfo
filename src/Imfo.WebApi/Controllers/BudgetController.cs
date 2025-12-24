@@ -4,6 +4,7 @@ using Imfo.WebApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Imfo.WebApi.Controllers;
 
@@ -82,7 +83,7 @@ public class BudgetController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        var idClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return Guid.TryParse(idClaim, out var id) ? id : Guid.Empty;
     }
 }

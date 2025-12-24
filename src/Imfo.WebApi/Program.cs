@@ -16,16 +16,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var jwtKey = builder.Configuration["Jwt:Key"];;
-        if (jwtKey == null) throw new Exception("WARNING: Using default JWT signing key. This is insecure and should be changed in production!");
-        var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
+        options.MetadataAddress = "http://localhost:3001/oidc/.well-known/openid-configuration";
+        options.RequireHttpsMetadata = false;
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = false,
             ValidateAudience = false,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+            ValidateIssuerSigningKey = true
         };
     });
 

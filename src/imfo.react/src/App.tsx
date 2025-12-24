@@ -11,8 +11,8 @@ import './styles.css'
 
 const config: LogtoConfig = {
   endpoint: 'http://localhost:3001/',
-  appId: 'kyy4w1e1s9oestigfh1iu',
-  resources: ['https://localhost:5001']
+  appId: '0cxcjvutccjvyen7ofkr0',
+  resources: ['https://localhost:5001/api']
 };
 
 function Default() {
@@ -24,13 +24,14 @@ function Default() {
   }, [])
 
   async function load() {
-    const token = await getAccessToken('https://localhost:5001');
-    const data = await getBudgets(token)
+    const token = await getAccessToken('https://localhost:5001/api');
+    const data = await getBudgets(token);
     setItems(data)
   }
 
   async function onCreate(item: Omit<BudgetItem, 'id'>) {
-    await createBudget(item)
+    const token = await getAccessToken('https://localhost:5001/api');
+    await createBudget(item, token);
     load()
   }
 

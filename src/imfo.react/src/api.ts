@@ -12,7 +12,11 @@ export async function getBudgets(token: string): Promise<BudgetItem[]> {
   return r.data
 }
 
-export async function createBudget(item: Omit<BudgetItem, 'id'>) {
-  const r = await api.post('/api/budget', item)
+export async function createBudget(item: Omit<BudgetItem, 'id'>, token: string) {
+  const r = await api.post('/api/budget', item, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
   return r.data
 }

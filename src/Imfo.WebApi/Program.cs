@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var iamUrl = builder.Configuration["LogToUrl"];
+        var iamUrl = builder.Configuration["IamUrl"];
         options.MetadataAddress = $"{iamUrl}/oidc/.well-known/openid-configuration";
         options.RequireHttpsMetadata = false;
 

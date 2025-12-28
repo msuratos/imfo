@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from 'react'
+import { LogtoProvider, LogtoConfig, useLogto } from '@logto/react';
+import { BrowserRouter, Route, Routes } from "react-router";
+
 import { getBudgets, createBudget } from './api'
+import Callback from './components/Callback';
+import Login from './pages/Login';
 import { BudgetItem } from './types'
 
 import './styles.css'
 
-export default function App() {
+const config: LogtoConfig = {
+  endpoint: import.meta.env.VITE_LOGTO_URL,
+  appId: import.meta.env.VITE_LOGTO_APP_ID,
+  resources: [import.meta.env.VITE_LOGTO_API_URL]
+};
+
+function Default() {
+  const { isAuthenticated, getAccessToken } = useLogto();
   const [items, setItems] = useState<BudgetItem[]>([])
 
   useEffect(() => {
@@ -12,44 +24,70 @@ export default function App() {
   }, [])
 
   async function load() {
-    const data = await getBudgets()
+    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+    const data = await getBudgets(token);
     setItems(data)
   }
 
   async function onCreate(item: Omit<BudgetItem, 'id'>) {
-    await createBudget(item)
+    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+    await createBudget(item, token);
     load()
   }
 
   return (
-    <div className="app-root">
-      <header className="app-header">
-        <h1 title='Is My Finances Okay?'>Imfo</h1>
-        <p className="muted">Simple budgeting with clear cards and categories</p>
-      </header>
-      <main className="container">
-        <section className="left">
-          <div className="card">
-            <h2>Transactions</h2>
-            <div className="list">
-              {items.map(i => (
-                <div key={i.id} className="list-item">
-                  <div className="title">{i.title}</div>
-                  <div className="meta">{i.category} • {new Date(i.date).toLocaleDateString()}</div>
-                  <div className={"amount " + (i.amount >= 0 ? 'pos' : 'neg')}>{i.amount.toFixed(2)}</div>
-                </div>
-              ))}
+    <>
+      {
+        isAuthenticated
+          ? (
+            <div className="app-root" >
+              <header className="app-header">
+                <h1 title='Is My Finances Okay?'>Imfo</h1>
+                <p className="muted">Simple budgeting with clear cards and categories</p>
+                <Login />
+              </header>
+              <main className="container">
+                <section className="left">
+                  <div className="card">
+                    <h2>Transactions</h2>
+                    <div className="list">
+                      {items.map(i => (
+                        <div key={i.id} className="list-item">
+                          <div className="title">{i.title}</div>
+                          <div className="meta">{i.category} • {new Date(i.date).toLocaleDateString()}</div>
+                          <div className={"amount " + (i.amount >= 0 ? 'pos' : 'neg')}>{i.amount.toFixed(2)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+                <aside className="right">
+                  <div className="card">
+                    <h2>Add Item</h2>
+                    <BudgetForm onCreate={onCreate} />
+                  </div>
+                </aside>
+              </main>
             </div>
-          </div>
-        </section>
-        <aside className="right">
-          <div className="card">
-            <h2>Add Item</h2>
-            <BudgetForm onCreate={onCreate} />
-          </div>
-        </aside>
-      </main>
-    </div>
+          )
+          : (
+            <Login />
+          )
+      }
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <LogtoProvider config={config}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Default />} />
+          <Route path="/callback" element={<Callback />} />
+        </Routes>
+      </BrowserRouter>
+    </LogtoProvider>
   )
 }
 

@@ -10,9 +10,9 @@ import { BudgetItem } from './types'
 import './styles.css'
 
 const config: LogtoConfig = {
-  endpoint: 'http://localhost:3001/',
-  appId: '0cxcjvutccjvyen7ofkr0',
-  resources: ['https://localhost:5001/api']
+  endpoint: import.meta.env.VITE_LOGTO_URL,
+  appId: import.meta.env.VITE_LOGTO_APP_ID,
+  resources: [import.meta.env.VITE_LOGTO_API_URL]
 };
 
 function Default() {
@@ -24,13 +24,13 @@ function Default() {
   }, [])
 
   async function load() {
-    const token = await getAccessToken('https://localhost:5001/api');
+    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
     const data = await getBudgets(token);
     setItems(data)
   }
 
   async function onCreate(item: Omit<BudgetItem, 'id'>) {
-    const token = await getAccessToken('https://localhost:5001/api');
+    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
     await createBudget(item, token);
     load()
   }

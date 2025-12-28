@@ -5,11 +5,11 @@ export default function Login() {
   const { signIn, signOut, isAuthenticated } = useLogto();
 
   React.useEffect(() => {
-    if (!isAuthenticated) signIn('https://localhost:5173/callback')
+    if (!isAuthenticated) signIn(`${import.meta.env.VITE_APP_URL}/callback`)
   }, [isAuthenticated]);
 
   return isAuthenticated ? (
-    <button onClick={() => signOut('https://localhost:5173/ ')}>Sign Out</button>
+    <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
   ) : (
     <div>Signing in...</div>
   );

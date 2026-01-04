@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 
 import Callback from './pages/Callback';
 import Default from './pages/Default';
+import Login from './pages/Login';
 
 import './styles.css'
 
@@ -20,6 +21,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Default />} />
           <Route path="/callback" element={<Callback />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </BrowserRouter>
     </LogtoProvider>

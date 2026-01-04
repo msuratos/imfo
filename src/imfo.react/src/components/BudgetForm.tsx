@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { TransactionItem } from '../types';
 
 export default function BudgetForm({ onCreate }: { onCreate: (item: Omit<TransactionItem, 'id'>) => Promise<void> }) {
-  const [description, setDescription] = React.useState('')
-  const [amount, setAmount] = React.useState('')
-  const [category, setCategory] = React.useState('Misc')
+  const [description, setDescription] = useState('')
+  const [amount, setAmount] = useState('')
+  const [category, setCategory] = useState('Misc')
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()

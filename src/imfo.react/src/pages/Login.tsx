@@ -9,7 +9,7 @@ export default function Login() {
   }, [isAuthenticated]);
 
   return isAuthenticated ? (
-    <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
+    <div>Something went wrong during sign in.</div>
   ) : (
     <div>Signing in...</div>
   );

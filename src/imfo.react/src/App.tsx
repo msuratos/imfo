@@ -2,7 +2,7 @@ import React from 'react'
 import { LogtoProvider, LogtoConfig } from '@logto/react';
 import { BrowserRouter, Route, Routes } from "react-router";
 
-import Callback from './components/Callback';
+import Callback from './pages/Callback';
 import Default from './pages/Default';
 
 import './styles.css'

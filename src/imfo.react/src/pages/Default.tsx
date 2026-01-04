@@ -1,0 +1,70 @@
+import React from 'react';
+import { useLogto } from '@logto/react';
+
+import { getTransactions, createTransaction } from '../api'
+import BudgetForm from '../components/BudgetForm';
+import Login from '../pages/Login';
+import { TransactionItem } from '../types'
+
+export default function Default() {
+  const { isAuthenticated, getAccessToken } = useLogto();
+  const [items, setItems] = React.useState<TransactionItem[]>([])
+
+  React.useEffect(() => {
+    load()
+  }, [])
+
+  async function load() {
+    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+    const data = await getTransactions(token);
+    setItems(data)
+  }
+
+  async function onCreate(item: Omit<TransactionItem, 'id'>) {
+    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+    await createTransaction(item, token);
+    load()
+  }
+
+  return (
+    <>
+      {
+        isAuthenticated
+          ? (
+            <div className="app-root" >
+              <header className="app-header">
+                <h1 title='Is My Finances Okay?'>Imfo</h1>
+                <p className="muted">Simple budgeting with clear cards and categories</p>
+                <Login />
+              </header>
+              <main className="container">
+                <section className="left">
+                  <div className="card">
+                    <h2>Transactions</h2>
+                    <div className="list">
+                      {items.map(i => (
+                        <div key={i.id} className="list-item">
+                          <div className="description">{i.description}</div>
+                          <div className="meta">{i.category} • {new Date(i.date).toLocaleDateString()}</div>
+                          <div className={"amount " + (i.amount >= 0 ? 'pos' : 'neg')}>{i.amount.toFixed(2)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+                <aside className="right">
+                  <div className="card">
+                    <h2>Add Item</h2>
+                    <BudgetForm onCreate={onCreate} />
+                  </div>
+                </aside>
+              </main>
+            </div>
+          )
+          : (
+            <Login />
+          )
+      }
+    </>
+  );
+}

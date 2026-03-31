@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TransactionItem } from '../types';
 
-export default function BudgetForm({ onCreate }: { onCreate: (item: Omit<TransactionItem, 'id'>) => Promise<void> }) {
+export default function TransactionForm({ onCreate }: { onCreate: (item: Omit<TransactionItem, 'id'>) => Promise<void> }) {
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('Misc')

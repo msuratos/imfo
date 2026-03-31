@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 
 import { getTransactions, createTransaction } from '../api'
-import BudgetForm from '../components/BudgetForm';
+import TransactionForm from '../components/TransactionForm';
 import { TransactionItem } from '../types'
 
 export default function Default() {
@@ -53,7 +53,7 @@ export default function Default() {
         <aside className="right">
           <div className="card">
             <h2>Add Item</h2>
-            <BudgetForm onCreate={onCreate} />
+            <TransactionForm onCreate={onCreate} />
           </div>
         </aside>
       </main>

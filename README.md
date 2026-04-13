@@ -28,9 +28,8 @@ Notes
 
 ## TODO
 
-- add categories to all transactions
-   - **it should have 2 types of categories, categories for incomes and categories for expenses*
 - adding forecasting by frequency
+- add a goal tracking system
 - update the layout to be responsive for mobile
    - **the head navigation is too big*
    - add dark and light theme

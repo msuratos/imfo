@@ -12,6 +12,7 @@ export default function ScheduledTransactions() {
   const [newItem, setNewItem] = useState<Omit<ScheduledTransaction, 'id'>>({
     source: '',
     amount: 0,
+    category: '',
     receivedDate: new Date().toISOString().split('T')[0],
     frequency: 'one-time'
   });
@@ -29,12 +30,17 @@ export default function ScheduledTransactions() {
 
   async function onCreate() {
     if (!newItem.source || newItem.amount === 0) return;
+    if (newItem.amount < 0 && !newItem.category) {
+      alert('Please provide a category for expenses');
+      return;
+    }
     
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
     await createScheduledTransaction(newItem, token);
     setNewItem({
       source: '',
       amount: 0,
+      category: '',
       receivedDate: new Date().toISOString().split('T')[0],
       frequency: 'one-time'
     });
@@ -83,7 +89,7 @@ export default function ScheduledTransactions() {
                 {items.map(i => (
                   <div key={i.id} className="transaction-item">
                     <div className="transaction-info">
-                      <div className="description">{i.source}</div>
+                      <div className="description">{i.source}{i.amount < 0 && i.category ? ` — ${i.category}` : ''}</div>
                       <div className="meta">{i.frequency.charAt(0).toUpperCase() + i.frequency.slice(1)} • {new Date(i.receivedDate).toLocaleDateString()}</div>
                     </div>
                     <div className={`amount ${i.amount >= 0 ? 'pos' : 'neg'}`}>${i.amount.toFixed(2)}</div>
@@ -125,6 +131,18 @@ export default function ScheduledTransactions() {
                   required
                 />
               </div>
+              {newItem.amount < 0 && (
+                <div className="form-group">
+                  <label>Category (expense)</label>
+                  <input
+                    type="text"
+                    value={newItem.category}
+                    onChange={(e) => setNewItem({...newItem, category: e.target.value})}
+                    placeholder="e.g., Rent, Groceries"
+                    required
+                  />
+                </div>
+              )}
               <div className="form-row">
                 <div className="form-group half">
                   <label>Frequency</label>

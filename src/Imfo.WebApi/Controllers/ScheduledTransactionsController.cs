@@ -46,6 +46,7 @@ public class ScheduledTransactionsController : ControllerBase
             Id = Guid.NewGuid(),
             Source = income.Source,
             Amount = income.Amount,
+            Category = income.Category,
             ReceivedDate = income.ReceivedDate,
             Frequency = income.Frequency,
             UserId = userId
@@ -59,6 +60,7 @@ public class ScheduledTransactionsController : ControllerBase
             Id = st.Id,
             Source = st.Source,
             Amount = st.Amount,
+            Category = st.Category,
             ReceivedDate = st.ReceivedDate,
             Frequency = st.Frequency,
             UserId = st.UserId
@@ -77,6 +79,7 @@ public class ScheduledTransactionsController : ControllerBase
 
         existing.Source = updated.Source;
         existing.Amount = updated.Amount;
+        existing.Category = updated.Category;
         existing.ReceivedDate = updated.ReceivedDate;
         existing.Frequency = updated.Frequency;
 

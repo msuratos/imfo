@@ -2,6 +2,7 @@ export interface ScheduledTransaction {
   id: string
   source: string
   amount: number
+  category?: string
   receivedDate: string
   frequency: string
 }

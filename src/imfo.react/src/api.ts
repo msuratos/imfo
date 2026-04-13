@@ -1,9 +1,9 @@
 import axios from 'axios'
-import { BudgetItem, TransactionItem } from './types'
+import { Budget, Transaction } from './types'
 
 const api = axios.create();
 
-export async function createBudget(item: Omit<BudgetItem, 'id'>, token: string) {
+export async function createBudget(item: Omit<Budget, 'id'>, token: string) {
   const r = await api.post('/api/budget', item, {
     headers: {
       Authorization: `Bearer ${token}`
@@ -12,7 +12,7 @@ export async function createBudget(item: Omit<BudgetItem, 'id'>, token: string) 
   return r.data
 }
 
-export async function getBudgets(token: string): Promise<BudgetItem[]> {
+export async function getBudgets(token: string): Promise<Budget[]> {
   const r = await api.get('/api/budget', {
     headers: {
       Authorization: `Bearer ${token}`
@@ -30,7 +30,7 @@ export async function deleteBudget(id: string, token: string) {
   return r.data
 }
 
-export async function createTransaction(item: Omit<TransactionItem, 'id'>, token: string) {
+export async function createTransaction(item: Omit<Transaction, 'id'>, token: string) {
   const r = await api.post('/api/transaction', item, {
     headers: {
       Authorization: `Bearer ${token}`
@@ -40,8 +40,26 @@ export async function createTransaction(item: Omit<TransactionItem, 'id'>, token
 }
 
 
-export async function getTransactions(token: string): Promise<TransactionItem[]> {
+export async function getTransactions(token: string): Promise<Transaction[]> {
   const r = await api.get('/api/transaction', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return r.data
+}
+
+export async function updateTransaction(id: string, item: Omit<Transaction, 'id'>, token: string) {
+  const r = await api.put(`/api/transaction/${id}`, item, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return r.data
+}
+
+export async function deleteTransaction(id: string, token: string) {
+  const r = await api.delete(`/api/transaction/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }

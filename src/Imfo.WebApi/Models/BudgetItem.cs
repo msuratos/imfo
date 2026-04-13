@@ -1,6 +1,6 @@
 namespace Imfo.WebApi.Models;
 
-public class BudgetItem
+public class Budget
 {
     public Guid Id { get; set; }
     public string Category { get; set; } = string.Empty;

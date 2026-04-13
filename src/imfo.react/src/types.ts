@@ -1,11 +1,11 @@
-export interface BudgetItem {
+export interface Budget {
   id: string
   category: string
   amount: number
   frequency: string
 }
 
-export interface TransactionItem {
+export interface Transaction {
   id: string
   description: string
   amount: number

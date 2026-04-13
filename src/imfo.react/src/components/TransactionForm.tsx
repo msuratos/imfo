@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Transaction } from '../types';
+import { Transaction, Category } from '../types';
 
-export default function TransactionForm({ onCreate }: { onCreate: (item: Omit<Transaction, 'id'>) => Promise<void> }) {
+export default function TransactionForm({ onCreate, categories }: { onCreate: (item: Omit<Transaction, 'id'>) => Promise<void>, categories: Category[] }) {
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState('Misc')
+  const [categoryId, setCategoryId] = useState('')
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     const a = parseFloat(amount || '0')
-    await onCreate({ description, amount: a, category, date: new Date().toISOString() })
+    await onCreate({ description, amount: a, categoryId, date: new Date().toISOString() })
     setDescription('')
     setAmount('')
   }
@@ -38,12 +38,12 @@ export default function TransactionForm({ onCreate }: { onCreate: (item: Omit<Tr
         </div>
         <div className="form-group half">
           <label>Category</label>
-          <input
-            type="text"
-            placeholder="e.g. Groceries"
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-          />
+          <select value={categoryId} onChange={e => setCategoryId(e.target.value)}>
+            <option value="">Select category</option>
+            {categories.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
         </div>
       </div>
       <div className="form-actions">

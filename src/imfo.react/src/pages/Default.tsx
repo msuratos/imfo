@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
-import { getTransactions, createTransaction, getBudgets, updateTransaction, deleteTransaction, getScheduledTransactions } from '../api'
+import { getTransactions, createTransaction, getBudgets, updateTransaction, deleteTransaction, getScheduledTransactions, getCategories } from '../api'
 import TransactionForm from '../components/TransactionForm';
-import { Transaction, Budget, ScheduledTransaction } from '../types'
+import { Transaction, Budget, ScheduledTransaction, Category } from '../types'
 
 export default function Default() {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ export default function Default() {
   const [items, setItems] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [scheduledTransactions, setScheduledTransactions] = useState<ScheduledTransaction[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [selectedFrequency, setSelectedFrequency] = useState<'weekly' | 'bi-weekly' | 'monthly' | 'yearly'>('monthly');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Omit<Transaction, 'id'> | null>(null);
@@ -28,10 +29,17 @@ export default function Default() {
       getTransactions(token),
       getBudgets(token),
       getScheduledTransactions(token)
+    // TODO: getCategories requires token in API; fetch separately
     ]);
     setItems(transactions);
     setBudgets(budgetData);
     setScheduledTransactions(scheduledData);
+    try {
+      const cats = await getCategories(token);
+      setCategories(cats || []);
+    } catch {
+      setCategories([]);
+    }
   }
 
   async function onCreate(item: Omit<Transaction, 'id'>) {
@@ -45,7 +53,7 @@ export default function Default() {
     setEditData({
       description: transaction.description,
       amount: transaction.amount,
-      category: transaction.category,
+      categoryId: transaction.categoryId,
       date: transaction.date
     });
   }
@@ -157,6 +165,7 @@ export default function Default() {
         <div>
           <button onClick={() => navigate('/scheduled-transactions')}>Schedules</button>
           <button onClick={() => navigate('/budgets')}>Budgets</button>
+          <button onClick={() => navigate('/categories')}>Categories</button>
           <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
         </div>
       </header>
@@ -265,11 +274,11 @@ export default function Default() {
               {items.length === 0 ? (
                 <div className="empty-state">No transactions yet. Add one to get started.</div>
               ) : (
-                items.map(i => (
+    items.map(i => (
                   <div key={i.id} className="list-item transaction-item">
                     <div className="transaction-info">
                       <div className="description">{i.description}</div>
-                      <div className="meta">{i.category} • {new Date(i.date).toLocaleDateString()}</div>
+                      <div className="meta">{(categories.find(c => c.id === i.categoryId)?.name ?? i.categoryId)} • {new Date(i.date).toLocaleDateString()}</div>
                     </div>
                     <div className={"amount " + (i.amount >= 0 ? 'pos' : 'neg')}>{i.amount.toFixed(2)}</div>
                     <div className="actions">
@@ -332,7 +341,7 @@ export default function Default() {
             ) : (
               <>
                 <h2>Add Transaction</h2>
-                <TransactionForm onCreate={onCreate} />
+                <TransactionForm onCreate={onCreate} categories={categories} />
               </>
             )}
           </div>

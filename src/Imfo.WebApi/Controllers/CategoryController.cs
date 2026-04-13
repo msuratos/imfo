@@ -24,6 +24,8 @@ public class CategoryController : ControllerBase
     {
         var userId = GetCurrentUserId();
         // return categories belonging to the user plus global categories (UserId == Guid.Empty)
+        var categories = await _db.Categories.ToListAsync();
+
         return Ok(await _db.Categories.Where(c => c.UserId == userId || c.UserId == Guid.Empty).ToListAsync());
     }
 

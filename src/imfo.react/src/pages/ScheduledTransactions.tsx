@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 
-import { getScheduledTransactions, createScheduledTransaction, deleteScheduledTransaction } from '../api'
-import { ScheduledTransaction } from '../types'
+import { getScheduledTransactions, createScheduledTransaction, deleteScheduledTransaction, getCategories } from '../api'
+import { ScheduledTransaction, Category } from '../types'
 
 export default function ScheduledTransactions() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken, signOut } = useLogto();
   const [items, setItems] = useState<ScheduledTransaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [newItem, setNewItem] = useState<Omit<ScheduledTransaction, 'id'>>({
     source: '',
     amount: 0,
@@ -26,6 +27,12 @@ export default function ScheduledTransactions() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
     const data = await getScheduledTransactions(token);
     setItems(data);
+    try {
+      const cats = await getCategories(token);
+      setCategories(cats || []);
+    } catch {
+      setCategories([]);
+    }
   }
 
   async function onCreate() {
@@ -34,7 +41,7 @@ export default function ScheduledTransactions() {
       alert('Please provide a category for expenses');
       return;
     }
-    
+
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
     await createScheduledTransaction(newItem, token);
     setNewItem({
@@ -116,7 +123,7 @@ export default function ScheduledTransactions() {
                 <input
                   type="text"
                   value={newItem.source}
-                  onChange={(e) => setNewItem({...newItem, source: e.target.value})}
+                  onChange={(e) => setNewItem({ ...newItem, source: e.target.value })}
                   placeholder="e.g., Salary, Rent, Utilities"
                   required
                 />
@@ -127,28 +134,29 @@ export default function ScheduledTransactions() {
                   type="number"
                   step="0.01"
                   value={newItem.amount}
-                  onChange={(e) => setNewItem({...newItem, amount: parseFloat(e.target.value) || 0})}
+                  onChange={(e) => setNewItem({ ...newItem, amount: parseFloat(e.target.value) || 0 })}
                   required
                 />
               </div>
-              {newItem.amount < 0 && (
-                <div className="form-group">
-                  <label>Category (expense)</label>
-                  <input
-                    type="text"
-                    value={newItem.category}
-                    onChange={(e) => setNewItem({...newItem, category: e.target.value})}
-                    placeholder="e.g., Rent, Groceries"
-                    required
-                  />
-                </div>
-              )}
+              <div className="form-group">
+                <label>Category</label>
+                <select
+                  value={newItem.category}
+                  onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                  required
+                >
+                  <option value="">Select category</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
               <div className="form-row">
                 <div className="form-group half">
                   <label>Frequency</label>
                   <select
                     value={newItem.frequency}
-                    onChange={(e) => setNewItem({...newItem, frequency: e.target.value})}
+                    onChange={(e) => setNewItem({ ...newItem, frequency: e.target.value })}
                     required
                   >
                     <option value="one-time">One-time</option>
@@ -163,7 +171,7 @@ export default function ScheduledTransactions() {
                   <input
                     type="date"
                     value={newItem.receivedDate}
-                    onChange={(e) => setNewItem({...newItem, receivedDate: e.target.value})}
+                    onChange={(e) => setNewItem({ ...newItem, receivedDate: e.target.value })}
                     required
                   />
                 </div>

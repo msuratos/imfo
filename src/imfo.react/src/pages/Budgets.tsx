@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 
-import { getBudgets, createBudget, deleteBudget } from '../api'
-import { Budget } from '../types'
+import { getBudgets, createBudget, deleteBudget, getCategories } from '../api'
+import { Budget, Category } from '../types'
 
 export default function Budgets() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken, signOut } = useLogto();
   const [items, setItems] = useState<Budget[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [newItem, setNewItem] = useState<Omit<Budget, 'id'>>({
     category: '',
     amount: 0,
@@ -24,6 +25,12 @@ export default function Budgets() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
     const data = await getBudgets(token);
     setItems(data);
+    try {
+      const cats = await getCategories(token);
+      setCategories(cats || []);
+    } catch {
+      setCategories([]);
+    }
   }
 
   async function onCreate() {
@@ -97,12 +104,12 @@ export default function Budgets() {
             <form className="form" onSubmit={(e) => { e.preventDefault(); onCreate(); }}>
               <div className="form-group">
                 <label>Category</label>
-                <input
-                  type="text"
-                  value={newItem.category}
-                  onChange={(e) => setNewItem({...newItem, category: e.target.value})}
-                  required
-                />
+                <select value={newItem.category} onChange={(e) => setNewItem({...newItem, category: e.target.value})} required>
+                  <option value="">Select category</option>
+                  {categories.filter(c => c.type === 'Expense').map(c => (
+                    <option key={c.id} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="form-row">
                 <div className="form-group half">

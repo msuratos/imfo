@@ -48,4 +48,11 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
+// Ensure the in-memory database is created so model seed data (HasData) is applied.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ImfoDbContext>();
+    db.Database.EnsureCreated();
+}
+
 app.Run();

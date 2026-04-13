@@ -6,6 +6,7 @@ import Callback from './pages/Callback';
 import Default from './pages/Default';
 import Login from './pages/Login';
 import Budgets from './pages/Budgets';
+import Income from './pages/Income';
 
 import './styles.css'
 
@@ -22,6 +23,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Default />} />
           <Route path="/budgets" element={<Budgets />} />
+          <Route path="/income" element={<Income />} />
           <Route path="/callback" element={<Callback />} />
           <Route path="/login" element={<Login />} />
         </Routes>

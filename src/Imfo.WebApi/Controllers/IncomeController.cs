@@ -11,56 +11,56 @@ namespace Imfo.WebApi.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class AssetController : ControllerBase
+public class IncomeController : ControllerBase
 {
     private readonly ImfoDbContext _db;
 
-    public AssetController(ImfoDbContext db)
+    public IncomeController(ImfoDbContext db)
     {
         _db = db;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Asset>>> Get()
+    public async Task<ActionResult<IEnumerable<Income>>> Get()
     {
         var userId = GetCurrentUserId();
-        return Ok(await _db.Assets.Where(a => a.UserId == userId).OrderByDescending(x => x.AcquiredDate).ToListAsync());
+        return Ok(await _db.Incomes.Where(i => i.UserId == userId).OrderByDescending(x => x.ReceivedDate).ToListAsync());
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Asset>> Get(Guid id)
+    public async Task<ActionResult<Income>> Get(Guid id)
     {
         var userId = GetCurrentUserId();
-        var it = await _db.Assets.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var it = await _db.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (it == null) return NotFound();
         return Ok(it);
     }
 
     [HttpPost]
-    public async Task<ActionResult<AssetReadDto>> Post([FromBody] AssetCreateDto a)
+    public async Task<ActionResult<IncomeReadDto>> Post([FromBody] IncomeCreateDto income)
     {
         var userId = GetCurrentUserId();
-        var entity = new Asset
+        var entity = new Income
         {
             Id = Guid.NewGuid(),
-            Name = a.Name,
-            Value = a.Value,
-            Type = a.Type,
-            AcquiredDate = a.AcquiredDate,
+            Source = income.Source,
+            Amount = income.Amount,
+            ReceivedDate = income.ReceivedDate,
+            Frequency = income.Frequency,
             UserId = userId
         };
 
-        _db.Assets.Add(entity);
+        _db.Incomes.Add(entity);
         await _db.SaveChangesAsync();
 
-        var read = new AssetReadDto
+        var read = new IncomeReadDto
         {
             Id = entity.Id,
-            Name = entity.Name,
-            Value = entity.Value,
-            Type = entity.Type,
-            AcquiredDate = entity.AcquiredDate,
+            Source = entity.Source,
+            Amount = entity.Amount,
+            ReceivedDate = entity.ReceivedDate,
+            Frequency = entity.Frequency,
             UserId = entity.UserId
         };
 
@@ -68,17 +68,17 @@ public class AssetController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Asset>> Put(Guid id, [FromBody] Asset updated)
+    public async Task<ActionResult<Income>> Put(Guid id, [FromBody] Income updated)
     {
         var userId = GetCurrentUserId();
-        var existing = await _db.Assets.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var existing = await _db.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (existing == null) return NotFound();
 
-        existing.Name = updated.Name;
-        existing.Value = updated.Value;
-        existing.Type = updated.Type;
-        existing.AcquiredDate = updated.AcquiredDate;
+        existing.Source = updated.Source;
+        existing.Amount = updated.Amount;
+        existing.ReceivedDate = updated.ReceivedDate;
+        existing.Frequency = updated.Frequency;
 
         // UserId remains the authenticated user
         await _db.SaveChangesAsync();
@@ -89,10 +89,10 @@ public class AssetController : ControllerBase
     public async Task<ActionResult> Delete(Guid id)
     {
         var userId = GetCurrentUserId();
-        var it = await _db.Assets.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var it = await _db.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (it == null) return NotFound();
-        _db.Assets.Remove(it);
+        _db.Incomes.Remove(it);
         await _db.SaveChangesAsync();
 
         return NoContent();

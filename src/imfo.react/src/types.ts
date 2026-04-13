@@ -1,3 +1,11 @@
+export interface Income {
+  id: string
+  source: string
+  amount: number
+  receivedDate: string
+  frequency: string
+}
+
 export interface Budget {
   id: string
   category: string
@@ -8,7 +16,7 @@ export interface Budget {
 export interface Transaction {
   id: string
   description: string
-  amount: number
+  amount: number // Positive = Expense, Negative = Income
   category: string
   date: string
 }

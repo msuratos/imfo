@@ -133,9 +133,19 @@ export default function Default() {
   const budgetSummary = getBudgetSummary();
   const totalBudgeted = budgetSummary.reduce((sum, s) => sum + s.normalizedBudget, 0);
   const totalSpent = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
-  const totalRemaining = totalBudgeted - totalSpent;
-  const totalIncome = scheduledTransactions.reduce((sum, i) => sum + normalizeAmount(i.amount, i.frequency, selectedFrequency), 0);
-  const totalExpenses = totalSpent;
+  // Scheduled transactions may be positive (income) or negative (expense).
+  const scheduledIncome = scheduledTransactions.reduce((sum, i) => {
+    const normalized = normalizeAmount(i.amount, i.frequency, selectedFrequency);
+    return normalized > 0 ? sum + normalized : sum;
+  }, 0);
+
+  const scheduledExpenses = scheduledTransactions.reduce((sum, i) => {
+    const normalized = normalizeAmount(i.amount, i.frequency, selectedFrequency);
+    return normalized < 0 ? sum + Math.abs(normalized) : sum;
+  }, 0);
+
+  const totalIncome = scheduledIncome;
+  const totalExpenses = totalSpent + scheduledExpenses;
   const netBalance = totalIncome - totalExpenses;
   const budgetChartColors = ['#ef4444', '#10b981'];
 

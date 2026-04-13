@@ -1,20 +1,17 @@
 namespace Imfo.WebApi.Models.Dtos;
 
-public class BudgetItemCreateDto
+public class BudgetCreateDto
 {
-    public string Title { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
     public string Category { get; set; } = string.Empty;
-    public DateTime Date { get; set; }
-    
+    public decimal Amount { get; set; }
+    public string Frequency { get; set; } = string.Empty;
 }
 
-public class BudgetItemReadDto
+public class BudgetReadDto
 {
     public Guid Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
     public string Category { get; set; } = string.Empty;
-    public DateTime Date { get; set; }
+    public decimal Amount { get; set; }
+    public string Frequency { get; set; } = string.Empty;
     public Guid UserId { get; set; }
 }

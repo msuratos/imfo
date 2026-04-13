@@ -21,46 +21,44 @@ public class BudgetController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<BudgetItem>>> Get()
+    public async Task<ActionResult<IEnumerable<Budget>>> Get()
     {
         var userId = GetCurrentUserId();
-        return Ok(await _db.BudgetItems.Where(b => b.UserId == userId).OrderByDescending(x => x.Date).ToListAsync());
+        return Ok(await _db.Budgets.Where(b => b.UserId == userId).ToListAsync());
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<BudgetItem>> Get(Guid id)
+    public async Task<ActionResult<Budget>> Get(Guid id)
     {
         var userId = GetCurrentUserId();
-        var item = await _db.BudgetItems.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var item = await _db.Budgets.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (item == null) return NotFound();
         return Ok(item);
     }
 
     [HttpPost]
-    public async Task<ActionResult<BudgetItemReadDto>> Post([FromBody] BudgetItemCreateDto item)
+    public async Task<ActionResult<BudgetReadDto>> Post([FromBody] BudgetCreateDto item)
     {
         var userId = GetCurrentUserId();
-        var entity = new BudgetItem
+        var entity = new Budget
         {
             Id = Guid.NewGuid(),
-            Title = item.Title,
-            Amount = item.Amount,
             Category = item.Category,
-            Date = item.Date,
+            Amount = item.Amount,
+            Frequency = item.Frequency,
             UserId = userId
         };
 
-        _db.BudgetItems.Add(entity);
+        _db.Budgets.Add(entity);
         await _db.SaveChangesAsync();
 
-        var read = new BudgetItemReadDto
+        var read = new BudgetReadDto
         {
             Id = entity.Id,
-            Title = entity.Title,
-            Amount = entity.Amount,
             Category = entity.Category,
-            Date = entity.Date,
+            Amount = entity.Amount,
+            Frequency = entity.Frequency,
             UserId = entity.UserId
         };
 
@@ -71,11 +69,11 @@ public class BudgetController : ControllerBase
     public async Task<ActionResult> Delete(Guid id)
     {
         var userId = GetCurrentUserId();
-        var it = await _db.BudgetItems.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var it = await _db.Budgets.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (it == null) return NotFound();
 
-        _db.BudgetItems.Remove(it);
+        _db.Budgets.Remove(it);
         await _db.SaveChangesAsync();
         
         return NoContent();

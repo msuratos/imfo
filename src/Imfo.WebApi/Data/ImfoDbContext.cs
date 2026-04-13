@@ -11,7 +11,7 @@ public class ImfoDbContext : DbContext
 
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<Asset> Assets { get; set; } = null!;
-    public DbSet<BudgetItem> BudgetItems { get; set; } = null!;
+    public DbSet<Budget> Budgets { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -22,7 +22,7 @@ public class ImfoDbContext : DbContext
         {
             eb.HasKey(u => u.Id);
             eb.HasMany(u => u.Assets).WithOne(a => a.User).HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Cascade);
-            eb.HasMany(u => u.BudgetItems).WithOne(b => b.User).HasForeignKey(b => b.UserId).OnDelete(DeleteBehavior.Cascade);
+            eb.HasMany(u => u.Budgets).WithOne(b => b.User).HasForeignKey(b => b.UserId).OnDelete(DeleteBehavior.Cascade);
             eb.HasMany(u => u.Transactions).WithOne(t => t.User).HasForeignKey(t => t.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -31,7 +31,7 @@ public class ImfoDbContext : DbContext
             eb.HasKey(a => a.Id);
         });
 
-        modelBuilder.Entity<BudgetItem>(eb =>
+        modelBuilder.Entity<Budget>(eb =>
         {
             eb.HasKey(b => b.Id);
         });

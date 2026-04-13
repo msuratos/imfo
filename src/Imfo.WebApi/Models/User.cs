@@ -10,6 +10,6 @@ public class User
 
     // EF Core: navigation collections
     public ICollection<Asset> Assets { get; set; } = new List<Asset>();
-    public ICollection<BudgetItem> BudgetItems { get; set; } = new List<BudgetItem>();
+    public ICollection<Budget> Budgets { get; set; } = new List<Budget>();
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

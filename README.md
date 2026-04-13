@@ -28,8 +28,8 @@ Notes
 
 ## TODO
 
-- rename income page to scheduled transactions
-   - **the amount in transaction in default page should determine income vs expense already. so the purpose of this page will to manage scheduled transactions for reoccurences*
+- add categories to all transactions
+   - **it should have 2 types of categories, categories for incomes and categories for expenses*
 - adding forecasting by frequency
 - update the layout to be responsive for mobile
    - **the head navigation is too big*

@@ -2,16 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 
-import { getIncomes, createIncome, deleteIncome } from '../api'
-import { Income } from '../types'
+import { getScheduledTransactions, createScheduledTransaction, deleteScheduledTransaction } from '../api'
+import { ScheduledTransaction } from '../types'
 
-export default function IncomeManagement() {
+export default function ScheduledTransactions() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken, signOut } = useLogto();
-  const [items, setItems] = useState<Income[]>([]);
-  const [newItem, setNewItem] = useState<Omit<Income, 'id'>>({
+  const [items, setItems] = useState<ScheduledTransaction[]>([]);
+  const [newItem, setNewItem] = useState<Omit<ScheduledTransaction, 'id'>>({
     source: '',
     amount: 0,
+    category: '',
     receivedDate: new Date().toISOString().split('T')[0],
     frequency: 'one-time'
   });
@@ -23,18 +24,23 @@ export default function IncomeManagement() {
 
   async function load() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    const data = await getIncomes(token);
+    const data = await getScheduledTransactions(token);
     setItems(data);
   }
 
   async function onCreate() {
-    if (!newItem.source || newItem.amount <= 0) return;
+    if (!newItem.source || newItem.amount === 0) return;
+    if (newItem.amount < 0 && !newItem.category) {
+      alert('Please provide a category for expenses');
+      return;
+    }
     
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await createIncome(newItem, token);
+    await createScheduledTransaction(newItem, token);
     setNewItem({
       source: '',
       amount: 0,
+      category: '',
       receivedDate: new Date().toISOString().split('T')[0],
       frequency: 'one-time'
     });
@@ -43,17 +49,17 @@ export default function IncomeManagement() {
 
   async function onDelete(id: string) {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await deleteIncome(id, token);
+    await deleteScheduledTransaction(id, token);
     load();
   }
 
-  const totalIncome = items.reduce((sum, i) => sum + i.amount, 0);
+  const total = items.reduce((sum, i) => sum + i.amount, 0);
 
   return (
     <div className="app-root" >
       <header className="app-header">
-        <h1 title='Is My Finances Okay?'>Imfo - Income</h1>
-        <p className="muted">Track your income sources</p>
+        <h1 title='Is My Finances Okay?'>Imfo - Scheduled Transactions</h1>
+        <p className="muted">Manage scheduled recurring transactions</p>
         <div>
           <button onClick={() => navigate('/')}>Transactions</button>
           <button onClick={() => navigate('/budgets')}>Budgets</button>
@@ -65,28 +71,28 @@ export default function IncomeManagement() {
           <div className="card transactions-card">
             <div className="card-header">
               <div>
-                <h2>Income Sources</h2>
-                <p className="muted">Manage all your income streams.</p>
+                <h2>Scheduled Transactions</h2>
+                <p className="muted">Manage scheduled recurring transactions (incomes & bills).</p>
               </div>
-              <div className="transaction-count">{items.length} source{items.length === 1 ? '' : 's'}</div>
+              <div className="transaction-count">{items.length} item{items.length === 1 ? '' : 's'}</div>
             </div>
             <div className="budget-stats">
               <div className="stat-box">
-                <div className={`stat-value pos`}>${totalIncome.toFixed(2)}</div>
-                <div className="stat-label">Total Income</div>
+                <div className={`stat-value ${total >= 0 ? 'pos' : 'neg'}`}>${total.toFixed(2)}</div>
+                <div className="stat-label">Total</div>
               </div>
             </div>
             {items.length === 0 ? (
-              <div className="empty-state">No income sources yet. Use the form to add your first source.</div>
+              <div className="empty-state">No scheduled transactions yet. Use the form to add one.</div>
             ) : (
               <div className="list">
                 {items.map(i => (
                   <div key={i.id} className="transaction-item">
                     <div className="transaction-info">
-                      <div className="description">{i.source}</div>
+                      <div className="description">{i.source}{i.amount < 0 && i.category ? ` — ${i.category}` : ''}</div>
                       <div className="meta">{i.frequency.charAt(0).toUpperCase() + i.frequency.slice(1)} • {new Date(i.receivedDate).toLocaleDateString()}</div>
                     </div>
-                    <div className="amount pos">${i.amount.toFixed(2)}</div>
+                    <div className={`amount ${i.amount >= 0 ? 'pos' : 'neg'}`}>${i.amount.toFixed(2)}</div>
                     <div className="actions">
                       <button className="delete-btn" onClick={() => onDelete(i.id)}>Delete</button>
                     </div>
@@ -100,8 +106,8 @@ export default function IncomeManagement() {
           <div className="card transactions-card">
             <div className="card-header">
               <div>
-                <h2>Add Income</h2>
-                <p className="muted">Record a new income source.</p>
+                <h2>Add Scheduled Transaction</h2>
+                <p className="muted">Record a scheduled income or expense.</p>
               </div>
             </div>
             <form className="form" onSubmit={(e) => { e.preventDefault(); onCreate(); }}>
@@ -111,7 +117,7 @@ export default function IncomeManagement() {
                   type="text"
                   value={newItem.source}
                   onChange={(e) => setNewItem({...newItem, source: e.target.value})}
-                  placeholder="e.g., Salary, Freelance, Bonus"
+                  placeholder="e.g., Salary, Rent, Utilities"
                   required
                 />
               </div>
@@ -125,6 +131,18 @@ export default function IncomeManagement() {
                   required
                 />
               </div>
+              {newItem.amount < 0 && (
+                <div className="form-group">
+                  <label>Category (expense)</label>
+                  <input
+                    type="text"
+                    value={newItem.category}
+                    onChange={(e) => setNewItem({...newItem, category: e.target.value})}
+                    placeholder="e.g., Rent, Groceries"
+                    required
+                  />
+                </div>
+              )}
               <div className="form-row">
                 <div className="form-group half">
                   <label>Frequency</label>
@@ -141,7 +159,7 @@ export default function IncomeManagement() {
                   </select>
                 </div>
                 <div className="form-group half">
-                  <label>Received Date</label>
+                  <label>Start Date</label>
                   <input
                     type="date"
                     value={newItem.receivedDate}
@@ -151,7 +169,7 @@ export default function IncomeManagement() {
                 </div>
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn primary full">Add Income</button>
+                <button type="submit" className="btn primary full">Add Scheduled Transaction</button>
               </div>
             </form>
           </div>

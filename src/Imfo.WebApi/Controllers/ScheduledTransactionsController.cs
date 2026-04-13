@@ -10,73 +10,76 @@ namespace Imfo.WebApi.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
-public class IncomeController : ControllerBase
+[Route("api/scheduled-transactions")]
+public class ScheduledTransactionsController : ControllerBase
 {
     private readonly ImfoDbContext _db;
 
-    public IncomeController(ImfoDbContext db)
+    public ScheduledTransactionsController(ImfoDbContext db)
     {
         _db = db;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Income>>> Get()
+    public async Task<ActionResult<IEnumerable<ScheduledTransaction>>> Get()
     {
         var userId = GetCurrentUserId();
-        return Ok(await _db.Incomes.Where(i => i.UserId == userId).OrderByDescending(x => x.ReceivedDate).ToListAsync());
+        return Ok(await _db.ScheduledTransactions.Where(i => i.UserId == userId).OrderByDescending(x => x.ReceivedDate).ToListAsync());
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Income>> Get(Guid id)
+    public async Task<ActionResult<ScheduledTransaction>> Get(Guid id)
     {
         var userId = GetCurrentUserId();
-        var it = await _db.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var it = await _db.ScheduledTransactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (it == null) return NotFound();
         return Ok(it);
     }
 
     [HttpPost]
-    public async Task<ActionResult<IncomeReadDto>> Post([FromBody] IncomeCreateDto income)
+    public async Task<ActionResult<ScheduledTransactionReadDto>> Post([FromBody] ScheduledTransactionCreateDto income)
     {
         var userId = GetCurrentUserId();
-        var entity = new Income
+        var st = new ScheduledTransaction
         {
             Id = Guid.NewGuid(),
             Source = income.Source,
             Amount = income.Amount,
+            Category = income.Category,
             ReceivedDate = income.ReceivedDate,
             Frequency = income.Frequency,
             UserId = userId
         };
 
-        _db.Incomes.Add(entity);
+        _db.ScheduledTransactions.Add(st);
         await _db.SaveChangesAsync();
 
-        var read = new IncomeReadDto
+        var readSt = new ScheduledTransactionReadDto
         {
-            Id = entity.Id,
-            Source = entity.Source,
-            Amount = entity.Amount,
-            ReceivedDate = entity.ReceivedDate,
-            Frequency = entity.Frequency,
-            UserId = entity.UserId
+            Id = st.Id,
+            Source = st.Source,
+            Amount = st.Amount,
+            Category = st.Category,
+            ReceivedDate = st.ReceivedDate,
+            Frequency = st.Frequency,
+            UserId = st.UserId
         };
 
-        return CreatedAtAction(nameof(Get), new { id = entity.Id }, read);
+        return CreatedAtAction(nameof(Get), new { id = st.Id }, readSt);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Income>> Put(Guid id, [FromBody] Income updated)
+    public async Task<ActionResult<ScheduledTransaction>> Put(Guid id, [FromBody] ScheduledTransaction updated)
     {
         var userId = GetCurrentUserId();
-        var existing = await _db.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var existing = await _db.ScheduledTransactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (existing == null) return NotFound();
 
         existing.Source = updated.Source;
         existing.Amount = updated.Amount;
+        existing.Category = updated.Category;
         existing.ReceivedDate = updated.ReceivedDate;
         existing.Frequency = updated.Frequency;
 
@@ -86,13 +89,13 @@ public class IncomeController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(Guid id)
+    public async Task<ActionResult> Delete (Guid id) 
     {
         var userId = GetCurrentUserId();
-        var it = await _db.Incomes.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var it = await _db.ScheduledTransactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
 
         if (it == null) return NotFound();
-        _db.Incomes.Remove(it);
+        _db.ScheduledTransactions.Remove(it);
         await _db.SaveChangesAsync();
 
         return NoContent();

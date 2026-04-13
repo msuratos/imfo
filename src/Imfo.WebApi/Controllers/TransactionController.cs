@@ -45,7 +45,7 @@ public class TransactionController : ControllerBase
             Id = Guid.NewGuid(),
             Description = t.Description,
             Amount = t.Amount,
-            Category = t.Category,
+            CategoryId = t.CategoryId,
             Date = t.Date,
             UserId = userId
         };
@@ -58,7 +58,7 @@ public class TransactionController : ControllerBase
             Id = entity.Id,
             Description = entity.Description,
             Amount = entity.Amount,
-            Category = entity.Category,
+            CategoryId = entity.CategoryId,
             Date = entity.Date,
             UserId = entity.UserId
         };
@@ -76,7 +76,7 @@ public class TransactionController : ControllerBase
 
         existing.Description = updated.Description;
         existing.Amount = updated.Amount;
-        existing.Category = updated.Category;
+        existing.CategoryId = updated.CategoryId;
         existing.Date = updated.Date;
 
         await _db.SaveChangesAsync();

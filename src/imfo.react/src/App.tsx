@@ -7,6 +7,7 @@ import Default from './pages/Default';
 import Login from './pages/Login';
 import Budgets from './pages/Budgets';
 import ScheduledTransactions from './pages/ScheduledTransactions';
+import Categories from './pages/Categories';
 
 import './styles.css'
 
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/" element={<Default />} />
           <Route path="/budgets" element={<Budgets />} />
           <Route path="/scheduled-transactions" element={<ScheduledTransactions />} />
+          <Route path="/categories" element={<Categories />} />
           <Route path="/callback" element={<Callback />} />
           <Route path="/login" element={<Login />} />
         </Routes>

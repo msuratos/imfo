@@ -18,6 +18,12 @@ export interface Transaction {
   id: string
   description: string
   amount: number // Positive = Expense, Negative = Income
-  category: string
+  categoryId: string
   date: string
+}
+
+export interface Category {
+  id: string
+  name: string
+  type: 'Income' | 'Expense'
 }

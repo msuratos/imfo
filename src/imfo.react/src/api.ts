@@ -1,9 +1,9 @@
 import axios from 'axios'
-import { Budget, Transaction, ScheduledTransaction } from './types'
+import { Budget, Transaction, ScheduledTransaction, Category } from './types'
 
 const api = axios.create();
 
-// Income API calls
+// Scheduled Transaction API calls
 export async function createScheduledTransaction(item: Omit<ScheduledTransaction, 'id'>, token: string) {
   const r = await api.post('/api/scheduled-transactions', item, {
     headers: {
@@ -62,6 +62,25 @@ export async function deleteBudget(id: string, token: string) {
 // Transaction API calls
 export async function createTransaction(item: Omit<Transaction, 'id'>, token: string) {
   const r = await api.post('/api/transaction', item, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return r.data
+}
+
+// Category API calls
+export async function createCategory(item: Omit<Category, 'id'>, token: string) {
+  const r = await api.post('/api/category', item, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return r.data
+}
+
+export async function getCategories(token: string): Promise<Category[]> {
+  const r = await api.get('/api/category', {
     headers: {
       Authorization: `Bearer ${token}`
     }

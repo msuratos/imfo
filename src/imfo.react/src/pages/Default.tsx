@@ -165,6 +165,7 @@ export default function Default() {
         <div>
           <button onClick={() => navigate('/scheduled-transactions')}>Schedules</button>
           <button onClick={() => navigate('/budgets')}>Budgets</button>
+          <button onClick={() => navigate('/forecast')}>Forecast</button>
           <button onClick={() => navigate('/categories')}>Categories</button>
           <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
         </div>

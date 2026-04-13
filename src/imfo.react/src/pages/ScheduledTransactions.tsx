@@ -69,6 +69,7 @@ export default function ScheduledTransactions() {
         <p className="muted">Manage scheduled recurring transactions</p>
         <div>
           <button onClick={() => navigate('/')}>Transactions</button>
+          <button onClick={() => navigate('/forecast')}>Forecast</button>
           <button onClick={() => navigate('/budgets')}>Budgets</button>
           <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
         </div>

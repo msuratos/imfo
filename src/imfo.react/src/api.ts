@@ -21,6 +21,15 @@ export async function getBudgets(token: string): Promise<BudgetItem[]> {
   return r.data
 }
 
+export async function deleteBudget(id: string, token: string) {
+  const r = await api.delete(`/api/budget/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return r.data
+}
+
 export async function createTransaction(item: Omit<TransactionItem, 'id'>, token: string) {
   const r = await api.post('/api/transaction', item, {
     headers: {

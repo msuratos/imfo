@@ -33,6 +33,25 @@ body {
     opacity: 0.9
   }
 
+  .app-header div {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .app-header button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+  }
+
+  .app-header button:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
 .container {
   display: flex;
   gap: 20px;
@@ -65,12 +84,26 @@ body {
 
 .list-item {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto auto;
   gap: 8px;
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #eef2f7
 }
+
+  .list-item button {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    background: var(--danger);
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .list-item button:hover {
+    background: #dc2626;
+  }
 
   .list-item .title {
     font-weight: 600
@@ -98,6 +131,24 @@ body {
   display: block;
   margin-bottom: 10px;
   font-size: 14px
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e6eef8;
+  border-radius: 6px;
 }
 
 .form input {

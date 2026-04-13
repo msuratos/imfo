@@ -1,9 +1,8 @@
 export interface BudgetItem {
   id: string
-  title: string
-  amount: number
   category: string
-  date: string
+  amount: number
+  frequency: string
 }
 
 export interface TransactionItem {

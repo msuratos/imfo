@@ -1,4 +1,4 @@
-export interface Income {
+export interface ScheduledTransaction {
   id: string
   source: string
   amount: number

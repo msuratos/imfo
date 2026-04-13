@@ -3,16 +3,16 @@ import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
-import { getTransactions, createTransaction, getBudgets, updateTransaction, deleteTransaction, getIncomes } from '../api'
+import { getTransactions, createTransaction, getBudgets, updateTransaction, deleteTransaction, getScheduledTransactions } from '../api'
 import TransactionForm from '../components/TransactionForm';
-import { Transaction, Budget, Income } from '../types'
+import { Transaction, Budget, ScheduledTransaction } from '../types'
 
 export default function Default() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken, signOut } = useLogto();
   const [items, setItems] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [incomes, setIncomes] = useState<Income[]>([]);
+  const [scheduledTransactions, setScheduledTransactions] = useState<ScheduledTransaction[]>([]);
   const [selectedFrequency, setSelectedFrequency] = useState<'weekly' | 'bi-weekly' | 'monthly' | 'yearly'>('monthly');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Omit<Transaction, 'id'> | null>(null);
@@ -24,14 +24,14 @@ export default function Default() {
 
   async function load() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    const [transactions, budgetData, incomeData] = await Promise.all([
+    const [transactions, budgetData, scheduledData] = await Promise.all([
       getTransactions(token),
       getBudgets(token),
-      getIncomes(token)
+      getScheduledTransactions(token)
     ]);
     setItems(transactions);
     setBudgets(budgetData);
-    setIncomes(incomeData);
+    setScheduledTransactions(scheduledData);
   }
 
   async function onCreate(item: Omit<Transaction, 'id'>) {
@@ -134,7 +134,7 @@ export default function Default() {
   const totalBudgeted = budgetSummary.reduce((sum, s) => sum + s.normalizedBudget, 0);
   const totalSpent = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
   const totalRemaining = totalBudgeted - totalSpent;
-  const totalIncome = incomes.reduce((sum, i) => sum + normalizeAmount(i.amount, i.frequency, selectedFrequency), 0);
+  const totalIncome = scheduledTransactions.reduce((sum, i) => sum + normalizeAmount(i.amount, i.frequency, selectedFrequency), 0);
   const totalExpenses = totalSpent;
   const netBalance = totalIncome - totalExpenses;
   const budgetChartColors = ['#ef4444', '#10b981'];
@@ -145,7 +145,7 @@ export default function Default() {
         <h1 title='Is My Finances Okay?'>Imfo</h1>
         <p className="muted">Simple budgeting with clear cards and categories</p>
         <div>
-          <button onClick={() => navigate('/income')}>Income</button>
+          <button onClick={() => navigate('/scheduled-transactions')}>Schedules</button>
           <button onClick={() => navigate('/budgets')}>Budgets</button>
           <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
         </div>

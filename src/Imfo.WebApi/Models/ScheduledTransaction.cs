@@ -1,6 +1,6 @@
 namespace Imfo.WebApi.Models;
 
-public class Income
+public class ScheduledTransaction
 {
     public Guid Id { get; set; }
     public string Source { get; set; } = string.Empty;

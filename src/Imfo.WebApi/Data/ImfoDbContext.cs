@@ -10,7 +10,7 @@ public class ImfoDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; } = null!;
-    public DbSet<Income> Incomes { get; set; } = null!;
+    public DbSet<ScheduledTransaction> ScheduledTransactions { get; set; } = null!;
     public DbSet<Budget> Budgets { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
 
@@ -21,12 +21,12 @@ public class ImfoDbContext : DbContext
         modelBuilder.Entity<User>(eb =>
         {
             eb.HasKey(u => u.Id);
-            eb.HasMany(u => u.Incomes).WithOne(i => i.User).HasForeignKey(i => i.UserId).OnDelete(DeleteBehavior.Cascade);
+            eb.HasMany(u => u.ScheduledTransactions).WithOne(i => i.User).HasForeignKey(i => i.UserId).OnDelete(DeleteBehavior.Cascade);
             eb.HasMany(u => u.Budgets).WithOne(b => b.User).HasForeignKey(b => b.UserId).OnDelete(DeleteBehavior.Cascade);
             eb.HasMany(u => u.Transactions).WithOne(t => t.User).HasForeignKey(t => t.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<Income>(eb =>
+        modelBuilder.Entity<ScheduledTransaction>(eb =>
         {
             eb.HasKey(i => i.Id);
         });

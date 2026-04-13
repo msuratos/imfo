@@ -9,7 +9,7 @@ public class User
     public string? Token { get; set; }
 
     // EF Core: navigation collections
-    public ICollection<Income> Incomes { get; set; } = new List<Income>();
+    public ICollection<ScheduledTransaction> ScheduledTransactions { get; set; } = new List<ScheduledTransaction>();
     public ICollection<Budget> Budgets { get; set; } = new List<Budget>();
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

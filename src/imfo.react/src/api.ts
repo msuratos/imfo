@@ -1,11 +1,11 @@
 import axios from 'axios'
-import { Budget, Transaction, Income } from './types'
+import { Budget, Transaction, ScheduledTransaction } from './types'
 
 const api = axios.create();
 
 // Income API calls
-export async function createIncome(item: Omit<Income, 'id'>, token: string) {
-  const r = await api.post('/api/income', item, {
+export async function createScheduledTransaction(item: Omit<ScheduledTransaction, 'id'>, token: string) {
+  const r = await api.post('/api/scheduled-transactions', item, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -13,8 +13,8 @@ export async function createIncome(item: Omit<Income, 'id'>, token: string) {
   return r.data
 }
 
-export async function getIncomes(token: string): Promise<Income[]> {
-  const r = await api.get('/api/income', {
+export async function getScheduledTransactions(token: string): Promise<ScheduledTransaction[]> {
+  const r = await api.get('/api/scheduled-transactions', {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -22,8 +22,8 @@ export async function getIncomes(token: string): Promise<Income[]> {
   return r.data
 }
 
-export async function deleteIncome(id: string, token: string) {
-  const r = await api.delete(`/api/income/${id}`, {
+export async function deleteScheduledTransaction(id: string, token: string) {
+  const r = await api.delete(`/api/scheduled-transactions/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }

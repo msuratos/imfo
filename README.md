@@ -25,3 +25,15 @@ Notes
 ## Architecture
 
 [Architecture](./docs/architecture.md)
+
+## TODO
+
+- rename income page to scheduled transactions
+   - **the amount in transaction in default page should determine income vs expense already. so the purpose of this page will to manage scheduled transactions for reoccurences*
+- adding forecasting by frequency
+- update the layout to be responsive for mobile
+   - **the head navigation is too big*
+   - add dark and light theme
+- integration with banks
+- AI chatbox to ask questions
+   - **should use a local LLM, no external service*

@@ -13,6 +13,7 @@ export default function Default() {
   const [items, setItems] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
+  const [selectedFrequency, setSelectedFrequency] = useState<'weekly' | 'bi-weekly' | 'monthly' | 'yearly'>('monthly');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Omit<Transaction, 'id'> | null>(null);
 
@@ -65,31 +66,76 @@ export default function Default() {
     load();
   }
 
-  function getBudgetSummary() {
-    // Group transactions by category and sum expenses
-    const spentByCategory: { [key: string]: number } = {};
-    items.forEach(item => {
-      if (item.amount < 0) { // Only count expenses
-        spentByCategory[item.category] = (spentByCategory[item.category] || 0) + Math.abs(item.amount);
-      }
-    });
-
-    // Calculate budget summary per category
-    return budgets.map(budget => ({
-      category: budget.category,
-      frequency: budget.frequency,
-      budgeted: budget.amount,
-      spent: spentByCategory[budget.category] || 0,
-      remaining: budget.amount - (spentByCategory[budget.category] || 0)
-    }));
+  function getFrequencyMultiplier(frequency: string): number {
+    switch (frequency.toLowerCase()) {
+      case 'weekly':
+        return 52;
+      case 'bi-weekly':
+        return 26;
+      case 'monthly':
+        return 12;
+      case 'yearly':
+        return 1;
+      case 'one-time':
+      default:
+        return 1;
+    }
   }
 
+  function normalizeAmount(amount: number, fromFrequency: string, toFrequency: string) {
+    const fromPeriods = getFrequencyMultiplier(fromFrequency);
+    const toPeriods = getFrequencyMultiplier(toFrequency);
+    return amount * (fromPeriods / toPeriods);
+  }
+
+  function getPeriodStart(frequency: string) {
+    const now = new Date();
+    switch (frequency) {
+      case 'weekly':
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+      case 'monthly':
+        return new Date(now.getFullYear(), now.getMonth(), 1);
+      case 'yearly':
+        return new Date(now.getFullYear(), 0, 1);
+      default:
+        return new Date(0);
+    }
+  }
+
+  function getFilteredExpenses() {
+    const startDate = getPeriodStart(selectedFrequency);
+    return items.filter(item => item.amount < 0 && new Date(item.date) >= startDate);
+  }
+
+  function getBudgetSummary() {
+    const filteredExpenses = getFilteredExpenses();
+    const spentByCategory: { [key: string]: number } = {};
+
+    filteredExpenses.forEach(item => {
+      spentByCategory[item.category] = (spentByCategory[item.category] || 0) + Math.abs(item.amount);
+    });
+
+    return budgets.map(budget => {
+      const normalizedBudget = normalizeAmount(budget.amount, budget.frequency, selectedFrequency);
+      const spent = spentByCategory[budget.category] || 0;
+      return {
+        category: budget.category,
+        frequency: budget.frequency,
+        budgeted: budget.amount,
+        normalizedBudget,
+        spent,
+        remaining: normalizedBudget - spent
+      };
+    });
+  }
+
+  const filteredExpenses = getFilteredExpenses();
   const budgetSummary = getBudgetSummary();
-  const totalBudgeted = budgetSummary.reduce((sum, s) => sum + s.budgeted, 0);
-  const totalSpent = budgetSummary.reduce((sum, s) => sum + s.spent, 0);
+  const totalBudgeted = budgetSummary.reduce((sum, s) => sum + s.normalizedBudget, 0);
+  const totalSpent = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
   const totalRemaining = totalBudgeted - totalSpent;
-  const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
-  const totalExpenses = items.reduce((sum, i) => i.amount < 0 ? sum + Math.abs(i.amount) : sum, 0);
+  const totalIncome = incomes.reduce((sum, i) => sum + normalizeAmount(i.amount, i.frequency, selectedFrequency), 0);
+  const totalExpenses = totalSpent;
   const netBalance = totalIncome - totalExpenses;
   const budgetChartColors = ['#ef4444', '#10b981'];
 
@@ -110,17 +156,30 @@ export default function Default() {
             <div className="card-header">
               <div>
                 <h2>Summary</h2>
-                <p className="muted">Overview of your financial status.</p>
+                <p className="muted">Normalized totals for the selected frequency.</p>
+              </div>
+              <div className="summary-toolbar">
+                <label htmlFor="frequency">View:</label>
+                <select
+                  id="frequency"
+                  value={selectedFrequency}
+                  onChange={(e) => setSelectedFrequency(e.target.value as 'weekly' | 'bi-weekly' | 'monthly' | 'yearly')}
+                >
+                  <option value="weekly">Weekly</option>
+                  <option value="bi-weekly">Bi-weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
               </div>
             </div>
             <div className="budget-stats">
               <div className="stat-box">
                 <div className="stat-value pos">${totalIncome.toFixed(2)}</div>
-                <div className="stat-label">Total Income</div>
+                <div className="stat-label">{selectedFrequency.charAt(0).toUpperCase() + selectedFrequency.slice(1)} Income</div>
               </div>
               <div className="stat-box">
                 <div className="stat-value">${totalExpenses.toFixed(2)}</div>
-                <div className="stat-label">Total Expenses</div>
+                <div className="stat-label">{selectedFrequency.charAt(0).toUpperCase() + selectedFrequency.slice(1)} Expenses</div>
               </div>
               <div className="stat-box">
                 <div className={`stat-value ${netBalance >= 0 ? 'pos' : 'neg'}`}>${netBalance.toFixed(2)}</div>
@@ -134,8 +193,8 @@ export default function Default() {
           <div className="card budget-summary-card">
             <div className="card-header">
               <div>
-                <h2>Spending Analysis</h2>
-                <p className="muted">Budget vs. actual spending by category.</p>
+                <h2>Expenses Analysis</h2>
+                <p className="muted">Actual expense vs. budget by category for the selected frequency.</p>
               </div>
             </div>
             {budgetSummary.length === 0 ? (
@@ -174,8 +233,7 @@ export default function Default() {
                         </PieChart>
                       </ResponsiveContainer>
                       <div className="budget-chart-footer">
-                        <div><strong>Spent:</strong> ${summary.spent.toFixed(2)}</div>
-                        <div><strong>Budget:</strong> ${summary.budgeted.toFixed(2)}</div>
+                        <div><strong>{selectedFrequency.charAt(0).toUpperCase() + selectedFrequency.slice(1)} Budget:</strong> ${summary.normalizedBudget.toFixed(2)}</div>
                       </div>
                     </div>
                   )

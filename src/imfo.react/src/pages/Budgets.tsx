@@ -113,6 +113,7 @@ export default function Budgets() {
                     required
                   >
                     <option value="weekly">Weekly</option>
+                    <option value="bi-weekly">Bi-weekly</option>
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                   </select>

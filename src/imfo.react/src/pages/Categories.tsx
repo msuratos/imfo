@@ -6,7 +6,7 @@ import { Category } from '../types'
 
 export default function Categories() {
   const navigate = useNavigate()
-  const { isAuthenticated, getAccessToken } = useLogto()
+  const { isAuthenticated, getAccessToken, signOut } = useLogto()
   const [items, setItems] = useState<Category[]>([])
   const [name, setName] = useState('')
   const [type, setType] = useState<'Income' | 'Expense'>('Expense')
@@ -31,43 +31,69 @@ export default function Categories() {
   }
 
   return (
-    <div className="container">
+    <div className="app-root" >
       <header className="app-header">
-        <h2>Categories</h2>
+        <h1 title='Is My Finances Okay?'>Imfo - Categories</h1>
         <p className="muted">Manage your income and expense categories</p>
+        <div>
+          <button onClick={() => navigate('/')}>Transactions</button>
+          <button onClick={() => navigate('/scheduled-transactions')}>Schedules</button>
+          <button onClick={() => navigate('/budgets')}>Budgets</button>
+          <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
+        </div>
       </header>
-
-      <main>
-        <div className="card">
-          <form onSubmit={onCreate} className="form">
-            <div className="form-group">
-              <label>Name</label>
-              <input value={name} onChange={e => setName(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label>Type</label>
-              <select value={type} onChange={e => setType(e.target.value as 'Income' | 'Expense')}>
-                <option value="Expense">Expense</option>
-                <option value="Income">Income</option>
-              </select>
-            </div>
-            <div className="form-actions">
-              <button className="btn primary" type="submit">Create</button>
-            </div>
-          </form>
-        </div>
-
-        <div className="card">
-          <h3>Your categories</h3>
-          <div className="list">
-            {items.length === 0 ? <div className="empty-state">No categories yet.</div> : items.map(c => (
-              <div key={c.id} className="list-item">
-                <div>{c.name}</div>
-                <div className="muted">{c.type}</div>
+      <main className="container">
+        <section className="left">
+          <div className="card transactions-card">
+            <div className="card-header">
+              <div>
+                <h2>Categories</h2>
+                <p className="muted">Manage income and expense categories available to your account.</p>
               </div>
-            ))}
+              <div className="transaction-count">{items.length} item{items.length === 1 ? '' : 's'}</div>
+            </div>
+            <div className="list">
+              {items.length === 0 ? (
+                <div className="empty-state">No categories yet.</div>
+              ) : (
+                items.map(c => (
+                  <div key={c.id} className="list-item">
+                    <div className="transaction-info">
+                      <div className="description">{c.name}</div>
+                      <div className="meta">{c.type}</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        </section>
+        <aside className="right">
+          <div className="card transactions-card">
+            <div className="card-header">
+              <div>
+                <h2>Add Category</h2>
+                <p className="muted">Create a new category for incomes or expenses.</p>
+              </div>
+            </div>
+            <form onSubmit={onCreate} className="form">
+              <div className="form-group">
+                <label>Name</label>
+                <input value={name} onChange={e => setName(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Type</label>
+                <select value={type} onChange={e => setType(e.target.value as 'Income' | 'Expense')}>
+                  <option value="Expense">Expense</option>
+                  <option value="Income">Income</option>
+                </select>
+              </div>
+              <div className="form-actions">
+                <button className="btn primary full" type="submit">Create</button>
+              </div>
+            </form>
+          </div>
+        </aside>
       </main>
     </div>
   )

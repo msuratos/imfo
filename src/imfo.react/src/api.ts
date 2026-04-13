@@ -85,7 +85,20 @@ export async function getCategories(token: string): Promise<Category[]> {
       Authorization: `Bearer ${token}`
     }
   })
-  return r.data
+  // Normalize type: backend may return numeric enum values or string labels
+  const data = r.data as any[];
+  return data.map(d => {
+    const typeStr = typeof d.type === 'number'
+      ? (d.type === 0 ? 'Income' : 'Expense')
+      : String(d.type);
+    // ensure type matches the Category.type union
+    const normalizedType = (typeStr === 'Income' || typeStr === 'Expense') ? typeStr as ('Income' | 'Expense') : 'Expense';
+    return {
+      id: d.id,
+      name: d.name,
+      type: normalizedType
+    } as Category;
+  });
 }
 
 

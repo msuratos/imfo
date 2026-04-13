@@ -20,13 +20,22 @@ public class CategoryController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Category>>> Get()
+    public async Task<ActionResult<IEnumerable<CategoryReadDto>>> Get()
     {
         var userId = GetCurrentUserId();
         // return categories belonging to the user plus global categories (UserId == Guid.Empty)
-        var categories = await _db.Categories.ToListAsync();
+        var cats = await _db.Categories
+            .Where(c => c.UserId == userId || c.UserId == Guid.Empty)
+            .Select(c => new CategoryReadDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Type = c.Type.ToString(),
+                UserId = c.UserId
+            })
+            .ToListAsync();
 
-        return Ok(await _db.Categories.Where(c => c.UserId == userId || c.UserId == Guid.Empty).ToListAsync());
+        return Ok(cats);
     }
 
     [HttpPost]

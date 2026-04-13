@@ -3,15 +3,16 @@ import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
-import { getTransactions, createTransaction, getBudgets, updateTransaction, deleteTransaction } from '../api'
+import { getTransactions, createTransaction, getBudgets, updateTransaction, deleteTransaction, getIncomes } from '../api'
 import TransactionForm from '../components/TransactionForm';
-import { Transaction, Budget } from '../types'
+import { Transaction, Budget, Income } from '../types'
 
 export default function Default() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken, signOut } = useLogto();
   const [items, setItems] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [incomes, setIncomes] = useState<Income[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Omit<Transaction, 'id'> | null>(null);
 
@@ -22,12 +23,14 @@ export default function Default() {
 
   async function load() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    const [transactions, budgetData] = await Promise.all([
+    const [transactions, budgetData, incomeData] = await Promise.all([
       getTransactions(token),
-      getBudgets(token)
+      getBudgets(token),
+      getIncomes(token)
     ]);
     setItems(transactions);
     setBudgets(budgetData);
+    setIncomes(incomeData);
   }
 
   async function onCreate(item: Omit<Transaction, 'id'>) {
@@ -85,6 +88,9 @@ export default function Default() {
   const totalBudgeted = budgetSummary.reduce((sum, s) => sum + s.budgeted, 0);
   const totalSpent = budgetSummary.reduce((sum, s) => sum + s.spent, 0);
   const totalRemaining = totalBudgeted - totalSpent;
+  const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
+  const totalExpenses = items.reduce((sum, i) => i.amount < 0 ? sum + Math.abs(i.amount) : sum, 0);
+  const netBalance = totalIncome - totalExpenses;
   const budgetChartColors = ['#ef4444', '#10b981'];
 
   return (
@@ -93,6 +99,7 @@ export default function Default() {
         <h1 title='Is My Finances Okay?'>Imfo</h1>
         <p className="muted">Simple budgeting with clear cards and categories</p>
         <div>
+          <button onClick={() => navigate('/income')}>Income</button>
           <button onClick={() => navigate('/budgets')}>Budgets</button>
           <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
         </div>
@@ -102,25 +109,38 @@ export default function Default() {
           <div className="card budget-summary-card">
             <div className="card-header">
               <div>
-                <h2>Budget Summary</h2>
-                <p className="muted">A simplified view of your current budget totals.</p>
+                <h2>Summary</h2>
+                <p className="muted">Overview of your financial status.</p>
               </div>
             </div>
             <div className="budget-stats">
               <div className="stat-box">
-                <div className="stat-value">${totalBudgeted.toFixed(2)}</div>
-                <div className="stat-label">Budgeted</div>
+                <div className="stat-value pos">${totalIncome.toFixed(2)}</div>
+                <div className="stat-label">Total Income</div>
               </div>
               <div className="stat-box">
-                <div className="stat-value">${totalSpent.toFixed(2)}</div>
-                <div className="stat-label">Spent</div>
+                <div className="stat-value">${totalExpenses.toFixed(2)}</div>
+                <div className="stat-label">Total Expenses</div>
               </div>
               <div className="stat-box">
-                <div className={`stat-value ${totalRemaining >= 0 ? 'pos' : 'neg'}`}>${totalRemaining.toFixed(2)}</div>
-                <div className="stat-label">Remaining</div>
+                <div className={`stat-value ${netBalance >= 0 ? 'pos' : 'neg'}`}>${netBalance.toFixed(2)}</div>
+                <div className="stat-label">Net Balance</div>
               </div>
             </div>
-            {budgetSummary.length > 0 && (
+          </div>
+        </section>
+
+        <section className="full-width">
+          <div className="card budget-summary-card">
+            <div className="card-header">
+              <div>
+                <h2>Spending Analysis</h2>
+                <p className="muted">Budget vs. actual spending by category.</p>
+              </div>
+            </div>
+            {budgetSummary.length === 0 ? (
+              <div className="empty-state">No budgets set yet.</div>
+            ) : (
               <div className="chart-container">
                 {budgetSummary.map(summary => {
                   const chartData = [

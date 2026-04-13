@@ -2,17 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 
-import { getBudgets, createBudget, deleteBudget } from '../api'
-import { Budget } from '../types'
+import { getIncomes, createIncome, deleteIncome } from '../api'
+import { Income } from '../types'
 
-export default function Budgets() {
+export default function IncomeManagement() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken, signOut } = useLogto();
-  const [items, setItems] = useState<Budget[]>([]);
-  const [newItem, setNewItem] = useState<Omit<Budget, 'id'>>({
-    category: '',
+  const [items, setItems] = useState<Income[]>([]);
+  const [newItem, setNewItem] = useState<Omit<Income, 'id'>>({
+    source: '',
     amount: 0,
-    frequency: 'monthly'
+    receivedDate: new Date().toISOString().split('T')[0],
+    frequency: 'one-time'
   });
 
   useEffect(() => {
@@ -22,37 +23,40 @@ export default function Budgets() {
 
   async function load() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    const data = await getBudgets(token);
+    const data = await getIncomes(token);
     setItems(data);
   }
 
   async function onCreate() {
-    if (!newItem.category || newItem.amount <= 0) return;
+    if (!newItem.source || newItem.amount <= 0) return;
     
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await createBudget(newItem, token);
+    await createIncome(newItem, token);
     setNewItem({
-      category: '',
+      source: '',
       amount: 0,
-      frequency: 'monthly'
+      receivedDate: new Date().toISOString().split('T')[0],
+      frequency: 'one-time'
     });
     load();
   }
 
   async function onDelete(id: string) {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await deleteBudget(id, token);
+    await deleteIncome(id, token);
     load();
   }
+
+  const totalIncome = items.reduce((sum, i) => sum + i.amount, 0);
 
   return (
     <div className="app-root" >
       <header className="app-header">
-        <h1 title='Is My Finances Okay?'>Imfo - Budgets</h1>
-        <p className="muted">Manage your budgets by frequency</p>
+        <h1 title='Is My Finances Okay?'>Imfo - Income</h1>
+        <p className="muted">Track your income sources</p>
         <div>
           <button onClick={() => navigate('/')}>Transactions</button>
-          <button onClick={() => navigate('/income')}>Income</button>
+          <button onClick={() => navigate('/budgets')}>Budgets</button>
           <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
         </div>
       </header>
@@ -61,22 +65,28 @@ export default function Budgets() {
           <div className="card transactions-card">
             <div className="card-header">
               <div>
-                <h2>Budgets</h2>
-                <p className="muted">Track spending limits by category.</p>
+                <h2>Income Sources</h2>
+                <p className="muted">Manage all your income streams.</p>
               </div>
-              <div className="transaction-count">{items.length} budget{items.length === 1 ? '' : 's'}</div>
+              <div className="transaction-count">{items.length} source{items.length === 1 ? '' : 's'}</div>
+            </div>
+            <div className="budget-stats">
+              <div className="stat-box">
+                <div className={`stat-value pos`}>${totalIncome.toFixed(2)}</div>
+                <div className="stat-label">Total Income</div>
+              </div>
             </div>
             {items.length === 0 ? (
-              <div className="empty-state">No budgets yet. Use the form to add your first category.</div>
+              <div className="empty-state">No income sources yet. Use the form to add your first source.</div>
             ) : (
               <div className="list">
                 {items.map(i => (
                   <div key={i.id} className="transaction-item">
                     <div className="transaction-info">
-                      <div className="description">{i.category}</div>
-                      <div className="meta">{i.frequency.charAt(0).toUpperCase() + i.frequency.slice(1)} • ${i.amount.toFixed(2)}</div>
+                      <div className="description">{i.source}</div>
+                      <div className="meta">{i.frequency.charAt(0).toUpperCase() + i.frequency.slice(1)} • {new Date(i.receivedDate).toLocaleDateString()}</div>
                     </div>
-                    <div className="amount">${i.amount.toFixed(2)}</div>
+                    <div className="amount pos">${i.amount.toFixed(2)}</div>
                     <div className="actions">
                       <button className="delete-btn" onClick={() => onDelete(i.id)}>Delete</button>
                     </div>
@@ -90,17 +100,28 @@ export default function Budgets() {
           <div className="card transactions-card">
             <div className="card-header">
               <div>
-                <h2>Add Budget</h2>
-                <p className="muted">Create a new budget goal for a category.</p>
+                <h2>Add Income</h2>
+                <p className="muted">Record a new income source.</p>
               </div>
             </div>
             <form className="form" onSubmit={(e) => { e.preventDefault(); onCreate(); }}>
               <div className="form-group">
-                <label>Category</label>
+                <label>Source</label>
                 <input
                   type="text"
-                  value={newItem.category}
-                  onChange={(e) => setNewItem({...newItem, category: e.target.value})}
+                  value={newItem.source}
+                  onChange={(e) => setNewItem({...newItem, source: e.target.value})}
+                  placeholder="e.g., Salary, Freelance, Bonus"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Amount</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={newItem.amount}
+                  onChange={(e) => setNewItem({...newItem, amount: parseFloat(e.target.value) || 0})}
                   required
                 />
               </div>
@@ -112,24 +133,24 @@ export default function Budgets() {
                     onChange={(e) => setNewItem({...newItem, frequency: e.target.value})}
                     required
                   >
+                    <option value="one-time">One-time</option>
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                   </select>
                 </div>
                 <div className="form-group half">
-                  <label>Amount</label>
+                  <label>Received Date</label>
                   <input
-                    type="number"
-                    step="0.01"
-                    value={newItem.amount}
-                    onChange={(e) => setNewItem({...newItem, amount: parseFloat(e.target.value) || 0})}
+                    type="date"
+                    value={newItem.receivedDate}
+                    onChange={(e) => setNewItem({...newItem, receivedDate: e.target.value})}
                     required
                   />
                 </div>
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn primary full">Add Budget</button>
+                <button type="submit" className="btn primary full">Add Income</button>
               </div>
             </form>
           </div>

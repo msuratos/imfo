@@ -5,13 +5,12 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { getTransactions, createTransaction, getBudgets, updateTransaction, deleteTransaction, getScheduledTransactions, getCategories } from '../api'
 import TransactionForm from '../components/TransactionForm';
+import Layout from '../components/Layout';
 import { Transaction, Budget, ScheduledTransaction, Category } from '../types'
 
 export default function Default() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken, signOut } = useLogto();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [items, setItems] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [scheduledTransactions, setScheduledTransactions] = useState<ScheduledTransaction[]>([]);
@@ -25,20 +24,7 @@ export default function Default() {
     else navigate('/login');
   }, [isAuthenticated])
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('imfo_theme');
-      if (saved === 'dark' || saved === 'light') setTheme(saved);
-      else setTheme('light');
-    } catch { }
-  }, []);
 
-  useEffect(() => {
-    try {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('imfo_theme', theme);
-    } catch { }
-  }, [theme]);
 
   async function load() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
@@ -175,29 +161,7 @@ export default function Default() {
   const budgetChartColors = ['#ef4444', '#10b981'];
 
   return (
-    <div className="app-root" >
-      <header className="app-header">
-        <div className="app-header-inner">
-          <div className="brand">
-            <h1 title='Is My Finances Okay?'>Imfo</h1>
-            <p className="muted">Simple budgeting with clear cards and categories</p>
-          </div>
-
-          <div className="header-controls">
-            <div className="header-actions" data-open={mobileMenuOpen}>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/scheduled-transactions') }}>Schedules</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/budgets') }}>Budgets</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/forecast') }}>Forecast</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/categories') }}>Categories</button>
-              <button onClick={() => { setMobileMenuOpen(false); signOut(import.meta.env.VITE_APP_URL) }}>Sign Out</button>
-            </div>
-
-            <button className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? '☀️' : '🌙'}</button>
-
-            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">{mobileMenuOpen ? '✕' : '☰'}</button>
-          </div>
-        </div>
-      </header>
+    <Layout title="Imfo" subtitle="Simple budgeting with clear cards and categories">
       <main className="container">
         <section className="full-width">
           <div className="card budget-summary-card">
@@ -376,6 +340,6 @@ export default function Default() {
           </div>
         </aside>
       </main>
-    </div>
+    </Layout>
   );
 }

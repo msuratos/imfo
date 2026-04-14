@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 
 import { getBudgets, createBudget, deleteBudget, getCategories } from '../api'
+import Layout from '../components/Layout';
 import { Budget, Category } from '../types'
 
 export default function Budgets() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken, signOut } = useLogto();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [items, setItems] = useState<Budget[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [newItem, setNewItem] = useState<Omit<Budget, 'id'>>({
@@ -22,21 +21,6 @@ export default function Budgets() {
     if (isAuthenticated) load();
     else navigate('/login');
   }, [isAuthenticated])
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('imfo_theme');
-      if (saved === 'dark' || saved === 'light') setTheme(saved);
-      else setTheme('light');
-    } catch { }
-  }, []);
-
-  useEffect(() => {
-    try {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('imfo_theme', theme);
-    } catch { }
-  }, [theme]);
 
   async function load() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
@@ -70,28 +54,7 @@ export default function Budgets() {
   }
 
   return (
-    <div className="app-root" >
-      <header className="app-header">
-        <div className="app-header-inner">
-          <div className="brand">
-            <h1 title='Is My Finances Okay?'>Imfo - Budgets</h1>
-            <p className="muted">Manage your budgets by frequency</p>
-          </div>
-
-          <div className="header-controls">
-            <div className="header-actions" data-open={mobileMenuOpen}>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/scheduled-transactions') }}>Schedules</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/budgets') }}>Budgets</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/forecast') }}>Forecast</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/categories') }}>Categories</button>
-              <button onClick={() => { setMobileMenuOpen(false); signOut(import.meta.env.VITE_APP_URL) }}>Sign Out</button>
-            </div>
-
-            <button className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? '☀️' : '🌙'}</button>
-            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">{mobileMenuOpen ? '✕' : '☰'}</button>
-          </div>
-        </div>
-      </header>
+    <Layout title="Imfo - Budgets" subtitle="Manage your budgets by frequency">
       <main className="container">
         <section className="left">
           <div className="card transactions-card">
@@ -172,6 +135,6 @@ export default function Budgets() {
           </div>
         </aside>
       </main>
-    </div>
+    </Layout>
   );
 }

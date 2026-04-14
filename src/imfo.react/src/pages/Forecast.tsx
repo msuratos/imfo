@@ -4,6 +4,7 @@ import { useLogto } from '@logto/react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart, Bar, Legend } from 'recharts';
 
 import { getScheduledTransactions, getTransactions, getCategories } from '../api'
+import Layout from '../components/Layout';
 import { ScheduledTransaction, Transaction, Category } from '../types'
 
 function getFrequencyMultiplier(frequency: string): number {
@@ -207,28 +208,7 @@ export default function Forecast() {
   })() : [];
 
   return (
-    <div className="app-root">
-      <header className="app-header">
-        <div className="app-header-inner">
-          <div className="brand">
-            <h1>Imfo - Forecast</h1>
-            <p className="muted">Projected balances based on scheduled transactions and recent trends</p>
-          </div>
-
-          <div className="header-controls">
-            <div className="header-actions" data-open={mobileMenuOpen}>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/') }}>Transactions</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/scheduled-transactions') }}>Schedules</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/budgets') }}>Budgets</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/categories') }}>Categories</button>
-              <button onClick={() => { setMobileMenuOpen(false); signOut(import.meta.env.VITE_APP_URL) }}>Sign Out</button>
-            </div>
-
-            <button className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? '☀️' : '🌙'}</button>
-            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">{mobileMenuOpen ? '✕' : '☰'}</button>
-          </div>
-        </div>
-      </header>
+    <Layout title="Imfo - Forecast" subtitle="Projected balances based on scheduled transactions and recent trends">
       <main className="container">
         <section className="full-width">
           <div className="card budget-summary-card">
@@ -289,6 +269,6 @@ export default function Forecast() {
           </div>
         </section>
       </main>
-    </div>
+    </Layout>
   )
 }

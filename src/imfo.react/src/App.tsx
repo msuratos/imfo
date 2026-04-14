@@ -2,13 +2,13 @@ import React from 'react'
 import { LogtoProvider, LogtoConfig } from '@logto/react';
 import { BrowserRouter, Route, Routes } from "react-router";
 
-import Callback from './pages/Callback';
-import Default from './pages/Default';
-import Login from './pages/Login';
 import Budgets from './pages/Budgets';
-import ScheduledTransactions from './pages/ScheduledTransactions';
+import Callback from './pages/Callback';
 import Categories from './pages/Categories';
+import Default from './pages/Default';
 import Forecast from './pages/Forecast';
+import Login from './pages/Login';
+import ScheduledTransactions from './pages/ScheduledTransactions';
 
 import './styles.css'
 
@@ -31,7 +31,7 @@ export default function App() {
           <Route path="/callback" element={<Callback />} />
           <Route path="/login" element={<Login />} />
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
     </LogtoProvider>
   )
 }

@@ -4,6 +4,7 @@ import { useLogto } from '@logto/react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart, Bar, Legend } from 'recharts';
 
 import { getScheduledTransactions, getTransactions, getCategories } from '../api'
+import Layout from '../components/Layout';
 import { ScheduledTransaction, Transaction, Category } from '../types'
 
 function getFrequencyMultiplier(frequency: string): number {
@@ -149,6 +150,8 @@ function generateForecast(transactions: Transaction[], scheduled: ScheduledTrans
 export default function Forecast() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken, signOut } = useLogto();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [scheduled, setScheduled] = useState<ScheduledTransaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -160,6 +163,21 @@ export default function Forecast() {
     if (isAuthenticated) load();
     else navigate('/login');
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('imfo_theme');
+      if (saved === 'dark' || saved === 'light') setTheme(saved);
+      else setTheme('light');
+    } catch { }
+  }, []);
+
+  useEffect(() => {
+    try {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('imfo_theme', theme);
+    } catch { }
+  }, [theme]);
 
   useEffect(() => {
     // rebuild data when options change
@@ -190,17 +208,7 @@ export default function Forecast() {
   })() : [];
 
   return (
-    <div className="app-root">
-      <header className="app-header">
-        <h1>Imfo - Forecast</h1>
-        <p className="muted">Projected balances based on scheduled transactions and recent trends</p>
-        <div>
-          <button onClick={() => navigate('/')}>Transactions</button>
-          <button onClick={() => navigate('/scheduled-transactions')}>Schedules</button>
-          <button onClick={() => navigate('/budgets')}>Budgets</button>
-          <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
-        </div>
-      </header>
+    <Layout title="Imfo - Forecast" subtitle="Projected balances based on scheduled transactions and recent trends">
       <main className="container">
         <section className="full-width">
           <div className="card budget-summary-card">
@@ -261,6 +269,6 @@ export default function Forecast() {
           </div>
         </section>
       </main>
-    </div>
+    </Layout>
   )
 }

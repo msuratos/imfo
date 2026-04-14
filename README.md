@@ -28,9 +28,6 @@ Notes
 
 ## TODO
 
-- update the layout to be responsive for mobile
-   - **the head navigation is too big*
-   - add dark and light theme
 - bug: when adding a transaction, the summaries are not updated nor is the expenses analysis section
 - chore: refactor the Web API to Clean Architecture
 - add a goal tracking system

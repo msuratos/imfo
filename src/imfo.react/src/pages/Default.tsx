@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { getTransactions, createTransaction, getBudgets, updateTransaction, deleteTransaction, getScheduledTransactions, getCategories } from '../api'
 import TransactionForm from '../components/TransactionForm';
+import Layout from '../components/Layout';
 import { Transaction, Budget, ScheduledTransaction, Category } from '../types'
 
 export default function Default() {
@@ -22,6 +23,8 @@ export default function Default() {
     if (isAuthenticated) load();
     else navigate('/login');
   }, [isAuthenticated])
+
+
 
   async function load() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
@@ -158,18 +161,7 @@ export default function Default() {
   const budgetChartColors = ['#ef4444', '#10b981'];
 
   return (
-    <div className="app-root" >
-      <header className="app-header">
-        <h1 title='Is My Finances Okay?'>Imfo</h1>
-        <p className="muted">Simple budgeting with clear cards and categories</p>
-        <div>
-          <button onClick={() => navigate('/scheduled-transactions')}>Schedules</button>
-          <button onClick={() => navigate('/budgets')}>Budgets</button>
-          <button onClick={() => navigate('/forecast')}>Forecast</button>
-          <button onClick={() => navigate('/categories')}>Categories</button>
-          <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
-        </div>
-      </header>
+    <Layout title="Imfo" subtitle="Simple budgeting with clear cards and categories">
       <main className="container">
         <section className="full-width">
           <div className="card budget-summary-card">
@@ -348,6 +340,6 @@ export default function Default() {
           </div>
         </aside>
       </main>
-    </div>
+    </Layout>
   );
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { useLogto } from '@logto/react'
 import { getCategories, createCategory } from '../api'
 import { Category } from '../types'
+import Layout from '../components/Layout';
 
 export default function Categories() {
   const navigate = useNavigate()
@@ -15,6 +16,7 @@ export default function Categories() {
     if (isAuthenticated) load();
     else navigate('/login');
   }, [isAuthenticated])
+
 
   async function load() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL)
@@ -31,17 +33,7 @@ export default function Categories() {
   }
 
   return (
-    <div className="app-root" >
-      <header className="app-header">
-        <h1 title='Is My Finances Okay?'>Imfo - Categories</h1>
-        <p className="muted">Manage your income and expense categories</p>
-        <div>
-          <button onClick={() => navigate('/')}>Transactions</button>
-          <button onClick={() => navigate('/scheduled-transactions')}>Schedules</button>
-          <button onClick={() => navigate('/budgets')}>Budgets</button>
-          <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
-        </div>
-      </header>
+    <Layout title="Imfo - Categories" subtitle="Manage your income and expense categories">
       <main className="container">
         <section className="left">
           <div className="card transactions-card">
@@ -95,6 +87,6 @@ export default function Categories() {
           </div>
         </aside>
       </main>
-    </div>
+    </Layout>
   )
 }

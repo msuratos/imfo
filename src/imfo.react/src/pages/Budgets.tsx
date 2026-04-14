@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 
 import { getBudgets, createBudget, deleteBudget, getCategories } from '../api'
+import Layout from '../components/Layout';
 import { Budget, Category } from '../types'
 
 export default function Budgets() {
@@ -53,16 +54,7 @@ export default function Budgets() {
   }
 
   return (
-    <div className="app-root" >
-      <header className="app-header">
-        <h1 title='Is My Finances Okay?'>Imfo - Budgets</h1>
-        <p className="muted">Manage your budgets by frequency</p>
-        <div>
-          <button onClick={() => navigate('/')}>Transactions</button>
-          <button onClick={() => navigate('/income')}>Income</button>
-          <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
-        </div>
-      </header>
+    <Layout title="Imfo - Budgets" subtitle="Manage your budgets by frequency">
       <main className="container">
         <section className="left">
           <div className="card transactions-card">
@@ -143,6 +135,6 @@ export default function Budgets() {
           </div>
         </aside>
       </main>
-    </div>
+    </Layout>
   );
 }

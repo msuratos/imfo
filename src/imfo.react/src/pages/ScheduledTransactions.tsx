@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
+import Layout from '../components/Layout';
 
 import { getScheduledTransactions, createScheduledTransaction, deleteScheduledTransaction, getCategories } from '../api'
 import { ScheduledTransaction, Category } from '../types'
@@ -63,17 +64,7 @@ export default function ScheduledTransactions() {
   const total = items.reduce((sum, i) => sum + i.amount, 0);
 
   return (
-    <div className="app-root" >
-      <header className="app-header">
-        <h1 title='Is My Finances Okay?'>Imfo - Scheduled Transactions</h1>
-        <p className="muted">Manage scheduled recurring transactions</p>
-        <div>
-          <button onClick={() => navigate('/')}>Transactions</button>
-          <button onClick={() => navigate('/forecast')}>Forecast</button>
-          <button onClick={() => navigate('/budgets')}>Budgets</button>
-          <button onClick={() => signOut(import.meta.env.VITE_APP_URL)}>Sign Out</button>
-        </div>
-      </header>
+    <Layout title="Imfo - Scheduled Transactions" subtitle="Manage scheduled recurring transactions">
       <main className="container">
         <section className="left">
           <div className="card transactions-card">
@@ -184,6 +175,6 @@ export default function ScheduledTransactions() {
           </div>
         </aside>
       </main>
-    </div>
+    </Layout>
   );
 }

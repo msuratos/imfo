@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useLogto } from '@logto/react'
-import { getCategories, createCategory } from '../api'
+import { getCategories, createCategory } from '../apis/categoryApi'
 import { Category } from '../types'
 import Layout from '../components/Layout';
 

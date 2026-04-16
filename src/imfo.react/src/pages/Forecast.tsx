@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart, Bar, Legend } from 'recharts';
 
-import { getScheduledTransactions, getTransactions, getCategories } from '../api'
+import { getCategories } from '../apis/categoryApi';
+import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
+import { getTransactions } from '../apis/transactionApi';
 import Layout from '../components/Layout';
 import { ScheduledTransaction, Transaction, Category } from '../types'
 

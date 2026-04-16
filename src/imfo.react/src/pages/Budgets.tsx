@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 
-import { getBudgets, createBudget, deleteBudget, getCategories } from '../api'
+import { getBudgets, createBudget, deleteBudget } from '../apis/budgetApi';
+import { getCategories } from '../apis/categoryApi';
 import Layout from '../components/Layout';
 import { Budget, Category } from '../types'
 

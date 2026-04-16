@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Imfo.WebApi.Models;
+using Imfo.ApplicationCore.Persistance.Entities;
 
-namespace Imfo.WebApi.Data;
+namespace Imfo.ApplicationCore.Persistance;
 
 public class ImfoDbContext : DbContext
 {

@@ -1,10 +1,10 @@
-using System.Security.Claims;
-using Imfo.WebApi.Data;
-using Imfo.WebApi.Models;
+using Imfo.ApplicationCore.Persistance;
+using Imfo.ApplicationCore.Persistance.Entities;
 using Imfo.WebApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Imfo.WebApi.Controllers;
 

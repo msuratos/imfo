@@ -1,5 +1,4 @@
-using Imfo.WebApi.Data;
-using Imfo.WebApi.Models;
+using Imfo.ApplicationCore.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;

@@ -1,4 +1,4 @@
-namespace Imfo.WebApi.Models;
+namespace Imfo.ApplicationCore.Persistance.Entities;
 
 public class Transaction
 {

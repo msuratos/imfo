@@ -1,4 +1,5 @@
-using Imfo.ApplicationCore.Persistance;
+using Imfo.ApplicationCore.Common.Entities;
+using Imfo.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;

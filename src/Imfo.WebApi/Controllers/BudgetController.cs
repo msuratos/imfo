@@ -1,5 +1,5 @@
-using Imfo.ApplicationCore.Persistance;
-using Imfo.ApplicationCore.Persistance.Entities;
+using Imfo.ApplicationCore.Common.Entities;
+using Imfo.Infrastructure.Persistance;
 using Imfo.WebApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

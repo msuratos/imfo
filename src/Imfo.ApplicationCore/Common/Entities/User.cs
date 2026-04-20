@@ -1,4 +1,4 @@
-namespace Imfo.ApplicationCore.Persistance.Entities;
+namespace Imfo.ApplicationCore.Common.Entities;
 
 public class User
 {

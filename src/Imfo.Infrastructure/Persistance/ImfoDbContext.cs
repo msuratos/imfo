@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Imfo.ApplicationCore.Persistance.Entities;
+using Imfo.ApplicationCore.Common.Entities;
 
-namespace Imfo.ApplicationCore.Persistance;
+namespace Imfo.Infrastructure.Persistance;
 
 public class ImfoDbContext : DbContext
 {

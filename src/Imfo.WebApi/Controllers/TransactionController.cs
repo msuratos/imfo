@@ -1,9 +1,8 @@
 using Imfo.ApplicationCore.Common.Entities;
-using Imfo.Infrastructure.Persistance;
+using Imfo.ApplicationCore.Services.Transactions;
 using Imfo.WebApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Imfo.WebApi.Controllers;
 
@@ -12,25 +11,25 @@ namespace Imfo.WebApi.Controllers;
 [Route("api/[controller]")]
 public class TransactionController : ControllerBase
 {
-    private readonly ImfoDbContext _db;
+    private readonly ITransactionService _transactionService;
 
-    public TransactionController(ImfoDbContext db)
+    public TransactionController(ITransactionService transactionService)
     {
-        _db = db;
+        _transactionService = transactionService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Transaction>>> Get()
     {
         var userId = GetCurrentUserId();
-        return Ok(await _db.Transactions.Where(t => t.UserId == userId).OrderByDescending(x => x.Date).ToListAsync());
+        return Ok(await _transactionService.GetAllAsync(userId));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Transaction>> Get(Guid id)
     {
         var userId = GetCurrentUserId();
-        var it = await _db.Transactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var it = await _transactionService.GetByIdAsync(id, userId);
 
         if (it == null) return NotFound();
         return Ok(it);
@@ -50,8 +49,7 @@ public class TransactionController : ControllerBase
             UserId = userId
         };
 
-        _db.Transactions.Add(entity);
-        await _db.SaveChangesAsync();
+        await _transactionService.CreateAsync(entity);
 
         var read = new TransactionReadDto
         {
@@ -70,16 +68,9 @@ public class TransactionController : ControllerBase
     public async Task<ActionResult<Transaction>> Put(Guid id, [FromBody] Transaction updated)
     {
         var userId = GetCurrentUserId();
-        var existing = await _db.Transactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var existing = await _transactionService.UpdateAsync(id, updated, userId);
 
         if (existing == null) return NotFound();
-
-        existing.Description = updated.Description;
-        existing.Amount = updated.Amount;
-        existing.CategoryId = updated.CategoryId;
-        existing.Date = updated.Date;
-
-        await _db.SaveChangesAsync();
         return Ok(existing);
     }
 
@@ -87,12 +78,9 @@ public class TransactionController : ControllerBase
     public async Task<ActionResult> Delete(Guid id)
     {
         var userId = GetCurrentUserId();
-        var it = await _db.Transactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
-        
-        if (it == null) return NotFound();
-        _db.Transactions.Remove(it);
-        
-        await _db.SaveChangesAsync();
+        var deleted = await _transactionService.DeleteAsync(id, userId);
+
+        if (!deleted) return NotFound();
         return NoContent();
     }
 

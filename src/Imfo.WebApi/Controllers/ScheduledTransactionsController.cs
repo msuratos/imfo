@@ -1,10 +1,9 @@
-using System.Security.Claims;
-using Imfo.WebApi.Data;
-using Imfo.WebApi.Models;
+using Imfo.ApplicationCore.Common.Entities;
+using Imfo.ApplicationCore.Services.ScheduledTransactions;
 using Imfo.WebApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Imfo.WebApi.Controllers;
 
@@ -13,25 +12,25 @@ namespace Imfo.WebApi.Controllers;
 [Route("api/scheduled-transactions")]
 public class ScheduledTransactionsController : ControllerBase
 {
-    private readonly ImfoDbContext _db;
+    private readonly IScheduledTransactionService _scheduledTransactionService;
 
-    public ScheduledTransactionsController(ImfoDbContext db)
+    public ScheduledTransactionsController(IScheduledTransactionService scheduledTransactionService)
     {
-        _db = db;
+        _scheduledTransactionService = scheduledTransactionService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ScheduledTransaction>>> Get()
     {
         var userId = GetCurrentUserId();
-        return Ok(await _db.ScheduledTransactions.Where(i => i.UserId == userId).OrderByDescending(x => x.ReceivedDate).ToListAsync());
+        return Ok(await _scheduledTransactionService.GetAllAsync(userId));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<ScheduledTransaction>> Get(Guid id)
     {
         var userId = GetCurrentUserId();
-        var it = await _db.ScheduledTransactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var it = await _scheduledTransactionService.GetByIdAsync(id, userId);
 
         if (it == null) return NotFound();
         return Ok(it);
@@ -52,8 +51,7 @@ public class ScheduledTransactionsController : ControllerBase
             UserId = userId
         };
 
-        _db.ScheduledTransactions.Add(st);
-        await _db.SaveChangesAsync();
+        await _scheduledTransactionService.CreateAsync(st);
 
         var readSt = new ScheduledTransactionReadDto
         {
@@ -73,18 +71,10 @@ public class ScheduledTransactionsController : ControllerBase
     public async Task<ActionResult<ScheduledTransaction>> Put(Guid id, [FromBody] ScheduledTransaction updated)
     {
         var userId = GetCurrentUserId();
-        var existing = await _db.ScheduledTransactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var existing = await _scheduledTransactionService.UpdateAsync(id, updated, userId);
 
         if (existing == null) return NotFound();
 
-        existing.Source = updated.Source;
-        existing.Amount = updated.Amount;
-        existing.Category = updated.Category;
-        existing.ReceivedDate = updated.ReceivedDate;
-        existing.Frequency = updated.Frequency;
-
-        // UserId remains the authenticated user
-        await _db.SaveChangesAsync();
         return Ok(existing);
     }
 
@@ -92,11 +82,9 @@ public class ScheduledTransactionsController : ControllerBase
     public async Task<ActionResult> Delete (Guid id) 
     {
         var userId = GetCurrentUserId();
-        var it = await _db.ScheduledTransactions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var deleted = await _scheduledTransactionService.DeleteAsync(id, userId);
 
-        if (it == null) return NotFound();
-        _db.ScheduledTransactions.Remove(it);
-        await _db.SaveChangesAsync();
+        if (!deleted) return NotFound();
 
         return NoContent();
     }

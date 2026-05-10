@@ -23,6 +23,8 @@
     <ProjectReference Include="..\imfo.react\imfo.react.esproj">
       <ReferenceOutputAssembly>False</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\Imfo.ApplicationCore\Imfo.ApplicationCore.csproj" />
+    <ProjectReference Include="..\Imfo.Infrastructure\Imfo.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

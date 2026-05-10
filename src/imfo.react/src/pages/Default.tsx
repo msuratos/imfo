@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
-import { getTransactions, createTransaction, getBudgets, updateTransaction, deleteTransaction, getScheduledTransactions, getCategories } from '../api'
+import { getBudgets } from '../apis/budgetApi';
+import { getCategories } from '../apis/categoryApi';
+import { createTransaction, deleteTransaction, getTransactions, updateTransaction } from '../apis/transactionApi';
+import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
+
 import TransactionForm from '../components/TransactionForm';
 import Layout from '../components/Layout';
-import { Transaction, Budget, ScheduledTransaction, Category } from '../types'
+import { Transaction, Budget, ScheduledTransaction } from '../types'
 
 export default function Default() {
   const navigate = useNavigate();

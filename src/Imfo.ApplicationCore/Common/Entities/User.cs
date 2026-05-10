@@ -1,4 +1,4 @@
-namespace Imfo.WebApi.Models;
+namespace Imfo.ApplicationCore.Common.Entities;
 
 public class User
 {

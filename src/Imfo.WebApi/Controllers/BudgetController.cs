@@ -1,9 +1,8 @@
-using Imfo.WebApi.Data;
-using Imfo.WebApi.Models;
+using Imfo.ApplicationCore.Common.Entities;
+using Imfo.ApplicationCore.Services.Budgets;
 using Imfo.WebApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Imfo.WebApi.Controllers;
@@ -13,25 +12,25 @@ namespace Imfo.WebApi.Controllers;
 [Route("api/[controller]")]
 public class BudgetController : ControllerBase
 {
-    private readonly ImfoDbContext _db;
+    private readonly IBudgetService _budgetService;
 
-    public BudgetController(ImfoDbContext db)
+    public BudgetController(IBudgetService budgetService)
     {
-        _db = db;
+        _budgetService = budgetService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Budget>>> Get()
     {
         var userId = GetCurrentUserId();
-        return Ok(await _db.Budgets.Where(b => b.UserId == userId).ToListAsync());
+        return Ok(await _budgetService.GetAllAsync(userId));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Budget>> Get(Guid id)
     {
         var userId = GetCurrentUserId();
-        var item = await _db.Budgets.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var item = await _budgetService.GetByIdAsync(id, userId);
 
         if (item == null) return NotFound();
         return Ok(item);
@@ -50,8 +49,7 @@ public class BudgetController : ControllerBase
             UserId = userId
         };
 
-        _db.Budgets.Add(entity);
-        await _db.SaveChangesAsync();
+        await _budgetService.CreateAsync(entity);
 
         var read = new BudgetReadDto
         {
@@ -69,13 +67,10 @@ public class BudgetController : ControllerBase
     public async Task<ActionResult> Delete(Guid id)
     {
         var userId = GetCurrentUserId();
-        var it = await _db.Budgets.FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        var deleted = await _budgetService.DeleteAsync(id, userId);
 
-        if (it == null) return NotFound();
+        if (!deleted) return NotFound();
 
-        _db.Budgets.Remove(it);
-        await _db.SaveChangesAsync();
-        
         return NoContent();
     }
 

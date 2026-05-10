@@ -1,9 +1,8 @@
-using Imfo.WebApi.Data;
-using Imfo.WebApi.Models;
+using Imfo.ApplicationCore.Common.Entities;
+using Imfo.ApplicationCore.Services.Categories;
 using Imfo.WebApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Imfo.WebApi.Controllers;
 
@@ -12,30 +11,26 @@ namespace Imfo.WebApi.Controllers;
 [Route("api/[controller]")]
 public class CategoryController : ControllerBase
 {
-    private readonly ImfoDbContext _db;
+    private readonly ICategoryService _categoryService;
 
-    public CategoryController(ImfoDbContext db)
+    public CategoryController(ICategoryService categoryService)
     {
-        _db = db;
+        _categoryService = categoryService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CategoryReadDto>>> Get()
     {
         var userId = GetCurrentUserId();
-        // return categories belonging to the user plus global categories (UserId == Guid.Empty)
-        var cats = await _db.Categories
-            .Where(c => c.UserId == userId || c.UserId == Guid.Empty)
-            .Select(c => new CategoryReadDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Type = c.Type.ToString(),
-                UserId = c.UserId
-            })
-            .ToListAsync();
+        var categories = await _categoryService.GetAllAsync(userId);
 
-        return Ok(cats);
+        return Ok(categories.Select(c => new CategoryReadDto
+        {
+            Id = c.Id,
+            Name = c.Name,
+            Type = c.Type.ToString(),
+            UserId = c.UserId
+        }));
     }
 
     [HttpPost]
@@ -56,8 +51,7 @@ public class CategoryController : ControllerBase
             UserId = userId
         };
 
-        _db.Categories.Add(entity);
-        await _db.SaveChangesAsync();
+        await _categoryService.CreateAsync(entity);
 
         var read = new CategoryReadDto
         {

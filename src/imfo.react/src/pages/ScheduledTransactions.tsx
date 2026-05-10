@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 import Layout from '../components/Layout';
 
-import { getScheduledTransactions, createScheduledTransaction, deleteScheduledTransaction, getCategories } from '../api'
+import { getCategories } from '../apis/categoryApi';
+import { getScheduledTransactions, createScheduledTransaction, deleteScheduledTransaction } from '../apis/scheduledTransactionApi';
 import { ScheduledTransaction, Category } from '../types'
 
 export default function ScheduledTransactions() {

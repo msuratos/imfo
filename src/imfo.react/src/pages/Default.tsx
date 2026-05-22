@@ -127,7 +127,8 @@ export default function Default() {
     const spentByCategory: { [key: string]: number } = {};
 
     filteredExpenses.forEach(item => {
-      spentByCategory[item.category] = (spentByCategory[item.category] || 0) + Math.abs(item.amount);
+      const categoryName = categories.find(c => c.id === item.categoryId)?.name || item.categoryId;
+      spentByCategory[categoryName] = (spentByCategory[categoryName] || 0) + Math.abs(item.amount);
     });
 
     return budgets.map(budget => {
@@ -146,8 +147,8 @@ export default function Default() {
 
   const filteredExpenses = getFilteredExpenses();
   const budgetSummary = getBudgetSummary();
-  const totalBudgeted = budgetSummary.reduce((sum, s) => sum + s.normalizedBudget, 0);
   const totalSpent = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
+  
   // Scheduled transactions may be positive (income) or negative (expense).
   const scheduledIncome = scheduledTransactions.reduce((sum, i) => {
     const normalized = normalizeAmount(i.amount, i.frequency, selectedFrequency);

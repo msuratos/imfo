@@ -1,17 +1,17 @@
-import React, { PropsWithChildren, useEffect, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
 
 type Props = {
-  title?: string;
-  subtitle?: string;
+  
 };
 
-export default function Layout({ title = 'Imfo', subtitle = '', children }: PropsWithChildren<Props>) {
+export default function Layout({ children }: PropsWithChildren<Props>) {
   const navigate = useNavigate();
   const { signOut } = useLogto();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     try {
@@ -19,6 +19,26 @@ export default function Layout({ title = 'Imfo', subtitle = '', children }: Prop
       if (saved === 'dark' || saved === 'light') setTheme(saved as any);
       else setTheme('light');
     } catch { }
+  }, []);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!profileRef.current) return;
+      if (e.target instanceof Node && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    }
+
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setProfileOpen(false);
+    }
+
+    document.addEventListener('click', onDocClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
   }, []);
 
   useEffect(() => {
@@ -30,30 +50,33 @@ export default function Layout({ title = 'Imfo', subtitle = '', children }: Prop
 
   return (
     <div className="app-root">
-      <header className="app-header">
-        <div className="app-header-inner">
-          <div className="brand">
-            <h1 title="Is My Finances Okay?">{title}</h1>
-            {subtitle && <p className="muted">{subtitle}</p>}
-          </div>
+      <main className="app-main">
+        <div className="top-controls" ref={profileRef} aria-hidden={false}>
+          <button className="theme-toggle" aria-label="Toggle theme" title="Toggle theme" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
 
-          <div className="header-controls">
-            <div className="header-actions" data-open={mobileMenuOpen}>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/'); }}>Transactions</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/scheduled-transactions'); }}>Schedules</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/budgets'); }}>Budgets</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/forecast'); }}>Forecast</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate('/categories'); }}>Categories</button>
-              <button onClick={() => { setMobileMenuOpen(false); signOut(import.meta.env.VITE_APP_URL); }}>Sign Out</button>
-            </div>
+          <div className="profile-menu">
+            <button className="profile-btn" aria-haspopup="true" aria-expanded={profileOpen} aria-label="Account" onClick={() => setProfileOpen(!profileOpen)}>👤</button>
 
-            <button className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? '☀️' : '🌙'}</button>
-            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">{mobileMenuOpen ? '✕' : '☰'}</button>
+            {profileOpen && (
+              <div className="profile-dropdown" role="menu">
+                <button role="menuitem" onClick={() => { setProfileOpen(false); navigate('/profile'); }}>Profile</button>
+                <button role="menuitem" onClick={() => { setProfileOpen(false); navigate('/settings'); }}>Settings</button>
+                <button role="menuitem" onClick={() => { setProfileOpen(false); signOut(import.meta.env.VITE_APP_URL); }}>Sign Out</button>
+              </div>
+            )}
           </div>
         </div>
-      </header>
 
-      {children}
+        {children}
+      </main>
+
+      <footer className="bottom-nav" role="navigation" aria-label="Mobile navigation">
+        <button className="nav-btn nav-left" aria-label="Transactions" onClick={() => navigate('/transactions')}>Transactions</button>
+        <button className="nav-btn nav-center" aria-label="Home" onClick={() => navigate('/')}>Home</button>
+        <button className="nav-btn nav-right" aria-label="Settings" onClick={() => navigate('/settings')}>Settings</button>
+      </footer>
     </div>
   );
 }

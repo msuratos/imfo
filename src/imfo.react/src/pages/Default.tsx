@@ -26,9 +26,7 @@ export default function Default() {
   useEffect(() => {
     if (isAuthenticated) load();
     else navigate('/login');
-  }, [isAuthenticated])
-
-
+  }, [isAuthenticated]);
 
   async function load() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
@@ -36,7 +34,7 @@ export default function Default() {
       getTransactions(token),
       getBudgets(token),
       getScheduledTransactions(token)
-    // TODO: getCategories requires token in API; fetch separately
+      // TODO: getCategories requires token in API; fetch separately
     ]);
     setItems(transactions);
     setBudgets(budgetData);
@@ -47,79 +45,6 @@ export default function Default() {
     } catch {
       setCategories([]);
     }
-  }
-
-  async function onCreate(item: Omit<Transaction, 'id'>) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await createTransaction(item, token);
-    load();
-  }
-
-  function onEdit(transaction: Transaction) {
-    setEditingId(transaction.id);
-    setEditData({
-      description: transaction.description,
-      amount: transaction.amount,
-      categoryId: transaction.categoryId,
-      date: transaction.date
-    });
-  }
-
-  async function onSaveEdit() {
-    if (!editingId || !editData) return;
-    
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await updateTransaction(editingId, editData, token);
-    setEditingId(null);
-    setEditData(null);
-    load();
-  }
-
-  async function onDeleteTransaction(id: string) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await deleteTransaction(id, token);
-    load();
-  }
-
-  function getFrequencyMultiplier(frequency: string): number {
-    switch (frequency.toLowerCase()) {
-      case 'weekly':
-        return 52;
-      case 'bi-weekly':
-        return 26;
-      case 'monthly':
-        return 12;
-      case 'yearly':
-        return 1;
-      case 'one-time':
-      default:
-        return 1;
-    }
-  }
-
-  function normalizeAmount(amount: number, fromFrequency: string, toFrequency: string) {
-    const fromPeriods = getFrequencyMultiplier(fromFrequency);
-    const toPeriods = getFrequencyMultiplier(toFrequency);
-    return amount * (fromPeriods / toPeriods);
-  }
-
-  function getPeriodStart(frequency: string) {
-    const now = new Date();
-    switch (frequency) {
-      case 'weekly':
-        return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
-      case 'monthly':
-        return new Date(now.getFullYear(), now.getMonth(), 1);
-      case 'yearly':
-        return new Date(now.getFullYear(), 0, 1);
-      default:
-        return new Date(0);
-    }
-  }
-
-  function getFilteredExpenses() {
-    const startDate = getPeriodStart(selectedFrequency);
-    return items.filter(item => item.amount < 0 && new Date(item.date) >= startDate);
   }
 
   function getBudgetSummary() {
@@ -145,10 +70,83 @@ export default function Default() {
     });
   }
 
+  function getFilteredExpenses() {
+    const startDate = getPeriodStart(selectedFrequency);
+    return items.filter(item => item.amount < 0 && new Date(item.date) >= startDate);
+  }
+
+  function getFrequencyMultiplier(frequency: string): number {
+    switch (frequency.toLowerCase()) {
+      case 'weekly':
+        return 52;
+      case 'bi-weekly':
+        return 26;
+      case 'monthly':
+        return 12;
+      case 'yearly':
+        return 1;
+      case 'one-time':
+      default:
+        return 1;
+    }
+  }
+
+  function getPeriodStart(frequency: string) {
+    const now = new Date();
+    switch (frequency) {
+      case 'weekly':
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+      case 'monthly':
+        return new Date(now.getFullYear(), now.getMonth(), 1);
+      case 'yearly':
+        return new Date(now.getFullYear(), 0, 1);
+      default:
+        return new Date(0);
+    }
+  }
+
+  function normalizeAmount(amount: number, fromFrequency: string, toFrequency: string) {
+    const fromPeriods = getFrequencyMultiplier(fromFrequency);
+    const toPeriods = getFrequencyMultiplier(toFrequency);
+    return amount * (fromPeriods / toPeriods);
+  }
+
+  async function onCreate(item: Omit<Transaction, 'id'>) {
+    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+    await createTransaction(item, token);
+    load();
+  }
+
+  async function onDeleteTransaction(id: string) {
+    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+    await deleteTransaction(id, token);
+    load();
+  }
+
+  function onEdit(transaction: Transaction) {
+    setEditingId(transaction.id);
+    setEditData({
+      description: transaction.description,
+      amount: transaction.amount,
+      categoryId: transaction.categoryId,
+      date: transaction.date
+    });
+  }
+
+  async function onSaveEdit() {
+    if (!editingId || !editData) return;
+
+    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+    await updateTransaction(editingId, editData, token);
+    setEditingId(null);
+    setEditData(null);
+    load();
+  }
+
   const filteredExpenses = getFilteredExpenses();
   const budgetSummary = getBudgetSummary();
   const totalSpent = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
-  
+
   // Scheduled transactions may be positive (income) or negative (expense).
   const scheduledIncome = scheduledTransactions.reduce((sum, i) => {
     const normalized = normalizeAmount(i.amount, i.frequency, selectedFrequency);
@@ -176,17 +174,19 @@ export default function Default() {
                 <p className="muted">Normalized totals for the selected frequency.</p>
               </div>
               <div className="summary-toolbar">
-                <label htmlFor="frequency">View:</label>
-                <select
-                  id="frequency"
-                  value={selectedFrequency}
-                  onChange={(e) => setSelectedFrequency(e.target.value as 'weekly' | 'bi-weekly' | 'monthly' | 'yearly')}
-                >
-                  <option value="weekly">Weekly</option>
-                  <option value="bi-weekly">Bi-weekly</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="yearly">Yearly</option>
-                </select>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label htmlFor="frequency">View</label>
+                  <select
+                    id="frequency"
+                    value={selectedFrequency}
+                    onChange={(e) => setSelectedFrequency(e.target.value as 'weekly' | 'bi-weekly' | 'monthly' | 'yearly')}
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="bi-weekly">Bi-weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
               </div>
             </div>
             <div className="budget-stats">
@@ -272,7 +272,7 @@ export default function Default() {
               {items.length === 0 ? (
                 <div className="empty-state">No transactions yet. Add one to get started.</div>
               ) : (
-    items.map(i => (
+                items.map(i => (
                   <div key={i.id} className="list-item transaction-item">
                     <div className="transaction-info">
                       <div className="description">{i.description}</div>
@@ -300,7 +300,7 @@ export default function Default() {
                     <input
                       type="text"
                       value={editData.description}
-                      onChange={(e) => setEditData({...editData, description: e.target.value})}
+                      onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                     />
                   </div>
                   <div className="form-row">
@@ -310,7 +310,7 @@ export default function Default() {
                         type="number"
                         step="0.01"
                         value={editData.amount}
-                        onChange={(e) => setEditData({...editData, amount: parseFloat(e.target.value) || 0})}
+                        onChange={(e) => setEditData({ ...editData, amount: parseFloat(e.target.value) || 0 })}
                       />
                     </div>
                     <div className="form-group half">
@@ -318,7 +318,7 @@ export default function Default() {
                       <input
                         type="text"
                         value={editData.category}
-                        onChange={(e) => setEditData({...editData, category: e.target.value})}
+                        onChange={(e) => setEditData({ ...editData, category: e.target.value })}
                       />
                     </div>
                   </div>
@@ -327,7 +327,7 @@ export default function Default() {
                     <input
                       type="date"
                       value={editData.date.split('T')[0]}
-                      onChange={(e) => setEditData({...editData, date: e.target.value})}
+                      onChange={(e) => setEditData({ ...editData, date: e.target.value })}
                     />
                   </div>
                   <div className="form-actions">

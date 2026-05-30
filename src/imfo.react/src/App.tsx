@@ -25,9 +25,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Default />} />
           <Route path="/budgets" element={<Budgets />} />
-          <Route path="/scheduled-transactions" element={<ScheduledTransactions />} />
+          <Route path="/transactions" element={<ScheduledTransactions />} />
           <Route path="/forecast" element={<Forecast />} />
-          <Route path="/categories" element={<Categories />} />
+          <Route path="/settings" element={<Categories />} />
           <Route path="/callback" element={<Callback />} />
           <Route path="/login" element={<Login />} />
         </Routes>

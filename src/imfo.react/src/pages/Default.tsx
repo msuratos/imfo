@@ -174,7 +174,7 @@ export default function Default() {
   const budgetChartColors = ['#ef4444', '#10b981'];
 
   return (
-    <Layout title="Imfo" subtitle="Simple budgeting with clear cards and categories">
+    <Layout>
       <main className="container">
         <section className="full-width">
           <div className="card budget-summary-card">
@@ -245,7 +245,7 @@ export default function Default() {
               {/* Center net value */}
               <div className="summary-center">
                 <div className={`net-value ${(actualIncome - totalSpent) >= 0 ? 'pos' : 'neg'}`}>
-                  ${ (actualIncome - totalSpent).toFixed(2) }
+                  ${(actualIncome - totalSpent).toFixed(2)}
                 </div>
                 <div className="net-label">Net</div>
               </div>
@@ -303,48 +303,28 @@ export default function Default() {
         <section className="full-width">
           <div className="card budget-summary-card">
             <div className="card-header">
-              <div>
-                <h2>Expenses Analysis</h2>
-                <p className="muted">Actual expense vs. budget by category for the selected frequency.</p>
-              </div>
+              <h3>Budget Usage</h3>
             </div>
             {budgetSummary.length === 0 ? (
               <div className="empty-state">No budgets set yet.</div>
             ) : (
-              <div className="chart-container">
+              <div className="budget-table">
                 {budgetSummary.map(summary => {
-                  const chartData = [
-                    { name: 'Spent', value: summary.spent },
-                    { name: 'Remaining', value: Math.max(summary.remaining, 0) }
-                  ];
+                  const usageRatio = summary.normalizedBudget !== 0 ? summary.spent / summary.normalizedBudget : 0;
+                  const percent = usageRatio * 100;
+                  const filledPercent = Math.max(0, Math.min(percent, 100));
+                  const color = percent > 100 ? '#ef4444' : '#10b981';
 
                   return (
-                    <div key={summary.category} className="chart">
-                      <h3>{summary.category}</h3>
-                      <ResponsiveContainer width="100%" height={220}>
-                        <PieChart>
-                          <Pie
-                            data={chartData}
-                            dataKey="value"
-                            cx="50%"
-                            cy="75%"
-                            startAngle={180}
-                            endAngle={0}
-                            innerRadius={60}
-                            outerRadius={100}
-                            paddingAngle={2}
-                            label={({ percent }) => `${Math.round(percent * 100)}%`}
-                            labelLine={false}
-                          >
-                            {chartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={budgetChartColors[index % budgetChartColors.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip formatter={(value: any) => `$${Number(value).toFixed(2)}`} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div className="budget-chart-footer">
-                        <div><strong>{selectedFrequency.charAt(0).toUpperCase() + selectedFrequency.slice(1)} Budget:</strong> ${summary.normalizedBudget.toFixed(2)}</div>
+                    <div key={summary.category} className="budget-table-row" style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
+                      <div className="budget-name" style={{ flex: '0 0 35%', paddingRight: 12 }}>{summary.category}</div>
+                      <div className="budget-usage" style={{ flex: '1 1 65%' }}>
+                        <div style={{ position: 'relative', background: '#f1f5f9', height: 20, borderRadius: 6, overflow: 'hidden' }}>
+                          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${filledPercent}%`, background: color }} />
+                          <div style={{ position: 'relative', padding: '0 8px', lineHeight: '20px', fontSize: 12, color: '#0f172a', fontWeight: 500 }}>
+                            {`${summary.spent.toFixed(2)} / ${summary.normalizedBudget.toFixed(2)} (${percent.toFixed(0)}%)`}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )
@@ -354,13 +334,17 @@ export default function Default() {
           </div>
         </section>
         <section className="left transactions-section">
-          <div className="card transactions-card">
+          <div className="card budget-summary-card">
             <div className="card-header">
-              <div>
-                <h2>Transactions</h2>
-                <p className="muted">Recent activity with quick edit actions</p>
-              </div>
-              <span className="transaction-count">{items.length} items</span>
+              <h3>Goal Usage</h3>
+            </div>
+            <div className="empty-state">No goals set yet.</div>
+          </div>
+        </section>
+        <aside className="right">
+          <div className="card budget-summary-card">
+            <div className="card-header">
+              <h3>Transaction</h3>
             </div>
             <div className="list">
               {items.length === 0 ? (
@@ -381,61 +365,59 @@ export default function Default() {
                 ))
               )}
             </div>
-          </div>
-        </section>
-        <aside className="right">
-          <div className="card transaction-panel">
-            {editingId && editData ? (
-              <>
-                <h2>Edit Transaction</h2>
-                <form onSubmit={(e) => { e.preventDefault(); onSaveEdit(); }} className="form">
-                  <div className="form-group">
-                    <label>Description</label>
-                    <input
-                      type="text"
-                      value={editData.description}
-                      onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group half">
-                      <label>Amount</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={editData.amount}
-                        onChange={(e) => setEditData({ ...editData, amount: parseFloat(e.target.value) || 0 })}
-                      />
-                    </div>
-                    <div className="form-group half">
-                      <label>Category</label>
+            {editingId && editData
+              ? (
+                <>
+                  <h3>Edit Transaction</h3>
+                  <form onSubmit={(e) => { e.preventDefault(); onSaveEdit(); }} className="form">
+                    <div className="form-group">
+                      <label>Description</label>
                       <input
                         type="text"
-                        value={editData.category}
-                        onChange={(e) => setEditData({ ...editData, category: e.target.value })}
+                        value={editData.description}
+                        onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                       />
                     </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Date</label>
-                    <input
-                      type="date"
-                      value={editData.date.split('T')[0]}
-                      onChange={(e) => setEditData({ ...editData, date: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-actions">
-                    <button type="submit" className="btn primary full">Save</button>
-                    <button type="button" className="btn" onClick={() => { setEditingId(null); setEditData(null); }}>Cancel</button>
-                  </div>
-                </form>
-              </>
-            ) : (
-              <>
-                <h2>Add Transaction</h2>
-                <TransactionForm onCreate={onCreate} categories={categories} />
-              </>
-            )}
+                    <div className="form-row">
+                      <div className="form-group half">
+                        <label>Amount</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={editData.amount}
+                          onChange={(e) => setEditData({ ...editData, amount: parseFloat(e.target.value) || 0 })}
+                        />
+                      </div>
+                      <div className="form-group half">
+                        <label>Category</label>
+                        <input
+                          type="text"
+                          value={editData.category}
+                          onChange={(e) => setEditData({ ...editData, category: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Date</label>
+                      <input
+                        type="date"
+                        value={editData.date.split('T')[0]}
+                        onChange={(e) => setEditData({ ...editData, date: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-actions">
+                      <button type="submit" className="btn primary full">Save</button>
+                      <button type="button" className="btn" onClick={() => { setEditingId(null); setEditData(null); }}>Cancel</button>
+                    </div>
+                  </form>
+                </>
+              )
+              : (
+                <>
+                  <h3>Add Transaction</h3>
+                  <TransactionForm onCreate={onCreate} categories={categories} />
+                </>
+              )}
           </div>
         </aside>
       </main>

@@ -94,7 +94,6 @@ main {
 .container {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px; /* reduced gap to utilize width */
   max-width: 1200px; /* allow wider layout */
   margin: auto
 }

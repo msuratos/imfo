@@ -75,7 +75,7 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
       <footer className="bottom-nav" role="navigation" aria-label="Mobile navigation">
         <button className="nav-btn nav-left" aria-label="Transactions" onClick={() => navigate('/transactions')}>Transactions</button>
         <button className="nav-btn nav-center" aria-label="Home" onClick={() => navigate('/')}>Home</button>
-        <button className="nav-btn nav-right" aria-label="Settings" onClick={() => navigate('/settings')}>Settings</button>
+        <button className="nav-btn nav-right" aria-label="Settings" onClick={() => navigate('/budgets')}>Settings</button>
       </footer>
     </div>
   );

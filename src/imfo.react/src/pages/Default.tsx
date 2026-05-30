@@ -14,7 +14,7 @@ import { Transaction, Budget, ScheduledTransaction } from '../types'
 
 export default function Default() {
   const navigate = useNavigate();
-  const { isAuthenticated, getAccessToken, signOut } = useLogto();
+  const { isAuthenticated, getAccessToken } = useLogto();
   const [items, setItems] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [scheduledTransactions, setScheduledTransactions] = useState<ScheduledTransaction[]>([]);
@@ -22,6 +22,8 @@ export default function Default() {
   const [selectedFrequency, setSelectedFrequency] = useState<'weekly' | 'bi-weekly' | 'monthly' | 'yearly'>('monthly');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Omit<Transaction, 'id'> | null>(null);
+  const [incomeShowScheduled, setIncomeShowScheduled] = useState(false);
+  const [expenseShowScheduled, setExpenseShowScheduled] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) load();
@@ -147,6 +149,14 @@ export default function Default() {
   const budgetSummary = getBudgetSummary();
   const totalSpent = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
 
+  function getFilteredIncome() {
+    const startDate = getPeriodStart(selectedFrequency);
+    return items.filter(item => item.amount > 0 && new Date(item.date) >= startDate);
+  }
+
+  const filteredIncome = getFilteredIncome();
+  const actualIncome = filteredIncome.reduce((sum, item) => sum + item.amount, 0);
+
   // Scheduled transactions may be positive (income) or negative (expense).
   const scheduledIncome = scheduledTransactions.reduce((sum, i) => {
     const normalized = normalizeAmount(i.amount, i.frequency, selectedFrequency);
@@ -169,13 +179,8 @@ export default function Default() {
         <section className="full-width">
           <div className="card budget-summary-card">
             <div className="card-header">
-              <div>
-                <h2>Summary</h2>
-                <p className="muted">Normalized totals for the selected frequency.</p>
-              </div>
               <div className="summary-toolbar">
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label htmlFor="frequency">View</label>
                   <select
                     id="frequency"
                     value={selectedFrequency}
@@ -189,18 +194,107 @@ export default function Default() {
                 </div>
               </div>
             </div>
-            <div className="budget-stats">
-              <div className="stat-box">
-                <div className="stat-value pos">${totalIncome.toFixed(2)}</div>
-                <div className="stat-label">{selectedFrequency.charAt(0).toUpperCase() + selectedFrequency.slice(1)} Income</div>
+            <div className="summary-charts">
+              {/* Income semicircle */}
+              <div className="semichart">
+                <h4>Income</h4>
+                {(() => {
+                  const incomeChartData = [
+                    { name: 'Actual', value: actualIncome },
+                    { name: 'Remaining', value: Math.max(totalIncome - actualIncome, 0) }
+                  ];
+                  return (
+                    <>
+                      <div className="chart-wrap">
+                        <ResponsiveContainer width="100%" height={110}>
+                          <PieChart>
+                            <Pie
+                              data={incomeChartData}
+                              dataKey="value"
+                              startAngle={180}
+                              endAngle={0}
+                              innerRadius={'30%'}
+                              outerRadius={'60%'}
+                              paddingAngle={2}
+                              labelLine={false}
+                            >
+                              {incomeChartData.map((entry, index) => (
+                                <Cell
+                                  key={`inc-${index}`}
+                                  fill={index === 0 ? '#10b981' : '#e6eef8'}
+                                  onClick={() => {
+                                    // index 0 is filled actual slice, index 1 is remaining (scheduled)
+                                    if (index === 0) setIncomeShowScheduled(false);
+                                    else setIncomeShowScheduled(true);
+                                  }}
+                                  style={{ cursor: 'pointer' }}
+                                />
+                              ))}
+                            </Pie>
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <div className="chart-overlay">
+                          <div className="overlay-big">${(incomeShowScheduled ? totalIncome : actualIncome).toFixed(2)}</div>
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
-              <div className="stat-box">
-                <div className="stat-value">${totalExpenses.toFixed(2)}</div>
-                <div className="stat-label">{selectedFrequency.charAt(0).toUpperCase() + selectedFrequency.slice(1)} Expenses</div>
+
+              {/* Center net value */}
+              <div className="summary-center">
+                <div className={`net-value ${(actualIncome - totalSpent) >= 0 ? 'pos' : 'neg'}`}>
+                  ${ (actualIncome - totalSpent).toFixed(2) }
+                </div>
+                <div className="net-label">Net</div>
               </div>
-              <div className="stat-box">
-                <div className={`stat-value ${netBalance >= 0 ? 'pos' : 'neg'}`}>${netBalance.toFixed(2)}</div>
-                <div className="stat-label">Net Balance</div>
+
+              {/* Expenses semicircle */}
+              <div className="semichart">
+                <h4>Expenses</h4>
+                {(() => {
+                  const actualExpenses = totalSpent;
+                  const expenseChartData = [
+                    { name: 'Actual', value: actualExpenses },
+                    { name: 'Remaining', value: Math.max(scheduledExpenses - actualExpenses, 0) }
+                  ];
+                  return (
+                    <>
+                      <div className="chart-wrap">
+                        <ResponsiveContainer width="100%" height={110}>
+                          <PieChart>
+                            <Pie
+                              data={expenseChartData}
+                              dataKey="value"
+                              startAngle={180}
+                              endAngle={0}
+                              innerRadius={'30%'}
+                              outerRadius={'60%'}
+                              paddingAngle={2}
+                              labelLine={false}
+                            >
+                              {expenseChartData.map((entry, index) => (
+                                <Cell
+                                  key={`exp-${index}`}
+                                  fill={index === 0 ? '#ef4444' : '#fdecea'}
+                                  onClick={() => {
+                                    if (index === 0) setExpenseShowScheduled(false);
+                                    else setExpenseShowScheduled(true);
+                                  }}
+                                  style={{ cursor: 'pointer' }}
+                                />
+                              ))}
+                            </Pie>
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <div className="chart-overlay">
+                          <div className="overlay-big">${(expenseShowScheduled ? scheduledExpenses : actualExpenses).toFixed(2)}</div>
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
             </div>
           </div>

@@ -94,10 +94,9 @@ main {
 .container {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  padding: 16px;
-  max-width: 1100px;
-  margin: 16px auto
+  gap: 12px; /* reduced gap to utilize width */
+  max-width: 1200px; /* allow wider layout */
+  margin: auto
 }
 
 .full-width {
@@ -116,10 +115,12 @@ section.left {
 }
 
 .card {
-  background: var(--card);
-  padding: 14px;
-  border-radius: 8px;
-  box-shadow: 0 6px 18px rgba(12,24,40,0.06)
+  /* make cards flat: no raised background or shadow */
+  background: transparent;
+  /* subtle accent line at the top to distinguish sections */
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .list {
@@ -180,12 +181,6 @@ section.left {
   .delete-btn:hover {
     background: #dc2626;
   }
-
-.form label {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 14px
-}
 
 .form-group {
   margin-bottom: 14px;
@@ -316,9 +311,11 @@ section.left {
   align-items: center;
   gap: 10px;
   padding: 12px;
-  border-radius: 12px;
-  border: 1px solid #e8edf6;
-  background: #fafbff;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  /* use a flat separator between items */
+  border-bottom: 1px solid rgba(12,24,40,0.04);
 }
 
 .transaction-info {
@@ -352,9 +349,9 @@ section.left {
   padding: 18px;
   color: var(--muted);
   text-align: center;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px dashed #dbeafe;
+  background: transparent;
+  border-radius: 0;
+  border: 1px dashed rgba(12,24,40,0.04);
 }
 
 .budget-summary-card h2 {
@@ -362,49 +359,160 @@ section.left {
   margin-bottom: 16px;
 }
 
-.budget-stats {
+
+.summary-charts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   gap: 12px;
-  margin-bottom: 18px;
-}
-
-.stat-box {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 14px;
-  border-radius: 8px;
+  margin: 0;
+  justify-content: center;
+  justify-items: center;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.stat-value {
-  font-size: 24px;
+/* toolbar inside the budget summary header: align view dropdown and label in a row */
+.summary-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* make label and select appear inline in the toolbar */
+.summary-toolbar .form-group {
+  margin: 0; /* override default form-group spacing */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-toolbar .form-group label {
+  display: inline-block;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.summary-toolbar .form-group select {
+  display: inline-block;
+}
+
+.semichart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #0f172a;
+}
+
+.chart-wrap { position: relative; width: 100% }
+.chart-overlay {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+}
+.overlay-big { font-size: 14px; font-weight: 700; color: #0f172a }
+
+
+/* make pie slices clearly clickable */
+.recharts-pie-cell { cursor: pointer }
+
+.semichart h4 {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+}
+
+.summary-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+}
+
+.net-value {
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 4px;
 }
 
-  .stat-value.pos {
-    color: #10b981;
+.net-value.pos { color: #10b981 }
+.net-value.neg { color: #ef4444 }
+.net-label { color: var(--muted); font-size: 13px }
+
+@media (max-width: 720px) {
+  /* keep charts in one horizontal row on small screens; allow horizontal scroll */
+  .summary-charts {
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: nowrap; /* force single row */
+    gap: 10px;
+    align-items: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .stat-value.neg {
-    color: #fca5a5;
+  .semichart,
+  .summary-center {
+    display: inline-flex;
+    flex: 0 0 auto;
+    min-width: 120px;
+    vertical-align: top;
   }
 
-.stat-label {
-  font-size: 12px;
-  opacity: 0.9;
+  .semichart h4 {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .semichart .recharts-wrapper {
+    height: 86px !important;
+    width: 100% !important;
+  }
+
+.chart-label {
+    font-size: 12px;
+    margin-top: 6px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .net-value {
+    font-size: 20px;
+  }
 }
+
+@media (max-width:420px) {
+  .chart-label { flex-direction: column; align-items: center; gap: 2px }
+  .semichart, .summary-center { min-width: 110px }
+}
+
+
 
 .chart-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 18px;
   margin: 18px 0;
-  background: white;
-  padding: 16px;
-  border-radius: 8px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
   color: #0f172a;
+}
+
+/* Accent colors for the major areas so they remain distinguishable even when flat */
+.budget-summary-card {
+  border-bottom-color: var(--muted);
+}
+
+.transactions-card {
+  border-top-color: #10b981; /* green accent for transactions */
+}
+
+.transaction-panel {
+  border-top-color: var(--danger); /* red accent for add/edit panel */
 }
 
 .chart {
@@ -434,6 +542,6 @@ section.left {
 @media (max-width:800px) {
   .container {
     flex-direction: column;
-    padding: 12px
+    padding: 5px
   }
 }

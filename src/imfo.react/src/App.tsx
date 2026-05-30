@@ -8,7 +8,7 @@ import Categories from './pages/Categories';
 import Default from './pages/Default';
 import Forecast from './pages/Forecast';
 import Login from './pages/Login';
-import ScheduledTransactions from './pages/ScheduledTransactions';
+import Transactions from './pages/Transactions';
 
 import './styles.css'
 
@@ -25,7 +25,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Default />} />
           <Route path="/budgets" element={<Budgets />} />
-          <Route path="/transactions" element={<ScheduledTransactions />} />
+          <Route path="/transactions" element={<Transactions />} />
           <Route path="/forecast" element={<Forecast />} />
           <Route path="/settings" element={<Categories />} />
           <Route path="/callback" element={<Callback />} />

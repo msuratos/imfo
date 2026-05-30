@@ -333,7 +333,7 @@ export default function Default() {
             )}
           </div>
         </section>
-        <section className="left transactions-section">
+        <section className="full-width">
           <div className="card budget-summary-card">
             <div className="card-header">
               <h3>Goal Usage</h3>
@@ -341,85 +341,6 @@ export default function Default() {
             <div className="empty-state">No goals set yet.</div>
           </div>
         </section>
-        <aside className="right">
-          <div className="card budget-summary-card">
-            <div className="card-header">
-              <h3>Transaction</h3>
-            </div>
-            <div className="list">
-              {items.length === 0 ? (
-                <div className="empty-state">No transactions yet. Add one to get started.</div>
-              ) : (
-                items.map(i => (
-                  <div key={i.id} className="list-item transaction-item">
-                    <div className="transaction-info">
-                      <div className="description">{i.description}</div>
-                      <div className="meta">{(categories.find(c => c.id === i.categoryId)?.name ?? i.categoryId)} • {new Date(i.date).toLocaleDateString()}</div>
-                    </div>
-                    <div className={"amount " + (i.amount >= 0 ? 'pos' : 'neg')}>{i.amount.toFixed(2)}</div>
-                    <div className="actions">
-                      <button onClick={() => onEdit(i)} className="edit-btn">Edit</button>
-                      <button onClick={() => onDeleteTransaction(i.id)} className="delete-btn">Delete</button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-            {editingId && editData
-              ? (
-                <>
-                  <h3>Edit Transaction</h3>
-                  <form onSubmit={(e) => { e.preventDefault(); onSaveEdit(); }} className="form">
-                    <div className="form-group">
-                      <label>Description</label>
-                      <input
-                        type="text"
-                        value={editData.description}
-                        onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-row">
-                      <div className="form-group half">
-                        <label>Amount</label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={editData.amount}
-                          onChange={(e) => setEditData({ ...editData, amount: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div className="form-group half">
-                        <label>Category</label>
-                        <input
-                          type="text"
-                          value={editData.category}
-                          onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                    <div className="form-group">
-                      <label>Date</label>
-                      <input
-                        type="date"
-                        value={editData.date.split('T')[0]}
-                        onChange={(e) => setEditData({ ...editData, date: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-actions">
-                      <button type="submit" className="btn primary full">Save</button>
-                      <button type="button" className="btn" onClick={() => { setEditingId(null); setEditData(null); }}>Cancel</button>
-                    </div>
-                  </form>
-                </>
-              )
-              : (
-                <>
-                  <h3>Add Transaction</h3>
-                  <TransactionForm onCreate={onCreate} categories={categories} />
-                </>
-              )}
-          </div>
-        </aside>
       </main>
     </Layout>
   );

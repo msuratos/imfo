@@ -25,11 +25,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Default />} />
           <Route path="/budgets" element={<Budgets />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/forecast" element={<Forecast />} />
-          <Route path="/settings" element={<Categories />} />
           <Route path="/callback" element={<Callback />} />
+          <Route path="/settings" element={<Categories />} />
+          <Route path="/forecast" element={<Forecast />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/transactions" element={<Transactions />} />
         </Routes>
         </BrowserRouter>
     </LogtoProvider>

@@ -1,27 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 import { getBudgets } from '../apis/budgetApi';
 import { getCategories } from '../apis/categoryApi';
-import { createTransaction, deleteTransaction, getTransactions, updateTransaction } from '../apis/transactionApi';
+import { getTransactions } from '../apis/transactionApi';
 import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
 
-import TransactionForm from '../components/TransactionForm';
 import Layout from '../components/Layout';
 import { Transaction, Budget, ScheduledTransaction } from '../types'
 
 export default function Default() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken } = useLogto();
+
   const [items, setItems] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [scheduledTransactions, setScheduledTransactions] = useState<ScheduledTransaction[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedFrequency, setSelectedFrequency] = useState<'weekly' | 'bi-weekly' | 'monthly' | 'yearly'>('monthly');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<Omit<Transaction, 'id'> | null>(null);
   const [incomeShowScheduled, setIncomeShowScheduled] = useState(false);
   const [expenseShowScheduled, setExpenseShowScheduled] = useState(false);
 
@@ -32,21 +30,17 @@ export default function Default() {
 
   async function load() {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    const [transactions, budgetData, scheduledData] = await Promise.all([
+    const [transactions, budgets, scheduledTransactions, categories] = await Promise.all([
       getTransactions(token),
       getBudgets(token),
-      getScheduledTransactions(token)
-      // TODO: getCategories requires token in API; fetch separately
+      getScheduledTransactions(token),
+      getCategories(token)
     ]);
+
     setItems(transactions);
-    setBudgets(budgetData);
-    setScheduledTransactions(scheduledData);
-    try {
-      const cats = await getCategories(token);
-      setCategories(cats || []);
-    } catch {
-      setCategories([]);
-    }
+    setBudgets(budgets);
+    setScheduledTransactions(scheduledTransactions);
+    setCategories(categories || []);
   }
 
   function getBudgetSummary() {
@@ -75,6 +69,11 @@ export default function Default() {
   function getFilteredExpenses() {
     const startDate = getPeriodStart(selectedFrequency);
     return items.filter(item => item.amount < 0 && new Date(item.date) >= startDate);
+  }
+
+  function getFilteredIncome() {
+    const startDate = getPeriodStart(selectedFrequency);
+    return items.filter(item => item.amount > 0 && new Date(item.date) >= startDate);
   }
 
   function getFrequencyMultiplier(frequency: string): number {
@@ -113,46 +112,9 @@ export default function Default() {
     return amount * (fromPeriods / toPeriods);
   }
 
-  async function onCreate(item: Omit<Transaction, 'id'>) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await createTransaction(item, token);
-    load();
-  }
-
-  async function onDeleteTransaction(id: string) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await deleteTransaction(id, token);
-    load();
-  }
-
-  function onEdit(transaction: Transaction) {
-    setEditingId(transaction.id);
-    setEditData({
-      description: transaction.description,
-      amount: transaction.amount,
-      categoryId: transaction.categoryId,
-      date: transaction.date
-    });
-  }
-
-  async function onSaveEdit() {
-    if (!editingId || !editData) return;
-
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await updateTransaction(editingId, editData, token);
-    setEditingId(null);
-    setEditData(null);
-    load();
-  }
-
   const filteredExpenses = getFilteredExpenses();
   const budgetSummary = getBudgetSummary();
   const totalSpent = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
-
-  function getFilteredIncome() {
-    const startDate = getPeriodStart(selectedFrequency);
-    return items.filter(item => item.amount > 0 && new Date(item.date) >= startDate);
-  }
 
   const filteredIncome = getFilteredIncome();
   const actualIncome = filteredIncome.reduce((sum, item) => sum + item.amount, 0);
@@ -169,9 +131,6 @@ export default function Default() {
   }, 0);
 
   const totalIncome = scheduledIncome;
-  const totalExpenses = totalSpent + scheduledExpenses;
-  const netBalance = totalIncome - totalExpenses;
-  const budgetChartColors = ['#ef4444', '#10b981'];
 
   return (
     <Layout>
@@ -194,6 +153,7 @@ export default function Default() {
                 </div>
               </div>
             </div>
+
             <div className="summary-charts">
               {/* Income semicircle */}
               <div className="semichart">
@@ -233,6 +193,7 @@ export default function Default() {
                             </Pie>
                           </PieChart>
                         </ResponsiveContainer>
+
                         <div className="chart-overlay">
                           <div className="overlay-big">${(incomeShowScheduled ? totalIncome : actualIncome).toFixed(2)}</div>
                         </div>
@@ -288,6 +249,7 @@ export default function Default() {
                             </Pie>
                           </PieChart>
                         </ResponsiveContainer>
+
                         <div className="chart-overlay">
                           <div className="overlay-big">${(expenseShowScheduled ? scheduledExpenses : actualExpenses).toFixed(2)}</div>
                         </div>
@@ -305,32 +267,35 @@ export default function Default() {
             <div className="card-header">
               <h3>Budget Usage</h3>
             </div>
-            {budgetSummary.length === 0 ? (
-              <div className="empty-state">No budgets set yet.</div>
-            ) : (
-              <div className="budget-table">
-                {budgetSummary.map(summary => {
-                  const usageRatio = summary.normalizedBudget !== 0 ? summary.spent / summary.normalizedBudget : 0;
-                  const percent = usageRatio * 100;
-                  const filledPercent = Math.max(0, Math.min(percent, 100));
-                  const color = percent > 100 ? '#ef4444' : '#10b981';
+            {budgetSummary.length === 0
+              ? (
+                <div className="empty-state">No budgets set yet.</div>
+              )
+              : (
+                <div className="budget-table">
+                  {budgetSummary.map(summary => {
+                    const usageRatio = summary.normalizedBudget !== 0 ? summary.spent / summary.normalizedBudget : 0;
+                    const percent = usageRatio * 100;
+                    const filledPercent = Math.max(0, Math.min(percent, 100));
+                    const color = percent > 100 ? '#ef4444' : '#10b981';
 
-                  return (
-                    <div key={summary.category} className="budget-table-row" style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
-                      <div className="budget-name" style={{ flex: '0 0 35%', paddingRight: 12 }}>{summary.category}</div>
-                      <div className="budget-usage" style={{ flex: '1 1 65%' }}>
-                        <div style={{ position: 'relative', background: '#f1f5f9', height: 20, borderRadius: 6, overflow: 'hidden' }}>
-                          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${filledPercent}%`, background: color }} />
-                          <div style={{ position: 'relative', padding: '0 8px', lineHeight: '20px', fontSize: 12, color: '#0f172a', fontWeight: 500 }}>
-                            {`${summary.spent.toFixed(2)} / ${summary.normalizedBudget.toFixed(2)} (${percent.toFixed(0)}%)`}
+                    return (
+                      <div key={summary.category} className="budget-table-row" style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
+                        <div className="budget-name" style={{ flex: '0 0 35%', paddingRight: 12 }}>{summary.category}</div>
+                        <div className="budget-usage" style={{ flex: '1 1 65%' }}>
+                          <div style={{ position: 'relative', background: '#f1f5f9', height: 20, borderRadius: 6, overflow: 'hidden' }}>
+                            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${filledPercent}%`, background: color }} />
+                            <div style={{ position: 'relative', padding: '0 8px', lineHeight: '20px', fontSize: 12, color: '#0f172a', fontWeight: 500 }}>
+                              {`${summary.spent.toFixed(2)} / ${summary.normalizedBudget.toFixed(2)} (${percent.toFixed(0)}%)`}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+                    )
+                  })}
+                </div>
+              )
+            }
           </div>
         </section>
         <section className="full-width">
@@ -338,6 +303,7 @@ export default function Default() {
             <div className="card-header">
               <h3>Goal Usage</h3>
             </div>
+
             <div className="empty-state">No goals set yet.</div>
           </div>
         </section>

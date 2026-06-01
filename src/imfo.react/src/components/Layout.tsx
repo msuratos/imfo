@@ -1,16 +1,28 @@
 import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
+
 import { useLogto } from '@logto/react';
 
-type Props = {
-  
-};
+import Box from '@mui/material/Box';
+import BottomNavigation from '@mui/material/BottomNavigation';
+import BottomNavigationAction from '@mui/material/BottomNavigationAction';
+import CssBaseline from '@mui/material/CssBaseline';
+import Paper from '@mui/material/Paper';
+
+import DataUsageIcon from '@mui/icons-material/DataUsage';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import SettingsIcon from '@mui/icons-material/Settings';
+
+type Props = {};
 
 export default function Layout({ children }: PropsWithChildren<Props>) {
   const navigate = useNavigate();
   const { signOut } = useLogto();
+
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [profileOpen, setProfileOpen] = useState(false);
+  const [value, setValue] = React.useState(0);
+
   const profileRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -48,8 +60,27 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
     } catch { }
   }, [theme]);
 
+  function handleBottomNavigationClick(event, newValue) {
+    setValue(newValue);
+
+    switch (newValue) {
+      case 0:
+        navigate('/transactions');
+        return;
+      case 1:
+        navigate('/');
+        return;
+      case 2:
+        navigate('/budgets');
+        return;
+      default:
+        return;
+    }
+  }
+
   return (
-    <div className="app-root">
+    <Box>
+      <CssBaseline />
       <main className="app-main">
         <div className="top-controls" ref={profileRef} aria-hidden={false}>
           <button className="theme-toggle" aria-label="Toggle theme" title="Toggle theme" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
@@ -72,11 +103,19 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
         {children}
       </main>
 
-      <footer className="bottom-nav" role="navigation" aria-label="Mobile navigation">
-        <button className="nav-btn nav-left" aria-label="Transactions" onClick={() => navigate('/transactions')}>Transactions</button>
-        <button className="nav-btn nav-center" aria-label="Home" onClick={() => navigate('/')}>Home</button>
-        <button className="nav-btn nav-right" aria-label="Settings" onClick={() => navigate('/budgets')}>Settings</button>
-      </footer>
-    </div>
+      <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
+        <BottomNavigation value={value} onChange={handleBottomNavigationClick} showLabels>
+          <BottomNavigationAction label="Transactions" icon={<ReceiptIcon />} />
+          <BottomNavigationAction label="Usages" icon={<DataUsageIcon />} />
+          <BottomNavigationAction label="Settings" icon={<SettingsIcon />} />
+        </BottomNavigation>
+      </Paper>
+
+      {/*<footer className="bottom-nav" role="navigation" aria-label="Mobile navigation">*/}
+      {/*  <button className="nav-btn nav-left" aria-label="Transactions" onClick={() => navigate('/transactions')}>Transactions</button>*/}
+      {/*  <button className="nav-btn nav-center" aria-label="Home" onClick={() => navigate('/')}>Home</button>*/}
+      {/*  <button className="nav-btn nav-right" aria-label="Settings" onClick={() => navigate('/budgets')}>Settings</button>*/}
+      {/*</footer>*/}
+    </Box>
   );
 }

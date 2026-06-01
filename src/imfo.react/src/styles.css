@@ -89,7 +89,7 @@ main {
 }
 
 
-/* removed header/mobile menu specific rules (controls moved into main) */
+/* header/mobile menu specific rules were moved into main */
 
 .container {
   display: flex;
@@ -233,30 +233,6 @@ section.left {
   margin-top: 6px;
 }
 
-.bottom-nav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--card);
-  border-top: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 -6px 18px rgba(12,24,40,0.06);
-}
-
-.bottom-nav .nav-btn {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
 
 .btn {
   padding: 12px 16px;
@@ -280,9 +256,7 @@ section.left {
     width: 100%;
   }
 
-.transaction-panel {
-  min-height: 360px;
-}
+
 
 .transactions-card {
   padding: 18px;
@@ -511,6 +485,7 @@ section.left {
 }
 
 .transaction-panel {
+  min-height: 360px;
   border-top-color: var(--danger); /* red accent for add/edit panel */
 }
 

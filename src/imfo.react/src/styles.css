@@ -349,66 +349,7 @@ section.left {
   gap: 8px;
 }
 
-/* make label and select appear inline in the toolbar */
-.summary-toolbar .form-group {
-  margin: 0; /* override default form-group spacing */
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-}
 
-.summary-toolbar .form-group label {
-  display: inline-block;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.summary-toolbar .form-group select {
-  display: inline-block;
-}
-
-.semichart {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.chart-wrap { position: relative; width: 100% }
-.chart-overlay {
-  position: absolute;
-  left: 50%;
-  top: 36%;
-  transform: translateX(-50%);
-  text-align: center;
-  pointer-events: none;
-}
-
-/* make pie slices clearly clickable */
-.recharts-pie-cell { 
-  cursor: pointer;
-}
-
-.semichart h4 {
-  margin: 0 0 6px 0;
-}
-
-.summary-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 12px;
-}
-
-.net-value {
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.net-value.pos { color: #10b981 }
-.net-value.neg { color: #ef4444 }
-.net-label { color: var(--muted); font-size: 13px }
 
 @media (max-width: 720px) {
   /* keep charts in one horizontal row on small screens; allow horizontal scroll */
@@ -483,30 +424,6 @@ section.left {
   min-height: 360px;
   border-top-color: var(--danger); /* red accent for add/edit panel */
 }
-
-.chart {
-  min-height: 260px;
-}
-
-  .chart h3 {
-    text-align: center;
-    margin: 0 0 16px 0;
-    font-size: 16px;
-  }
-
-.budget-chart-footer {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #475569;
-}
-
-  .budget-chart-footer strong {
-    color: #0f172a;
-  }
 
 @media (max-width:800px) {
   .container {

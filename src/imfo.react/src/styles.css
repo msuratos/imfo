@@ -26,64 +26,8 @@ body {
 
 
 main {
-  position: relative; /* so .top-controls absolute positions relative to main */
-}
-
-/* Top controls moved into main: pin to top-right with minimal height */
-.top-controls {
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  height: 36px;
-  z-index: 50;
-}
-
-.top-controls .theme-toggle,
-.top-controls .profile-btn {
-  background: var(--card);
-  border: none;
-  color: var(--muted);
-  padding: 6px 8px;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(12,24,40,0.06);
-  font-size: 14px;
-}
-
-.profile-menu {
-  position: relative;
-}
-
-.profile-dropdown {
-  position: absolute;
-  top: 44px;
-  right: 0;
-  background: var(--card);
-  color: var(--muted);
+  /* layout handled by MUI components; keep a small padding for global pages */
   padding: 8px;
-  border-radius: 8px;
-  box-shadow: 0 8px 28px rgba(12,24,40,0.12);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 140px;
-}
-
-.profile-dropdown button {
-  background: transparent;
-  border: none;
-  text-align: left;
-  padding: 8px 6px;
-  color: inherit;
-  cursor: pointer;
-  border-radius: 6px;
-}
-
-.profile-dropdown button:hover {
-  background: rgba(0,0,0,0.04);
 }
 
 
@@ -112,12 +56,7 @@ section.left {
 }
 
 .card {
-  /* make cards flat: no raised background or shadow */
-  background: transparent;
-  /* subtle accent line at the top to distinguish sections */
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  box-shadow: none;
+  /* legacy helper kept for minimal global overrides; prefer MUI Paper */
 }
 
 .list {
@@ -150,34 +89,9 @@ section.left {
     color: var(--danger)
   }
 
-.edit-btn {
-  padding: 4px 8px;
-  margin-right: 4px;
-  border: none;
-  border-radius: 4px;
-  background: var(--accent);
-  color: white;
-  cursor: pointer;
-  font-size: 12px;
+.edit-btn, .delete-btn {
+  display: none; /* replaced by MUI Button components */
 }
-
-  .edit-btn:hover {
-    background: #0a4ccb;
-  }
-
-.delete-btn {
-  padding: 4px 8px;
-  border: none;
-  border-radius: 4px;
-  background: var(--danger);
-  color: white;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-  .delete-btn:hover {
-    background: #dc2626;
-  }
 
 .form-group {
   margin-bottom: 14px;
@@ -201,23 +115,6 @@ section.left {
   color: #0f172a;
 }
 
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid #d9e2ef;
-  border-radius: 10px;
-  background: #f7fafc;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-  .form-group input:focus,
-  .form-group select:focus {
-    outline: none;
-    border-color: #7c3aed;
-    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
-  }
-
 .form {
   display: flex;
   flex-direction: column;
@@ -232,27 +129,7 @@ section.left {
 }
 
 
-.btn {
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: none;
-  background: #e6eef8;
-  cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-  .btn:hover {
-    transform: translateY(-1px);
-  }
-
-  .btn.primary {
-    background: var(--accent);
-    color: white;
-  }
-
-  .btn.full {
-    width: 100%;
-  }
+.btn { display: none; }
 
 
 
@@ -276,18 +153,8 @@ section.left {
   color: white;
 }
 
-.transaction-item {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 0;
-  background: transparent;
-  border: none;
-  /* use a flat separator between items */
-  border-bottom: 1px solid rgba(12,24,40,0.04);
-}
+
+.transaction-item { display: none; }
 
 .transaction-info {
   display: flex;
@@ -316,14 +183,7 @@ section.left {
   justify-content: flex-end;
 }
 
-.empty-state {
-  padding: 18px;
-  color: var(--muted);
-  text-align: center;
-  background: transparent;
-  border-radius: 0;
-  border: 1px dashed rgba(12,24,40,0.04);
-}
+.empty-state { display: none; }
 
 .budget-summary-card h2 {
   margin-top: 0;

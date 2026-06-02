@@ -22,12 +22,10 @@ body {
   margin: 0;
   font-family: Inter,Segoe UI,Roboto,Arial,sans-serif;
   background: var(--bg);
-  color: #0f172a
 }
 
 
 main {
-  color: var(--muted);
   position: relative; /* so .top-controls absolute positions relative to main */
 }
 
@@ -374,7 +372,6 @@ section.left {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #0f172a;
 }
 
 .chart-wrap { position: relative; width: 100% }
@@ -386,15 +383,14 @@ section.left {
   text-align: center;
   pointer-events: none;
 }
-.overlay-big { font-size: 14px; font-weight: 700; color: #0f172a }
-
 
 /* make pie slices clearly clickable */
-.recharts-pie-cell { cursor: pointer }
+.recharts-pie-cell { 
+  cursor: pointer;
+}
 
 .semichart h4 {
   margin: 0 0 6px 0;
-  font-size: 14px;
 }
 
 .summary-center {
@@ -435,7 +431,6 @@ section.left {
   }
 
   .semichart h4 {
-    font-size: 13px;
     margin-bottom: 6px;
   }
 

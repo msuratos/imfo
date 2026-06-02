@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { useLogto } from '@logto/react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+
+import { useLogto } from '@logto/react';
+import Typography from '@mui/material/Typography';
 
 import { getBudgets } from '../apis/budgetApi';
 import { getCategories } from '../apis/categoryApi';
@@ -157,7 +159,7 @@ export default function Default() {
             <div className="summary-charts">
               {/* Income semicircle */}
               <div className="semichart">
-                <h4>Income</h4>
+                <Typography variant='h6'>Income</Typography>
                 {(() => {
                   const incomeChartData = [
                     { name: 'Actual', value: actualIncome },
@@ -195,7 +197,7 @@ export default function Default() {
                         </ResponsiveContainer>
 
                         <div className="chart-overlay">
-                          <div className="overlay-big">${(incomeShowScheduled ? totalIncome : actualIncome).toFixed(2)}</div>
+                          <Typography>${(incomeShowScheduled ? totalIncome : actualIncome).toFixed(2)}</Typography>
                         </div>
                       </div>
                     </>
@@ -208,12 +210,12 @@ export default function Default() {
                 <div className={`net-value ${(actualIncome - totalSpent) >= 0 ? 'pos' : 'neg'}`}>
                   ${(actualIncome - totalSpent).toFixed(2)}
                 </div>
-                <div className="net-label">Net</div>
+                <Typography variant='subtitle1'>Net</Typography>
               </div>
 
               {/* Expenses semicircle */}
               <div className="semichart">
-                <h4>Expenses</h4>
+                <Typography variant='h6'>Expenses</Typography>
                 {(() => {
                   const actualExpenses = totalSpent;
                   const expenseChartData = [
@@ -251,7 +253,7 @@ export default function Default() {
                         </ResponsiveContainer>
 
                         <div className="chart-overlay">
-                          <div className="overlay-big">${(expenseShowScheduled ? scheduledExpenses : actualExpenses).toFixed(2)}</div>
+                          <Typography>${(expenseShowScheduled ? scheduledExpenses : actualExpenses).toFixed(2)}</Typography>
                         </div>
                       </div>
                     </>
@@ -265,7 +267,7 @@ export default function Default() {
         <section className="full-width">
           <div className="card budget-summary-card">
             <div className="card-header">
-              <h3>Budget Usage</h3>
+              <Typography variant='h5'>Budget Usage</Typography>
             </div>
             {budgetSummary.length === 0
               ? (
@@ -301,7 +303,7 @@ export default function Default() {
         <section className="full-width">
           <div className="card budget-summary-card">
             <div className="card-header">
-              <h3>Goal Usage</h3>
+              <Typography variant='h5'>Goal Usage</Typography>
             </div>
 
             <div className="empty-state">No goals set yet.</div>

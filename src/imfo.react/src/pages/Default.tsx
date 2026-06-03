@@ -162,7 +162,7 @@ export default function Default() {
           </Box>
 
           <Grid container spacing={2} sx={{ alignItems: 'center', justifyContent: 'center' }}>
-            <Grid item xs={12} md={4}>
+            <Grid size={4}>
               <Typography variant='h6'>Income</Typography>
               {(() => {
                 const incomeChartData = [
@@ -206,7 +206,7 @@ export default function Default() {
               })()}
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid size={4}>
               <Box sx={{ textAlign: 'center' }}>
                 <Box sx={{ fontSize: 28, fontWeight: 700, color: (actualIncome - totalSpent) >= 0 ? 'success.main' : 'error.main' }}>
                   ${(actualIncome - totalSpent).toFixed(2)}
@@ -215,7 +215,7 @@ export default function Default() {
               </Box>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid size={4}>
               <Typography variant='h6'>Expenses</Typography>
               {(() => {
                 const actualExpenses = totalSpent;

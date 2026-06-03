@@ -138,7 +138,7 @@ export default function Transactions() {
         {activeTab === 'transactions'
           ? (
             <Grid container spacing={1}>
-              <Grid item xs={12} md={8} sx={{ width: '100%' }}>
+              <Grid size={{ xs: 12, md: 8 }}>
                 <Paper sx={{ p: 1 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Box>
@@ -173,7 +173,7 @@ export default function Transactions() {
                 </Paper>
               </Grid>
 
-              <Grid item xs={12} md={4} sx={{ width: '100%' }}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Paper sx={{ p: 1 }}>
                   <Box sx={{ mb: 1 }}>
                     <Typography variant="h6">{editingId && editData ? 'Edit Transaction' : 'Add Transaction'}</Typography>
@@ -208,7 +208,7 @@ export default function Transactions() {
           )
           : (
             <Grid container spacing={1}>
-              <Grid item xs={12} md={8} sx={{ width: '100%' }}>
+              <Grid size={{ xs: 12, md: 8 }}>
                 <Paper sx={{ p: 1 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Box>
@@ -249,7 +249,7 @@ export default function Transactions() {
                 </Paper>
               </Grid>
 
-              <Grid item xs={12} md={4} sx={{ width: '100%' }}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Paper sx={{ p: 1 }}>
                   <Box sx={{ mb: 1 }}>
                     <Typography variant="h6">Add Scheduled Transaction</Typography>

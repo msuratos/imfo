@@ -75,7 +75,7 @@ export default function Budgets() {
     <Layout>
       <Box component="main" sx={{ p: 1, maxWidth: 1200, margin: 'auto' }}>
         <Grid container spacing={1}>
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Paper sx={{ p: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Box>
@@ -120,7 +120,7 @@ export default function Budgets() {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Paper sx={{ p: 1 }}>
               <Typography variant="h5" sx={{ mb: 1 }}>Add Budget</Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>Create a new budget goal for a category.</Typography>

@@ -50,7 +50,7 @@ export default function Categories() {
     <Layout>
       <Box component="main" sx={{ p: 1, maxWidth: 1200, margin: 'auto' }}>
         <Grid container spacing={1}>
-          <Grid item xs={12} md={8} sx={{ width: '100%' }}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Paper sx={{ p: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Box>
@@ -80,7 +80,7 @@ export default function Categories() {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={4} sx={{ width: '100%' }}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Paper sx={{ p: 1 }}>
               <Box sx={{ mb: 1 }}>
                 <Typography variant="h6">Add Category</Typography>

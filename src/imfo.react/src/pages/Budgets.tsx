@@ -7,6 +7,23 @@ import { getCategories } from '../apis/categoryApi';
 import Layout from '../components/Layout';
 import { Budget, Category } from '../types'
 
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import FormControl from '@mui/material/FormControl';
+import Grid from '@mui/material/Grid';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import Select from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 export default function Budgets() {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessToken, signOut } = useLogto();
@@ -37,7 +54,7 @@ export default function Budgets() {
 
   async function onCreate() {
     if (!newItem.category || newItem.amount <= 0) return;
-    
+
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
     await createBudget(newItem, token);
     setNewItem({
@@ -55,87 +72,115 @@ export default function Budgets() {
   }
 
   return (
-    <Layout title="Imfo - Budgets" subtitle="Manage your budgets by frequency">
-      <main className="container">
-        <section className="left">
-          <div className="card transactions-card">
-            <div className="card-header">
-              <div>
-                <h2>Budgets</h2>
-                <p className="muted">Track spending limits by category.</p>
-              </div>
-              <div className="transaction-count">{items.length} budget{items.length === 1 ? '' : 's'}</div>
-            </div>
-            {items.length === 0 ? (
-              <div className="empty-state">No budgets yet. Use the form to add your first category.</div>
-            ) : (
-              <div className="list">
-                {items.map(i => (
-                  <div key={i.id} className="transaction-item">
-                    <div className="transaction-info">
-                      <div className="description">{i.category}</div>
-                      <div className="meta">{i.frequency.charAt(0).toUpperCase() + i.frequency.slice(1)} • ${i.amount.toFixed(2)}</div>
-                    </div>
-                    <div className="amount">${i.amount.toFixed(2)}</div>
-                    <div className="actions">
-                      <button className="delete-btn" onClick={() => onDelete(i.id)}>Delete</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-        <aside className="right">
-          <div className="card transactions-card">
-            <div className="card-header">
-              <div>
-                <h2>Add Budget</h2>
-                <p className="muted">Create a new budget goal for a category.</p>
-              </div>
-            </div>
-            <form className="form" onSubmit={(e) => { e.preventDefault(); onCreate(); }}>
-              <div className="form-group">
-                <label>Category</label>
-                <select value={newItem.category} onChange={(e) => setNewItem({...newItem, category: e.target.value})} required>
-                  <option value="">Select category</option>
-                  {categories.filter(c => c.type === 'Expense').map(c => (
-                    <option key={c.id} value={c.name}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-row">
-                <div className="form-group half">
-                  <label>Frequency</label>
-                  <select
-                    value={newItem.frequency}
-                    onChange={(e) => setNewItem({...newItem, frequency: e.target.value})}
-                    required
-                  >
-                    <option value="weekly">Weekly</option>
-                    <option value="bi-weekly">Bi-weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
-                </div>
-                <div className="form-group half">
-                  <label>Amount</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={newItem.amount}
-                    onChange={(e) => setNewItem({...newItem, amount: parseFloat(e.target.value) || 0})}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="form-actions">
-                <button type="submit" className="btn primary full">Add Budget</button>
-              </div>
-            </form>
-          </div>
-        </aside>
-      </main>
+    <Layout>
+      <Box component="main" sx={{ p: 1, maxWidth: 1200, margin: 'auto' }}>
+        <Grid container spacing={1}>
+          <Grid item xs={12} md={8}>
+            <Paper sx={{ p: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box>
+                  <Typography variant="h5">Budgets</Typography>
+                  <Typography variant="body2" color="textSecondary">Track spending limits by category.</Typography>
+                </Box>
+                <Typography variant="body2" color="textSecondary">
+                  {items.length} budget{items.length === 1 ? '' : 's'}
+                </Typography>
+              </Box>
+
+              {items.length === 0
+                ? (
+                  <Typography variant="body2" color="textSecondary" sx={{ py: 3, textAlign: 'center' }}>
+                    No budgets yet. Use the form to add your first category.
+                  </Typography>
+                )
+                : (
+                  <List>
+                    {items.map(i => (
+                      <ListItem
+                        key={i.id}
+                        secondaryAction={
+                          <IconButton edge="end" aria-label="delete" onClick={() => onDelete(i.id)} size="small">
+                            <DeleteIcon />
+                          </IconButton>
+                        }
+                        sx={{ display: 'flex', justifyContent: 'space-between', py: 1, px: 0 }}
+                      >
+                        <ListItemText
+                          primary={i.category}
+                          secondary={`${i.frequency.charAt(0).toUpperCase() + i.frequency.slice(1)} • $${i.amount.toFixed(2)}`}
+                        />
+                        <Typography variant="body2" sx={{ fontWeight: 'bold', ml: 2 }}>
+                          ${i.amount.toFixed(2)}
+                        </Typography>
+                      </ListItem>
+                    ))}
+                  </List>
+                )
+              }
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 1 }}>
+              <Typography variant="h5" sx={{ mb: 1 }}>Add Budget</Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>Create a new budget goal for a category.</Typography>
+
+              <Box component="form" onSubmit={(e) => { e.preventDefault(); onCreate(); }}>
+                <Stack spacing={2}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel id="budget-category-label">Category</InputLabel>
+                    <Select
+                      labelId="budget-category-label"
+                      value={newItem.category}
+                      label="Category"
+                      onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                      required
+                    >
+                      <MenuItem value="">Select category</MenuItem>
+                      {categories.filter(c => c.type === 'Expense').map(c => (
+                        <MenuItem key={c.id} value={c.name}>{c.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
+                      type="number"
+                      label="Amount"
+                      inputProps={{ step: '0.01' }}
+                      value={newItem.amount}
+                      onChange={(e) => setNewItem({ ...newItem, amount: parseFloat(e.target.value) || 0 })}
+                      required
+                      size="small"
+                      sx={{ flex: 1 }}
+                    />
+
+                    <FormControl size="small" sx={{ minWidth: 160 }}>
+                      <InputLabel id="budget-frequency-label">Frequency</InputLabel>
+                      <Select
+                        labelId="budget-frequency-label"
+                        value={newItem.frequency}
+                        label="Frequency"
+                        onChange={(e) => setNewItem({ ...newItem, frequency: e.target.value })}
+                        required
+                      >
+                        <MenuItem value="weekly">Weekly</MenuItem>
+                        <MenuItem value="bi-weekly">Bi-weekly</MenuItem>
+                        <MenuItem value="monthly">Monthly</MenuItem>
+                        <MenuItem value="yearly">Yearly</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+
+                  <Button type="submit" variant="contained" color="primary" fullWidth>
+                    Add Budget
+                  </Button>
+                </Stack>
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
     </Layout>
   );
 }

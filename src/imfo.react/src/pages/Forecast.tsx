@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
-import { Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart, Bar, Legend } from 'recharts';
+import { BarChart } from '@mui/x-charts';
 
 import { getCategories } from '../apis/categoryApi';
 import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
@@ -234,23 +234,20 @@ export default function Forecast() {
                 </Box>
               )
               : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={data}>
-                    <defs>
-                      <linearGradient id="colorBal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip formatter={(value: any) => `$${Number(value).toFixed(2)}`} />
-                    <Legend />
-                    <Bar dataKey="income" stackId="a" fill="#10b981" />
-                    <Bar dataKey="expenses" stackId="a" fill="#ef4444" />
-                    <Area type="monotone" dataKey="balance" stroke="#8884d8" fillOpacity={0.2} fill="url(#colorBal)" />
-                  </ComposedChart>
-                </ResponsiveContainer>
+                <BarChart
+                  dataset={data}
+                  xAxis={[{ scaleType: 'band', dataKey: 'date' }]}
+                  series={[
+                    { dataKey: 'income', label: 'Income', color: '#10b981' },
+                    { dataKey: 'expenses', label: 'Expenses', color: '#ef4444' },
+                    { dataKey: 'balance', label: 'Balance', type: 'line', color: '#8884d8' },
+                  ]}
+                  height={360}
+                  margin={{ top: 10, bottom: 30, left: 60, right: 10 }}
+                  slotProps={{
+                    legend: { hidden: false },
+                  }}
+                />
               )
             }
           </Box>

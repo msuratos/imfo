@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart as MuiPieChart } from '@mui/x-charts/PieChart';
 
 import { useLogto } from '@logto/react';
 import Typography from '@mui/material/Typography';
@@ -166,42 +166,48 @@ export default function Default() {
               <Typography variant='h6'>Income</Typography>
               {(() => {
                 const incomeChartData = [
-                  { name: 'Actual', value: actualIncome },
-                  { name: 'Remaining', value: Math.max(totalIncome - actualIncome, 0) }
+                  { id: 0, value: actualIncome, label: 'Actual' },
+                  { id: 1, value: Math.max(totalIncome - actualIncome, 0), label: 'Remaining' }
                 ];
+                const colors = ['#10b981', '#e6eef8'];
                 return (
-                  <Box sx={{ position: 'relative', height: 120 }}>
-                    <ResponsiveContainer width="100%" height={110}>
-                      <PieChart>
-                        <Pie
-                          data={incomeChartData}
-                          dataKey="value"
-                          startAngle={180}
-                          endAngle={0}
-                          innerRadius={'30%'}
-                          outerRadius={'60%'}
-                          paddingAngle={2}
-                          labelLine={false}
-                        >
-                          {incomeChartData.map((entry, index) => (
-                            <Cell
-                              key={`inc-${index}`}
-                              fill={index === 0 ? '#10b981' : '#e6eef8'}
-                              onClick={() => {
-                                if (index === 0) setIncomeShowScheduled(false);
-                                else setIncomeShowScheduled(true);
-                              }}
-                              style={{ cursor: 'pointer' }}
-                            />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-
-                    <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                      <Typography>${(incomeShowScheduled ? totalIncome : actualIncome).toFixed(2)}</Typography>
+                  <>
+                    <Box sx={{ position: 'relative', width: 120, height: 140 }}>
+                      <MuiPieChart
+                        series={[
+                          {
+                            data: incomeChartData,
+                            innerRadius: 15,
+                            outerRadius: 35,
+                            paddingAngle: 1,
+                            startAngle: -90,
+                            endAngle: 90,
+                            valueFormatter: (value) => `$${value}`,
+                            cx: 50,
+                            cy: 50,
+                          },
+                        ]}
+                        width={120}
+                        height={140}
+                        margin={{ top: 0, bottom: 30, left: 0, right: 0 }}
+                        colors={colors}
+                        slotProps={{
+                          legend: {
+                            position: 'bottom',
+                            direction: 'row',
+                          },
+                        }}
+                        onItemClick={(event) => {
+                          const index = event.dataIndex;
+                          if (index === 0) setIncomeShowScheduled(false);
+                          else setIncomeShowScheduled(true);
+                        }}
+                      />
+                      <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                      </Box>
                     </Box>
-                  </Box>
+                    <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(incomeShowScheduled ? totalIncome : actualIncome).toFixed(2)}</Typography>
+                  </>
                 )
               })()}
             </Grid>
@@ -220,42 +226,46 @@ export default function Default() {
               {(() => {
                 const actualExpenses = totalSpent;
                 const expenseChartData = [
-                  { name: 'Actual', value: actualExpenses },
-                  { name: 'Remaining', value: Math.max(scheduledExpenses - actualExpenses, 0) }
+                  { id: 0, value: actualExpenses, label: 'Actual' },
+                  { id: 1, value: Math.max(scheduledExpenses - actualExpenses, 0), label: 'Remaining' }
                 ];
+                const colors = ['#ef4444', '#fdecea'];
                 return (
-                  <Box sx={{ position: 'relative', height: 120 }}>
-                    <ResponsiveContainer width="100%" height={110}>
-                      <PieChart>
-                        <Pie
-                          data={expenseChartData}
-                          dataKey="value"
-                          startAngle={180}
-                          endAngle={0}
-                          innerRadius={'30%'}
-                          outerRadius={'60%'}
-                          paddingAngle={2}
-                          labelLine={false}
-                        >
-                          {expenseChartData.map((entry, index) => (
-                            <Cell
-                              key={`exp-${index}`}
-                              fill={index === 0 ? '#ef4444' : '#fdecea'}
-                              onClick={() => {
-                                if (index === 0) setExpenseShowScheduled(false);
-                                else setExpenseShowScheduled(true);
-                              }}
-                              style={{ cursor: 'pointer' }}
-                            />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-
-                    <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                      <Typography>${(expenseShowScheduled ? scheduledExpenses : actualExpenses).toFixed(2)}</Typography>
+                  <>
+                    <Box sx={{ position: 'relative', width: 120, height: 140 }}>
+                      <MuiPieChart
+                        series={[
+                          {
+                            data: expenseChartData,
+                            innerRadius: 15,
+                            outerRadius: 35,
+                            paddingAngle: 1,
+                            startAngle: -90,
+                            endAngle: 90,
+                            valueFormatter: (value) => `$${value}`,
+                            cx: 50,
+                            cy: 50,
+                          },
+                        ]}
+                        width={120}
+                        height={140}
+                        margin={{ top: 0, bottom: 30, left: 0, right: 0 }}
+                        colors={colors}
+                        slotProps={{
+                          legend: {
+                            position: 'bottom',
+                            direction: 'horizontal',
+                          },
+                        }}
+                        onItemClick={(event) => {
+                          const index = event.dataIndex;
+                          if (index === 0) setExpenseShowScheduled(false);
+                          else setExpenseShowScheduled(true);
+                        }}
+                      />
                     </Box>
-                  </Box>
+                    <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(expenseShowScheduled ? scheduledExpenses : actualExpenses).toFixed(2)}</Typography>
+                  </>
                 )
               })()}
             </Grid>

@@ -31,8 +31,6 @@ main {
 }
 
 
-/* header/mobile menu specific rules were moved into main */
-
 .container {
   display: flex;
   flex-wrap: wrap;
@@ -45,36 +43,9 @@ main {
   flex-basis: 100%;
 }
 
-section.left {
-  flex: 2;
-  min-width: 0;
-}
-
-.right {
-  flex: 1;
-  min-width: 250px;
-}
-
 .card {
   /* legacy helper kept for minimal global overrides; prefer MUI Paper */
 }
-
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 10px
-}
-
-.list-item {
-  display: grid;
-  grid-template-columns: 1fr auto auto auto;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #eef2f7
-}
-
 
 .amount {
   font-weight: 700;
@@ -89,50 +60,6 @@ section.left {
     color: var(--danger)
   }
 
-.edit-btn, .delete-btn {
-  display: none; /* replaced by MUI Button components */
-}
-
-.form-group {
-  margin-bottom: 14px;
-}
-
-  .form-group.half {
-    flex: 1;
-  }
-
-.form-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-
-.btn { display: none; }
-
-
-
 .transactions-card {
   padding: 18px;
 }
@@ -145,22 +72,7 @@ section.left {
   margin-bottom: 16px;
 }
 
-.transaction-count {
-  background: rgba(255,255,255,0.15);
-  padding: 8px 12px;
-  border-radius: 999px;
-  font-size: 13px;
-  color: white;
-}
-
-
 .transaction-item { display: none; }
-
-.transaction-info {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
 
 .transaction-item .description {
   font-weight: 600;
@@ -183,7 +95,12 @@ section.left {
   justify-content: flex-end;
 }
 
-.empty-state { display: none; }
+.empty-state {
+  color: var(--muted);
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+}
 
 .budget-summary-card h2 {
   margin-top: 0;
@@ -202,7 +119,6 @@ section.left {
   text-align: center;
 }
 
-/* toolbar inside the budget summary header: align view dropdown and label in a row */
 .summary-toolbar {
   display: flex;
   align-items: center;
@@ -212,11 +128,10 @@ section.left {
 
 
 @media (max-width: 720px) {
-  /* keep charts in one horizontal row on small screens; allow horizontal scroll */
   .summary-charts {
     display: flex !important;
     flex-direction: row;
-    flex-wrap: nowrap; /* force single row */
+    flex-wrap: nowrap;
     gap: 10px;
     align-items: center;
     overflow-x: auto;
@@ -271,18 +186,17 @@ section.left {
   color: #0f172a;
 }
 
-/* Accent colors for the major areas so they remain distinguishable even when flat */
 .budget-summary-card {
   border-bottom-color: var(--muted);
 }
 
 .transactions-card {
-  border-top-color: #10b981; /* green accent for transactions */
+  border-top-color: #10b981;
 }
 
 .transaction-panel {
   min-height: 360px;
-  border-top-color: var(--danger); /* red accent for add/edit panel */
+  border-top-color: var(--danger);
 }
 
 @media (max-width:800px) {
@@ -290,4 +204,8 @@ section.left {
     flex-direction: column;
     padding: 5px
   }
+}
+
+.muted {
+  color: var(--muted);
 }

@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useLogto } from '@logto/react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart, Bar, Legend } from 'recharts';
+import { Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ComposedChart, Bar, Legend } from 'recharts';
 
 import { getCategories } from '../apis/categoryApi';
 import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
 import { getTransactions } from '../apis/transactionApi';
 import Layout from '../components/Layout';
 import { ScheduledTransaction, Transaction, Category } from '../types'
+
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 function getFrequencyMultiplier(frequency: string): number {
   switch (frequency.toLowerCase()) {
@@ -151,9 +159,7 @@ function generateForecast(transactions: Transaction[], scheduled: ScheduledTrans
 
 export default function Forecast() {
   const navigate = useNavigate();
-  const { isAuthenticated, getAccessToken, signOut } = useLogto();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const { isAuthenticated, getAccessToken } = useLogto();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [scheduled, setScheduled] = useState<ScheduledTransaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -165,21 +171,6 @@ export default function Forecast() {
     if (isAuthenticated) load();
     else navigate('/login');
   }, [isAuthenticated]);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('imfo_theme');
-      if (saved === 'dark' || saved === 'light') setTheme(saved);
-      else setTheme('light');
-    } catch { }
-  }, []);
-
-  useEffect(() => {
-    try {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('imfo_theme', theme);
-    } catch { }
-  }, [theme]);
 
   useEffect(() => {
     // rebuild data when options change
@@ -210,39 +201,45 @@ export default function Forecast() {
   })() : [];
 
   return (
-    <Layout title="Imfo - Forecast" subtitle="Projected balances based on scheduled transactions and recent trends">
-      <main className="container">
-        <section className="full-width">
-          <div className="card budget-summary-card">
-            <div className="card-header">
-              <div>
-                <h2>Balance Forecast</h2>
-                <p className="muted">Projected balances</p>
-              </div>
-              <div className="summary-toolbar">
-                <label>Horizon:</label>
-                <select value={months} onChange={(e) => setMonths(parseInt(e.target.value))}>
-                  <option value={3}>3 months</option>
-                  <option value={6}>6 months</option>
-                  <option value={12}>12 months</option>
-                </select>
-                <label style={{ marginLeft: 8 }}>Trend:</label>
-                <select value={method} onChange={(e) => setMethod(e.target.value as 'average' | 'linear')}>
-                  <option value="average">Recent average</option>
-                  <option value="linear">Linear regression</option>
-                </select>
-              </div>
-            </div>
-            <div style={{ height: 360 }}>
-              {data.length === 0 ? (
-                <div className="empty-state">No data available to forecast.</div>
-              ) : (
+    <Layout>
+      <Box component="main" sx={{ p: 1 }}>
+        <Paper elevation={1} sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2, flexWrap: 'wrap' }}>
+            <Box>
+              <Typography variant="h5">Balance Forecast</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>Projected balances</Typography>
+            </Box>
+            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+              <FormControl size="small" sx={{ minWidth: 140 }}>
+                <Select value={months} onChange={(e) => setMonths(parseInt(e.target.value as string))}>
+                  <MenuItem value={3}>3 months</MenuItem>
+                  <MenuItem value={6}>6 months</MenuItem>
+                  <MenuItem value={12}>12 months</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <Select value={method} onChange={(e) => setMethod(e.target.value as 'average' | 'linear')}>
+                  <MenuItem value="average">Recent average</MenuItem>
+                  <MenuItem value="linear">Linear regression</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </Box>
+
+          <Box sx={{ height: 360, mb: 2 }}>
+            {data.length === 0
+              ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
+                  No data available to forecast.
+                </Box>
+              )
+              : (
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={data}>
                     <defs>
                       <linearGradient id="colorBal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" />
@@ -254,23 +251,29 @@ export default function Forecast() {
                     <Area type="monotone" dataKey="balance" stroke="#8884d8" fillOpacity={0.2} fill="url(#colorBal)" />
                   </ComposedChart>
                 </ResponsiveContainer>
-              )}
-            </div>
-            <div style={{ padding: 12 }}>
-              <h3>Top categories (first forecast month)</h3>
-              {topCategories.length === 0 ? (
-                <div className="empty-state">No category data available.</div>
-              ) : (
-                <ul>
+              )
+            }
+          </Box>
+
+          <Box>
+            <Typography variant="h6" sx={{ mb: 1 }}>Top categories (first forecast month)</Typography>
+            {topCategories.length === 0
+              ? (
+                <Box sx={{ color: 'text.secondary' }}>No category data available.</Box>
+              )
+              : (
+                <Box component="ul" sx={{ pl: 2, m: 0 }}>
                   {topCategories.map(c => (
-                    <li key={c.name}>{c.name}: ${c.amount.toFixed(2)}</li>
+                    <Box component="li" key={c.name} sx={{ mb: 0.5 }}>
+                      <Typography variant="body2">{c.name}: ${c.amount.toFixed(2)}</Typography>
+                    </Box>
                   ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        </section>
-      </main>
+                </Box>
+              )
+            }
+          </Box>
+        </Paper>
+      </Box>
     </Layout>
   )
 }

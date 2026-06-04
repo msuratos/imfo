@@ -1,26 +1,19 @@
+import React from 'react';
 import { useNavigate } from 'react-router';
-import { useHandleSignInCallback } from '@logto/react';
 
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 
+import ErrorIcon from '@mui/icons-material/Error';
 import { useTheme } from '@mui/material/styles';
 
-export default function Callback() {
+export default function NotFound() {
   const navigate = useNavigate();
   const theme = useTheme();
-
-  const { isLoading } = useHandleSignInCallback(() => {
-    // Navigate to root path when finished
-    navigate('/');
-  });
-
-  // When it's working in progress
-  if (!isLoading) return null;
 
   return (
     <Box
@@ -43,18 +36,27 @@ export default function Callback() {
               padding: 4,
             }}
           >
-            <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'center' }}>
-              Loading
-            </Typography>
+            <ErrorIcon sx={{ color: theme.palette.error.main, fontSize: 64 }} />
 
-            <CircularProgress size={60} sx={{ color: theme.palette.primary.main }} />
+            <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'center' }}>
+              Page not found
+            </Typography>
 
             <Typography variant="body1" sx={{ color: 'text.secondary', textAlign: 'center' }}>
-              Redirecting...
+              The page you are looking for doesn't exist or has been moved.
             </Typography>
+
+            <Button
+              onClick={() => navigate('/')}
+              variant="contained"
+              size="large"
+              sx={{ mt: 1 }}
+            >
+              Go back home
+            </Button>
           </CardContent>
         </Card>
       </Container>
     </Box>
-  )
-};
+  );
+}

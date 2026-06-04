@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router';
+import { Outlet, useNavigate, useLocation } from 'react-router';
 
 import { useLogto } from '@logto/react';
 
@@ -28,7 +28,7 @@ type Props = {};
 
 export default function Layout({ children }: PropsWithChildren<Props>) {
   const { mode, setMode } = useColorScheme();
-  const { signOut } = useLogto();
+  const { isAuthenticated, isLoading, signOut } = useLogto();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -36,6 +36,11 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
   const [value, setValue] = useState<string>(location.pathname);
 
   const open = Boolean(anchorEl);
+
+  useEffect(() => {
+    if (!isAuthenticated && !isLoading) 
+      navigate('/login');
+  }, [isAuthenticated, isLoading]);
 
   function handleAccountButtonClick(event: React.MouseEvent<HTMLElement>) {
     // toggle menu: if already open, close it; otherwise open anchored to the button
@@ -135,7 +140,7 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
         </MenuItem>
       </Menu>
 
-      {children}
+      <Outlet />
 
       <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation value={value} onChange={handleBottomNavigationClick} showLabels>

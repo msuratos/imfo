@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
 import { useLogto } from '@logto/react';
 
 import { getBudgets, createBudget, deleteBudget } from '../apis/budgetApi';
 import { getCategories } from '../apis/categoryApi';
-import Layout from '../components/Layout';
 import { Budget, Category } from '../types'
 
 import Box from '@mui/material/Box';
@@ -25,8 +23,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function Budgets() {
-  const navigate = useNavigate();
-  const { isAuthenticated, getAccessToken, signOut } = useLogto();
+  const { isAuthenticated, getAccessToken } = useLogto();
   const [items, setItems] = useState<Budget[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [newItem, setNewItem] = useState<Omit<Budget, 'id'>>({
@@ -36,21 +33,21 @@ export default function Budgets() {
   });
 
   useEffect(() => {
-    if (isAuthenticated) load();
-    else navigate('/login');
+    async function load() {
+      const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+      const data = await getBudgets(token);
+      setItems(data);
+      try {
+        const cats = await getCategories(token);
+        setCategories(cats || []);
+      } catch {
+        setCategories([]);
+      }
+    }
+    
+    load();
   }, [isAuthenticated])
 
-  async function load() {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    const data = await getBudgets(token);
-    setItems(data);
-    try {
-      const cats = await getCategories(token);
-      setCategories(cats || []);
-    } catch {
-      setCategories([]);
-    }
-  }
 
   async function onCreate() {
     if (!newItem.category || newItem.amount <= 0) return;
@@ -72,115 +69,113 @@ export default function Budgets() {
   }
 
   return (
-    <Layout>
-      <Box component="main" sx={{ p: 1, maxWidth: 1200, margin: 'auto' }}>
-        <Grid container spacing={1}>
-          <Grid size={{ xs: 12, md: 8 }}>
-            <Paper sx={{ p: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Box>
-                  <Typography variant="h5">Budgets</Typography>
-                  <Typography variant="body2" color="textSecondary">Track spending limits by category.</Typography>
-                </Box>
-                <Typography variant="body2" color="textSecondary">
-                  {items.length} budget{items.length === 1 ? '' : 's'}
-                </Typography>
+    <Box component="main" sx={{ p: 1, maxWidth: 1200, margin: 'auto' }}>
+      <Grid container spacing={1}>
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Paper sx={{ p: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Box>
+                <Typography variant="h5">Budgets</Typography>
+                <Typography variant="body2" color="textSecondary">Track spending limits by category.</Typography>
               </Box>
+              <Typography variant="body2" color="textSecondary">
+                {items.length} budget{items.length === 1 ? '' : 's'}
+              </Typography>
+            </Box>
 
-              {items.length === 0
-                ? (
-                  <Typography variant="body2" color="textSecondary" sx={{ py: 3, textAlign: 'center' }}>
-                    No budgets yet. Use the form to add your first category.
-                  </Typography>
-                )
-                : (
-                  <List>
-                    {items.map(i => (
-                      <ListItem
-                        key={i.id}
-                        secondaryAction={
-                          <IconButton edge="end" aria-label="delete" onClick={() => onDelete(i.id)} size="small">
-                            <DeleteIcon />
-                          </IconButton>
-                        }
-                        sx={{ display: 'flex', justifyContent: 'space-between', py: 1, px: 0 }}
-                      >
-                        <ListItemText
-                          primary={i.category}
-                          secondary={`${i.frequency.charAt(0).toUpperCase() + i.frequency.slice(1)} • $${i.amount.toFixed(2)}`}
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 'bold', ml: 2 }}>
-                          ${i.amount.toFixed(2)}
-                        </Typography>
-                      </ListItem>
+            {items.length === 0
+              ? (
+                <Typography variant="body2" color="textSecondary" sx={{ py: 3, textAlign: 'center' }}>
+                  No budgets yet. Use the form to add your first category.
+                </Typography>
+              )
+              : (
+                <List>
+                  {items.map(i => (
+                    <ListItem
+                      key={i.id}
+                      secondaryAction={
+                        <IconButton edge="end" aria-label="delete" onClick={() => onDelete(i.id)} size="small">
+                          <DeleteIcon />
+                        </IconButton>
+                      }
+                      sx={{ display: 'flex', justifyContent: 'space-between', py: 1, px: 0 }}
+                    >
+                      <ListItemText
+                        primary={i.category}
+                        secondary={`${i.frequency.charAt(0).toUpperCase() + i.frequency.slice(1)} • $${i.amount.toFixed(2)}`}
+                      />
+                      <Typography variant="body2" sx={{ fontWeight: 'bold', ml: 2 }}>
+                        ${i.amount.toFixed(2)}
+                      </Typography>
+                    </ListItem>
+                  ))}
+                </List>
+              )
+            }
+          </Paper>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Paper sx={{ p: 1 }}>
+            <Typography variant="h5" sx={{ mb: 1 }}>Add Budget</Typography>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>Create a new budget goal for a category.</Typography>
+
+            <Box component="form" onSubmit={(e) => { e.preventDefault(); onCreate(); }}>
+              <Stack spacing={2}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="budget-category-label">Category</InputLabel>
+                  <Select
+                    labelId="budget-category-label"
+                    value={newItem.category}
+                    label="Category"
+                    onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                    required
+                  >
+                    <MenuItem value="">Select category</MenuItem>
+                    {categories.filter(c => c.type === 'Expense').map(c => (
+                      <MenuItem key={c.id} value={c.name}>{c.name}</MenuItem>
                     ))}
-                  </List>
-                )
-              }
-            </Paper>
-          </Grid>
+                  </Select>
+                </FormControl>
 
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Paper sx={{ p: 1 }}>
-              <Typography variant="h5" sx={{ mb: 1 }}>Add Budget</Typography>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>Create a new budget goal for a category.</Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <TextField
+                    type="number"
+                    label="Amount"
+                    step="0.01"
+                    value={newItem.amount}
+                    onChange={(e) => setNewItem({ ...newItem, amount: parseFloat(e.target.value) || 0 })}
+                    required
+                    size="small"
+                    sx={{ flex: 1 }}
+                  />
 
-              <Box component="form" onSubmit={(e) => { e.preventDefault(); onCreate(); }}>
-                <Stack spacing={2}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel id="budget-category-label">Category</InputLabel>
+                  <FormControl size="small" sx={{ minWidth: 160 }}>
+                    <InputLabel id="budget-frequency-label">Frequency</InputLabel>
                     <Select
-                      labelId="budget-category-label"
-                      value={newItem.category}
-                      label="Category"
-                      onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                      labelId="budget-frequency-label"
+                      value={newItem.frequency}
+                      label="Frequency"
+                      onChange={(e) => setNewItem({ ...newItem, frequency: e.target.value })}
                       required
                     >
-                      <MenuItem value="">Select category</MenuItem>
-                      {categories.filter(c => c.type === 'Expense').map(c => (
-                        <MenuItem key={c.id} value={c.name}>{c.name}</MenuItem>
-                      ))}
+                      <MenuItem value="weekly">Weekly</MenuItem>
+                      <MenuItem value="bi-weekly">Bi-weekly</MenuItem>
+                      <MenuItem value="monthly">Monthly</MenuItem>
+                      <MenuItem value="yearly">Yearly</MenuItem>
                     </Select>
                   </FormControl>
+                </Box>
 
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <TextField
-                      type="number"
-                      label="Amount"
-                      inputProps={{ step: '0.01' }}
-                      value={newItem.amount}
-                      onChange={(e) => setNewItem({ ...newItem, amount: parseFloat(e.target.value) || 0 })}
-                      required
-                      size="small"
-                      sx={{ flex: 1 }}
-                    />
-
-                    <FormControl size="small" sx={{ minWidth: 160 }}>
-                      <InputLabel id="budget-frequency-label">Frequency</InputLabel>
-                      <Select
-                        labelId="budget-frequency-label"
-                        value={newItem.frequency}
-                        label="Frequency"
-                        onChange={(e) => setNewItem({ ...newItem, frequency: e.target.value })}
-                        required
-                      >
-                        <MenuItem value="weekly">Weekly</MenuItem>
-                        <MenuItem value="bi-weekly">Bi-weekly</MenuItem>
-                        <MenuItem value="monthly">Monthly</MenuItem>
-                        <MenuItem value="yearly">Yearly</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-
-                  <Button type="submit" variant="contained" color="primary" fullWidth>
-                    Add Budget
-                  </Button>
-                </Stack>
-              </Box>
-            </Paper>
-          </Grid>
+                <Button type="submit" variant="contained" color="primary" fullWidth>
+                  Add Budget
+                </Button>
+              </Stack>
+            </Box>
+          </Paper>
         </Grid>
-      </Box>
-    </Layout>
+      </Grid>
+    </Box>
   );
 }

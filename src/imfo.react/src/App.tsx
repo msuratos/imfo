@@ -9,6 +9,7 @@ import Callback from './pages/Callback';
 import Categories from './pages/Categories';
 import Default from './pages/Default';
 import Forecast from './pages/Forecast';
+import Layout from './components/Layout';
 import Login from './pages/Login';
 import Transactions from './pages/Transactions';
 
@@ -33,20 +34,23 @@ const theme = createTheme({
 
 export default function App() {
   return (
-    <LogtoProvider config={config}>
-      <ThemeProvider theme={theme}>
-        <BrowserRouter>
+    <BrowserRouter>
+      <LogtoProvider config={config}>
+        <ThemeProvider theme={theme}>
           <Routes>
-            <Route path="/" element={<Default />} />
-            <Route path="/settings" element={<Budgets />} />
+            <Route element={<Layout />}>
+              <Route path="/" element={<Default />} />
+              <Route path="/settings" element={<Budgets />} />
+              <Route path="/categories" element={<Categories />} />
+              <Route path="/forecast" element={<Forecast />} />
+              <Route path="/transactions" element={<Transactions />} />
+            </Route>
+
             <Route path="/callback" element={<Callback />} />
-            <Route path="/categories" element={<Categories />} />
-            <Route path="/forecast" element={<Forecast />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/transactions" element={<Transactions />} />
           </Routes>
-        </BrowserRouter>
-      </ThemeProvider>
-    </LogtoProvider>
+        </ThemeProvider>
+      </LogtoProvider>
+    </BrowserRouter>
   )
 }

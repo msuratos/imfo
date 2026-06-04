@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
 import { useLogto } from '@logto/react';
 import { BarChart } from '@mui/x-charts';
 
 import { getCategories } from '../apis/categoryApi';
 import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
 import { getTransactions } from '../apis/transactionApi';
-import Layout from '../components/Layout';
 import { ScheduledTransaction, Transaction, Category } from '../types'
 
 import Box from '@mui/material/Box';
@@ -158,8 +156,7 @@ function generateForecast(transactions: Transaction[], scheduled: ScheduledTrans
 }
 
 export default function Forecast() {
-  const navigate = useNavigate();
-  const { isAuthenticated, getAccessToken } = useLogto();
+  const { getAccessToken } = useLogto();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [scheduled, setScheduled] = useState<ScheduledTransaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -168,27 +165,26 @@ export default function Forecast() {
   const [method, setMethod] = useState<'average' | 'linear'>('average');
 
   useEffect(() => {
-    if (isAuthenticated) load();
-    else navigate('/login');
-  }, [isAuthenticated]);
-
-  useEffect(() => {
     // rebuild data when options change
     setData(generateForecast(transactions, scheduled, categories, months, method));
   }, [transactions, scheduled, categories, months, method]);
 
-  async function load() {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    const [txs, sched, cats] = await Promise.all([
-      getTransactions(token),
-      getScheduledTransactions(token),
-      (async () => { try { return await getCategories(token); } catch { return []; } })()
-    ]);
-    setTransactions(txs);
-    setScheduled(sched);
-    setCategories(cats || []);
-    setData(generateForecast(txs, sched, cats || [], months, method));
-  }
+  useEffect(() => {
+    async function load() {
+      const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+      const [txs, sched, cats] = await Promise.all([
+        getTransactions(token),
+        getScheduledTransactions(token),
+        (async () => { try { return await getCategories(token); } catch { return []; } })()
+      ]);
+      setTransactions(txs);
+      setScheduled(sched);
+      setCategories(cats || []);
+      setData(generateForecast(txs, sched, cats || [], months, method));
+    }
+
+    load();
+  }, []);
 
   const topCategories = (data.length > 0 && categories.length > 0) ? (() => {
     // aggregate category totals from first month of forecast
@@ -201,76 +197,74 @@ export default function Forecast() {
   })() : [];
 
   return (
-    <Layout>
-      <Box component="main" sx={{ p: 1 }}>
-        <Paper elevation={1} sx={{ p: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2, flexWrap: 'wrap' }}>
-            <Box>
-              <Typography variant="h5">Balance Forecast</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>Projected balances</Typography>
-            </Box>
-            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-              <FormControl size="small" sx={{ minWidth: 140 }}>
-                <Select value={months} onChange={(e) => setMonths(parseInt(e.target.value as string))}>
-                  <MenuItem value={3}>3 months</MenuItem>
-                  <MenuItem value={6}>6 months</MenuItem>
-                  <MenuItem value={12}>12 months</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl size="small" sx={{ minWidth: 160 }}>
-                <Select value={method} onChange={(e) => setMethod(e.target.value as 'average' | 'linear')}>
-                  <MenuItem value="average">Recent average</MenuItem>
-                  <MenuItem value="linear">Linear regression</MenuItem>
-                </Select>
-              </FormControl>
-            </Stack>
-          </Box>
-
-          <Box sx={{ height: 360, mb: 2 }}>
-            {data.length === 0
-              ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
-                  No data available to forecast.
-                </Box>
-              )
-              : (
-                <BarChart
-                  dataset={data}
-                  xAxis={[{ scaleType: 'band', dataKey: 'date' }]}
-                  series={[
-                    { dataKey: 'income', label: 'Income', color: '#10b981' },
-                    { dataKey: 'expenses', label: 'Expenses', color: '#ef4444' },
-                    { dataKey: 'balance', label: 'Balance', type: 'line', color: '#8884d8' },
-                  ]}
-                  height={360}
-                  margin={{ top: 10, bottom: 30, left: 60, right: 10 }}
-                  slotProps={{
-                    legend: { hidden: false },
-                  }}
-                />
-              )
-            }
-          </Box>
-
+    <Box component="main" sx={{ p: 1 }}>
+      <Paper elevation={1} sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2, flexWrap: 'wrap' }}>
           <Box>
-            <Typography variant="h6" sx={{ mb: 1 }}>Top categories (first forecast month)</Typography>
-            {topCategories.length === 0
-              ? (
-                <Box sx={{ color: 'text.secondary' }}>No category data available.</Box>
-              )
-              : (
-                <Box component="ul" sx={{ pl: 2, m: 0 }}>
-                  {topCategories.map(c => (
-                    <Box component="li" key={c.name} sx={{ mb: 0.5 }}>
-                      <Typography variant="body2">{c.name}: ${c.amount.toFixed(2)}</Typography>
-                    </Box>
-                  ))}
-                </Box>
-              )
-            }
+            <Typography variant="h5">Balance Forecast</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Projected balances</Typography>
           </Box>
-        </Paper>
-      </Box>
-    </Layout>
+          <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <Select value={months} onChange={(e) => setMonths(parseInt(e.target.value as string))}>
+                <MenuItem value={3}>3 months</MenuItem>
+                <MenuItem value={6}>6 months</MenuItem>
+                <MenuItem value={12}>12 months</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <Select value={method} onChange={(e) => setMethod(e.target.value as 'average' | 'linear')}>
+                <MenuItem value="average">Recent average</MenuItem>
+                <MenuItem value="linear">Linear regression</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
+        </Box>
+
+        <Box sx={{ height: 360, mb: 2 }}>
+          {data.length === 0
+            ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
+                No data available to forecast.
+              </Box>
+            )
+            : (
+              <BarChart
+                dataset={data}
+                xAxis={[{ scaleType: 'band', dataKey: 'date' }]}
+                series={[
+                  { dataKey: 'income', label: 'Income', color: '#10b981' },
+                  { dataKey: 'expenses', label: 'Expenses', color: '#ef4444' },
+                  { dataKey: 'balance', label: 'Balance', type: 'line', color: '#8884d8' },
+                ]}
+                height={360}
+                margin={{ top: 10, bottom: 30, left: 60, right: 10 }}
+                slotProps={{
+                  legend: { hidden: false },
+                }}
+              />
+            )
+          }
+        </Box>
+
+        <Box>
+          <Typography variant="h6" sx={{ mb: 1 }}>Top categories (first forecast month)</Typography>
+          {topCategories.length === 0
+            ? (
+              <Box sx={{ color: 'text.secondary' }}>No category data available.</Box>
+            )
+            : (
+              <Box component="ul" sx={{ pl: 2, m: 0 }}>
+                {topCategories.map(c => (
+                  <Box component="li" key={c.name} sx={{ mb: 0.5 }}>
+                    <Typography variant="body2">{c.name}: ${c.amount.toFixed(2)}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            )
+          }
+        </Box>
+      </Paper>
+    </Box>
   )
 }

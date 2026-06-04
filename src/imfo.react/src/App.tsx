@@ -11,6 +11,7 @@ import Default from './pages/Default';
 import Forecast from './pages/Forecast';
 import Layout from './components/Layout';
 import Login from './pages/Login';
+import NotFound from './pages/NotFound';
 import Transactions from './pages/Transactions';
 
 import './styles.css';
@@ -48,6 +49,7 @@ export default function App() {
 
             <Route path="/callback" element={<Callback />} />
             <Route path="/login" element={<Login />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </ThemeProvider>
       </LogtoProvider>

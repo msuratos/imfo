@@ -21,8 +21,10 @@ import DataUsageIcon from '@mui/icons-material/DataUsage';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LogoutIcon from '@mui/icons-material/Logout';
+import PaymentsIcon from '@mui/icons-material/Payments';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import SettingsIcon from '@mui/icons-material/Settings';
+import TimelineIcon from '@mui/icons-material/Timeline';
 
 type Props = {};
 
@@ -144,8 +146,10 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
 
       <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation value={value} onChange={handleBottomNavigationClick} showLabels>
+          <BottomNavigationAction value={'/budgets'} label="Budgets" icon={<PaymentsIcon />} />
           <BottomNavigationAction value={'/transactions'} label="Transactions" icon={<ReceiptIcon />} />
           <BottomNavigationAction value={'/'} label="Usages" icon={<DataUsageIcon />} />
+          <BottomNavigationAction value={'/forecast'} label="Forecast" icon={<TimelineIcon />} />
           <BottomNavigationAction value={'/settings'} label="Settings" icon={<SettingsIcon />} />
         </BottomNavigation>
       </Paper>

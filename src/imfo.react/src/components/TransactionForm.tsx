@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
 import { Transaction, Category } from '../types';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
 
 export default function TransactionForm({ onCreate, categories }: { onCreate: (item: Omit<Transaction, 'id'>) => Promise<void>, categories: Category[] }) {
   const [description, setDescription] = useState('')
@@ -12,43 +20,49 @@ export default function TransactionForm({ onCreate, categories }: { onCreate: (i
     await onCreate({ description, amount: a, categoryId, date: new Date().toISOString() })
     setDescription('')
     setAmount('')
+    setCategoryId('')
   }
 
   return (
-    <form onSubmit={submit} className="form transaction-form">
-      <div className="form-group">
-        <label>Description</label>
-        <input
-          type="text"
-          placeholder="Enter transaction description"
+    <Box component="form" onSubmit={submit}>
+      <Stack spacing={2}>
+        <TextField
+          label="Description"
           value={description}
           onChange={e => setDescription(e.target.value)}
+          fullWidth
+          size="small"
         />
-      </div>
-      <div className="form-row">
-        <div className="form-group half">
-          <label>Amount</label>
-          <input
+
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <TextField
+            label="Amount"
             type="number"
             step="0.01"
-            placeholder="0.00"
             value={amount}
             onChange={e => setAmount(e.target.value)}
+            size="small"
+            sx={{ flex: 1 }}
           />
-        </div>
-        <div className="form-group half">
-          <label>Category</label>
-          <select value={categoryId} onChange={e => setCategoryId(e.target.value)}>
-            <option value="">Select category</option>
-            {categories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <div className="form-actions">
-        <button type="submit" className="btn primary full">Add transaction</button>
-      </div>
-    </form>
+
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel id="txn-category-label">Category</InputLabel>
+            <Select
+              labelId="txn-category-label"
+              value={categoryId}
+              label="Category"
+              onChange={e => setCategoryId(e.target.value)}
+            >
+              <MenuItem value="">None</MenuItem>
+              {categories.map(c => (
+                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Button type="submit" variant="contained" color="primary" fullWidth>Add transaction</Button>
+      </Stack>
+    </Box>
   )
 }

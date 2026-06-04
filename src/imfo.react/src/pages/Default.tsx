@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { PieChart as MuiPieChart } from '@mui/x-charts/PieChart';
+
 import { useLogto } from '@logto/react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Stack from '@mui/material/Stack';
+import Grid from '@mui/material/Grid';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import { getBudgets } from '../apis/budgetApi';
 import { getCategories } from '../apis/categoryApi';
@@ -134,180 +144,172 @@ export default function Default() {
 
   return (
     <Layout>
-      <main className="container">
-        <section className="full-width">
-          <div className="card budget-summary-card">
-            <div className="card-header">
-              <div className="summary-toolbar">
-                <div className="form-group" style={{ margin: 0 }}>
-                  <select
-                    id="frequency"
-                    value={selectedFrequency}
-                    onChange={(e) => setSelectedFrequency(e.target.value as 'weekly' | 'bi-weekly' | 'monthly' | 'yearly')}
-                  >
-                    <option value="weekly">Weekly</option>
-                    <option value="bi-weekly">Bi-weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+      <Box component="main" sx={{ p: 1 }}>
+        <Paper sx={{ p: 1, mb: 1 }} elevation={1}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <Select
+                id="frequency"
+                value={selectedFrequency}
+                onChange={(e: any) => setSelectedFrequency(e.target.value as 'weekly' | 'bi-weekly' | 'monthly' | 'yearly')}
+              >
+                <MenuItem value="weekly">Weekly</MenuItem>
+                <MenuItem value="bi-weekly">Bi-weekly</MenuItem>
+                <MenuItem value="monthly">Monthly</MenuItem>
+                <MenuItem value="yearly">Yearly</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
 
-            <div className="summary-charts">
-              {/* Income semicircle */}
-              <div className="semichart">
-                <h4>Income</h4>
-                {(() => {
-                  const incomeChartData = [
-                    { name: 'Actual', value: actualIncome },
-                    { name: 'Remaining', value: Math.max(totalIncome - actualIncome, 0) }
-                  ];
-                  return (
-                    <>
-                      <div className="chart-wrap">
-                        <ResponsiveContainer width="100%" height={110}>
-                          <PieChart>
-                            <Pie
-                              data={incomeChartData}
-                              dataKey="value"
-                              startAngle={180}
-                              endAngle={0}
-                              innerRadius={'30%'}
-                              outerRadius={'60%'}
-                              paddingAngle={2}
-                              labelLine={false}
-                            >
-                              {incomeChartData.map((entry, index) => (
-                                <Cell
-                                  key={`inc-${index}`}
-                                  fill={index === 0 ? '#10b981' : '#e6eef8'}
-                                  onClick={() => {
-                                    // index 0 is filled actual slice, index 1 is remaining (scheduled)
-                                    if (index === 0) setIncomeShowScheduled(false);
-                                    else setIncomeShowScheduled(true);
-                                  }}
-                                  style={{ cursor: 'pointer' }}
-                                />
-                              ))}
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
+          <Grid container spacing={2} sx={{ alignItems: 'center', justifyContent: 'center' }}>
+            <Grid size={4}>
+              <Typography variant='h6'>Income</Typography>
+              {(() => {
+                const incomeChartData = [
+                  { id: 0, value: actualIncome, label: 'Actual' },
+                  { id: 1, value: Math.max(totalIncome - actualIncome, 0), label: 'Remaining' }
+                ];
+                const colors = ['#10b981', '#e6eef8'];
+                return (
+                  <>
+                    <Box sx={{ position: 'relative', width: 120, height: 140 }}>
+                      <MuiPieChart
+                        series={[
+                          {
+                            data: incomeChartData,
+                            innerRadius: 15,
+                            outerRadius: 35,
+                            paddingAngle: 1,
+                            startAngle: -90,
+                            endAngle: 90,
+                            valueFormatter: (value) => `$${value}`,
+                            cx: 50,
+                            cy: 50,
+                          },
+                        ]}
+                        width={120}
+                        height={140}
+                        margin={{ top: 0, bottom: 30, left: 0, right: 0 }}
+                        colors={colors}
+                        slotProps={{
+                          legend: {
+                            position: 'bottom',
+                            direction: 'row',
+                          },
+                        }}
+                        onItemClick={(event) => {
+                          const index = event.dataIndex;
+                          if (index === 0) setIncomeShowScheduled(false);
+                          else setIncomeShowScheduled(true);
+                        }}
+                      />
+                      <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                      </Box>
+                    </Box>
+                    <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(incomeShowScheduled ? totalIncome : actualIncome).toFixed(2)}</Typography>
+                  </>
+                )
+              })()}
+            </Grid>
 
-                        <div className="chart-overlay">
-                          <div className="overlay-big">${(incomeShowScheduled ? totalIncome : actualIncome).toFixed(2)}</div>
-                        </div>
-                      </div>
-                    </>
-                  )
-                })()}
-              </div>
-
-              {/* Center net value */}
-              <div className="summary-center">
-                <div className={`net-value ${(actualIncome - totalSpent) >= 0 ? 'pos' : 'neg'}`}>
+            <Grid size={4}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Box sx={{ fontSize: 28, fontWeight: 700, color: (actualIncome - totalSpent) >= 0 ? 'success.main' : 'error.main' }}>
                   ${(actualIncome - totalSpent).toFixed(2)}
-                </div>
-                <div className="net-label">Net</div>
-              </div>
+                </Box>
+                <Typography variant='subtitle1'>Net</Typography>
+              </Box>
+            </Grid>
 
-              {/* Expenses semicircle */}
-              <div className="semichart">
-                <h4>Expenses</h4>
-                {(() => {
-                  const actualExpenses = totalSpent;
-                  const expenseChartData = [
-                    { name: 'Actual', value: actualExpenses },
-                    { name: 'Remaining', value: Math.max(scheduledExpenses - actualExpenses, 0) }
-                  ];
+            <Grid size={4}>
+              <Typography variant='h6'>Expenses</Typography>
+              {(() => {
+                const actualExpenses = totalSpent;
+                const expenseChartData = [
+                  { id: 0, value: actualExpenses, label: 'Actual' },
+                  { id: 1, value: Math.max(scheduledExpenses - actualExpenses, 0), label: 'Remaining' }
+                ];
+                const colors = ['#ef4444', '#fdecea'];
+                return (
+                  <>
+                    <Box sx={{ position: 'relative', width: 120, height: 140 }}>
+                      <MuiPieChart
+                        series={[
+                          {
+                            data: expenseChartData,
+                            innerRadius: 15,
+                            outerRadius: 35,
+                            paddingAngle: 1,
+                            startAngle: -90,
+                            endAngle: 90,
+                            valueFormatter: (value) => `$${value}`,
+                            cx: 50,
+                            cy: 50,
+                          },
+                        ]}
+                        width={120}
+                        height={140}
+                        margin={{ top: 0, bottom: 30, left: 0, right: 0 }}
+                        colors={colors}
+                        slotProps={{
+                          legend: {
+                            position: 'bottom',
+                            direction: 'horizontal',
+                          },
+                        }}
+                        onItemClick={(event) => {
+                          const index = event.dataIndex;
+                          if (index === 0) setExpenseShowScheduled(false);
+                          else setExpenseShowScheduled(true);
+                        }}
+                      />
+                    </Box>
+                    <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(expenseShowScheduled ? scheduledExpenses : actualExpenses).toFixed(2)}</Typography>
+                  </>
+                )
+              })()}
+            </Grid>
+          </Grid>
+        </Paper>
+
+        <Paper sx={{ p: 1, mb: 1 }} elevation={1}>
+          <Typography variant='h5' sx={{ mb: 1 }}>Budget Usage</Typography>
+          {budgetSummary.length === 0
+            ? (
+              <Typography color="text.secondary">No budgets set yet.</Typography>
+            )
+            : (
+              <Stack spacing={1}>
+                {budgetSummary.map(summary => {
+                  const usageRatio = summary.normalizedBudget !== 0 ? summary.spent / summary.normalizedBudget : 0;
+                  const percent = usageRatio * 100;
+                  const filledPercent = Math.max(0, Math.min(percent, 100));
+                  const color = percent > 100 ? 'error.main' : 'success.main';
+
                   return (
-                    <>
-                      <div className="chart-wrap">
-                        <ResponsiveContainer width="100%" height={110}>
-                          <PieChart>
-                            <Pie
-                              data={expenseChartData}
-                              dataKey="value"
-                              startAngle={180}
-                              endAngle={0}
-                              innerRadius={'30%'}
-                              outerRadius={'60%'}
-                              paddingAngle={2}
-                              labelLine={false}
-                            >
-                              {expenseChartData.map((entry, index) => (
-                                <Cell
-                                  key={`exp-${index}`}
-                                  fill={index === 0 ? '#ef4444' : '#fdecea'}
-                                  onClick={() => {
-                                    if (index === 0) setExpenseShowScheduled(false);
-                                    else setExpenseShowScheduled(true);
-                                  }}
-                                  style={{ cursor: 'pointer' }}
-                                />
-                              ))}
-                            </Pie>
-                          </PieChart>
-                        </ResponsiveContainer>
-
-                        <div className="chart-overlay">
-                          <div className="overlay-big">${(expenseShowScheduled ? scheduledExpenses : actualExpenses).toFixed(2)}</div>
-                        </div>
-                      </div>
-                    </>
+                    <Box key={summary.category} sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Box sx={{ flex: '0 0 35%', pr: 1 }}>{summary.category}</Box>
+                      <Box sx={{ flex: '1 1 65%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ flex: 1 }}>
+                            <LinearProgress variant="determinate" value={filledPercent} sx={{ height: 12, borderRadius: 1, bgcolor: '#f1f5f9', '& .MuiLinearProgress-bar': { backgroundColor: color } }} />
+                          </Box>
+                          <Box sx={{ minWidth: 120, fontSize: 12, fontWeight: 500 }}>{`${summary.spent.toFixed(2)} / ${summary.normalizedBudget.toFixed(2)} (${percent.toFixed(0)}%)`}</Box>
+                        </Box>
+                      </Box>
+                    </Box>
                   )
-                })()}
-              </div>
-            </div>
-          </div>
-        </section>
+                })}
+              </Stack>
+            )
+          }
+        </Paper>
 
-        <section className="full-width">
-          <div className="card budget-summary-card">
-            <div className="card-header">
-              <h3>Budget Usage</h3>
-            </div>
-            {budgetSummary.length === 0
-              ? (
-                <div className="empty-state">No budgets set yet.</div>
-              )
-              : (
-                <div className="budget-table">
-                  {budgetSummary.map(summary => {
-                    const usageRatio = summary.normalizedBudget !== 0 ? summary.spent / summary.normalizedBudget : 0;
-                    const percent = usageRatio * 100;
-                    const filledPercent = Math.max(0, Math.min(percent, 100));
-                    const color = percent > 100 ? '#ef4444' : '#10b981';
-
-                    return (
-                      <div key={summary.category} className="budget-table-row" style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
-                        <div className="budget-name" style={{ flex: '0 0 35%', paddingRight: 12 }}>{summary.category}</div>
-                        <div className="budget-usage" style={{ flex: '1 1 65%' }}>
-                          <div style={{ position: 'relative', background: '#f1f5f9', height: 20, borderRadius: 6, overflow: 'hidden' }}>
-                            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${filledPercent}%`, background: color }} />
-                            <div style={{ position: 'relative', padding: '0 8px', lineHeight: '20px', fontSize: 12, color: '#0f172a', fontWeight: 500 }}>
-                              {`${summary.spent.toFixed(2)} / ${summary.normalizedBudget.toFixed(2)} (${percent.toFixed(0)}%)`}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )
-            }
-          </div>
-        </section>
-        <section className="full-width">
-          <div className="card budget-summary-card">
-            <div className="card-header">
-              <h3>Goal Usage</h3>
-            </div>
-
-            <div className="empty-state">No goals set yet.</div>
-          </div>
-        </section>
-      </main>
+        <Paper sx={{ p: 1 }} elevation={1}>
+          <Typography variant='h5' sx={{ mb: 1 }}>Goal Usage</Typography>
+          <Typography color="text.secondary">No goals set yet.</Typography>
+        </Paper>
+      </Box>
     </Layout>
   );
 }

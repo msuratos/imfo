@@ -4,14 +4,17 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { LogtoProvider, LogtoConfig } from '@logto/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
+import Layout from './components/Layout';
+import SettingsLayout from './components/SettingsLayout';
+
 import Budgets from './pages/Budgets';
 import Callback from './pages/Callback';
 import Categories from './pages/Categories';
 import Default from './pages/Default';
 import Forecast from './pages/Forecast';
-import Layout from './components/Layout';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
+import Settings from './pages/Settings';
 import Transactions from './pages/Transactions';
 
 import './styles.css';
@@ -42,9 +45,12 @@ export default function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Default />} />
               <Route path="/budgets" element={<Budgets />} />
-              <Route path="/categories" element={<Categories />} />
               <Route path="/forecast" element={<Forecast />} />
               <Route path="/transactions" element={<Transactions />} />
+              <Route path="/settings" element={<SettingsLayout />}>
+                <Route index element={<Settings />} />
+                <Route path="categories" element={<Categories />} />
+              </Route>
             </Route>
 
             <Route path="/callback" element={<Callback />} />

@@ -28,8 +28,6 @@ Notes
 
 ## TODO
 
-- bug: when adding a transaction, the summaries are not updated nor is the expenses analysis section
-- chore: refactor the Web API to Clean Architecture
 - add a goal tracking system
 - integration with banks
 - AI chatbox to ask questions

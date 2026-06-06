@@ -7,6 +7,7 @@ import { Budget, Category } from '../types'
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
 import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
 import InputLabel from '@mui/material/InputLabel';
@@ -20,7 +21,8 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
+
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 export default function Budgets() {
   const { isAuthenticated, getAccessToken } = useLogto();
@@ -78,9 +80,7 @@ export default function Budgets() {
                 <Typography variant="h5">Budgets</Typography>
                 <Typography variant="body2" color="textSecondary">Track spending limits by category.</Typography>
               </Box>
-              <Typography variant="body2" color="textSecondary">
-                {items.length} budget{items.length === 1 ? '' : 's'}
-              </Typography>
+              <Chip label={`${items.length} budget${items.length === 1 ? '' : 's'}`} />
             </Box>
 
             {items.length === 0
@@ -95,11 +95,10 @@ export default function Budgets() {
                     <ListItem
                       key={i.id}
                       secondaryAction={
-                        <IconButton edge="end" aria-label="delete" onClick={() => onDelete(i.id)} size="small">
-                          <DeleteIcon />
+                        <IconButton color="warning" edge="end" aria-label="delete" onClick={() => onDelete(i.id)} size="small">
+                          <DeleteOutlineOutlinedIcon />
                         </IconButton>
                       }
-                      sx={{ display: 'flex', justifyContent: 'space-between', py: 1, px: 0 }}
                     >
                       <ListItemText
                         primary={i.category}

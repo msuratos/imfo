@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
@@ -19,6 +20,9 @@ import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 export default function Transactions() {
   const { getAccessToken } = useLogto();
@@ -151,15 +155,28 @@ export default function Transactions() {
                     <Stack spacing={1}>
                       {items.map(i => (
                         <Paper key={i.id} sx={{ p: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                            <Typography sx={{ fontWeight: 600 }}>{i.description}</Typography>
-                            <Typography variant="caption" color="text.secondary">{(categories.find(c => c.id === i.categoryId)?.name ?? i.categoryId)} • {new Date(i.date).toLocaleDateString()}</Typography>
-                          </Box>
-                          <Typography sx={{ fontWeight: 700, minWidth: 90, textAlign: 'right', color: i.amount >= 0 ? 'success.main' : 'error.main' }}>{i.amount.toFixed(2)}</Typography>
-                          <Box>
-                            <Button size="small" variant="contained" onClick={() => onEdit(i)} sx={{ mr: 1 }}>Edit</Button>
-                            <Button size="small" variant="outlined" color="error" onClick={() => onDeleteTransaction(i.id)}>Delete</Button>
-                          </Box>
+                          <Grid container spacing={1} sx={{ alignItems: 'center', width: '100%' }}>
+                            <Grid size={5}>
+                              <Typography sx={{ fontWeight: 600 }}>{i.description}</Typography>
+                              <Typography variant="caption" color="text.secondary">{(categories.find(c => c.id === i.categoryId)?.name ?? i.categoryId)} • {new Date(i.date).toLocaleDateString()}</Typography>
+                            </Grid>
+
+                            <Grid size={3}>
+                              <Typography sx={{ fontWeight: 700, minWidth: 90, color: i.amount >= 0 ? 'success.main' : 'error.main' }}>{i.amount.toFixed(2)}</Typography>
+                            </Grid>
+
+                            <Grid size={4}>
+                              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <IconButton color="info" onClick={() => onEdit(i)}>
+                                  <EditOutlinedIcon />
+                                </IconButton>
+
+                                <IconButton color="warning" onClick={() => onDeleteTransaction(i.id)}>
+                                  <DeleteOutlineOutlinedIcon />
+                                </IconButton>
+                              </Box>
+                            </Grid>
+                          </Grid>
                         </Paper>
                       ))}
                     </Stack>
@@ -235,7 +252,9 @@ export default function Transactions() {
                           </Box>
                           <Typography sx={{ fontWeight: 700, minWidth: 90, textAlign: 'right', color: i.amount >= 0 ? 'success.main' : 'error.main' }}>${i.amount.toFixed(2)}</Typography>
                           <Box>
-                            <Button size="small" variant="outlined" color="error" onClick={() => onDeleteScheduled(i.id)}>Delete</Button>
+                            <IconButton color="warning" onClick={() => onDeleteScheduled(i.id)}>
+                              <DeleteOutlineOutlinedIcon />
+                            </IconButton>
                           </Box>
                         </Paper>
                       ))}
@@ -244,7 +263,7 @@ export default function Transactions() {
                 }
               </Paper>
             </Grid>
-            
+
             {/* TODO: Change to use a floating action button MUI component which will open a form using a sliding up animation for adding a new scheduled transaction */}
             <Grid size={{ xs: 12, md: 4 }}>
               <Paper sx={{ p: 1 }}>

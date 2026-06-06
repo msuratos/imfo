@@ -116,6 +116,7 @@ export default function Budgets() {
           </Paper>
         </Grid>
 
+        {/* TODO: Change to use a floating action button MUI component which will open a form using a sliding up animation for adding a new budget */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{ p: 1 }}>
             <Typography variant="h5" sx={{ mb: 1 }}>Add Budget</Typography>

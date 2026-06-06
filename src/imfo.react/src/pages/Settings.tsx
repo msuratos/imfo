@@ -11,15 +11,15 @@ export default function SettingsHome() {
   const navigate = useNavigate()
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Paper sx={{ p: 2 }}>
+    <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <Paper sx={{ p: 1 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>Settings</Typography>
         <Typography color="text.secondary" variant="body2">
           Select a setting to manage the app and account.
         </Typography>
       </Paper>
 
-      <Paper sx={{ p: 2 }}>
+      <Paper sx={{ p: 1 }}>
         <Typography variant="subtitle1" sx={{ mb: 2 }}>Available settings</Typography>
 
         <Stack spacing={1}>

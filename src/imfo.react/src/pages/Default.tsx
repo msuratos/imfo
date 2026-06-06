@@ -142,7 +142,7 @@ export default function Default() {
     <Box component="main" sx={{ p: 1 }}>
       <Paper sx={{ p: 1, mb: 1 }} elevation={1}>
         <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+          <FormControl size="small" sx={{ minWidth: 160, m: 'auto' }}>
             <Select
               id="frequency"
               value={selectedFrequency}

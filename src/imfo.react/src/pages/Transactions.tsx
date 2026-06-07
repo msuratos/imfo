@@ -20,7 +20,10 @@ import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Drawer from '@mui/material/Drawer';
+import Fab from '@mui/material/Fab';
 
+import AddIcon from '@mui/icons-material/Add';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
@@ -38,13 +41,14 @@ export default function Transactions() {
   const [scheduledItems, setScheduledItems] = useState<ScheduledTransaction[]>([]);
   const [newScheduled, setNewScheduled] = useState<Omit<ScheduledTransaction, 'id'>>({
     source: '',
-    amount: null,
+    amount: 0,
     category: '',
     receivedDate: new Date().toISOString().split('T')[0],
     frequency: 'one-time'
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [addPanel, setAddPanel] = useState<'transaction' | 'scheduled' | null>(null);
 
   useEffect(() => {
     load();
@@ -70,6 +74,7 @@ export default function Transactions() {
   async function onCreate(item: Omit<Transaction, 'id'>) {
     const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
     await createTransaction(item, token);
+    setAddPanel(null);
     load();
   }
 
@@ -114,6 +119,7 @@ export default function Transactions() {
       receivedDate: new Date().toISOString().split('T')[0],
       frequency: 'one-time'
     });
+    setAddPanel(null);
     load();
   }
 
@@ -129,8 +135,8 @@ export default function Transactions() {
     <Box component="main" sx={{ p: 1, maxWidth: 1200, margin: 'auto' }}>
       <Paper sx={{ p: 1, mb: 1 }}>
         <Stack direction="row" spacing={1}>
-          <Button variant={activeTab === 'transactions' ? 'contained' : 'outlined'} onClick={() => setActiveTab('transactions')}>Transactions</Button>
-          <Button variant={activeTab === 'scheduled' ? 'contained' : 'outlined'} onClick={() => setActiveTab('scheduled')}>Scheduled</Button>
+          <Button variant={activeTab === 'transactions' ? 'contained' : 'outlined'} onClick={() => { setActiveTab('transactions'); setAddPanel(null); }}>Transactions</Button>
+          <Button variant={activeTab === 'scheduled' ? 'contained' : 'outlined'} onClick={() => { setActiveTab('scheduled'); setAddPanel(null); }}>Scheduled</Button>
         </Stack>
       </Paper>
 
@@ -185,38 +191,46 @@ export default function Transactions() {
               </Paper>
             </Grid>
 
-            {/* TODO: Change to use a floating action button MUI component which will open a form using a sliding up animation for adding a new transaction */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Paper sx={{ p: 1 }}>
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="h6">{editingId && editData ? 'Edit Transaction' : 'Add Transaction'}</Typography>
-                  <Typography color="text.secondary" variant="body2">{editingId && editData ? 'Modify transaction details.' : 'Record an income or expense.'}</Typography>
-                </Box>
+            {editingId && editData && (
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Paper sx={{ p: 1 }}>
+                  <Box sx={{ mb: 1 }}>
+                    <Typography variant="h6">Edit Transaction</Typography>
+                    <Typography color="text.secondary" variant="body2">Modify transaction details.</Typography>
+                  </Box>
 
-                {editingId && editData
-                  ? (
-                    <Box component="form" onSubmit={(e) => { e.preventDefault(); onSaveEdit(); }} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                      <TextField label="Description" size="small" value={editData.description} onChange={(e) => setEditData({ ...editData, description: e.target.value })} />
+                  <Box component="form" onSubmit={(e) => { e.preventDefault(); onSaveEdit(); }} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <TextField label="Description" size="small" value={editData.description} onChange={(e) => setEditData({ ...editData, description: e.target.value })} />
 
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <TextField label="Amount" size="small" type="number" value={String(editData.amount)} onChange={(e) => setEditData({ ...editData, amount: parseFloat(e.target.value) || 0 })} sx={{ flex: 1 }} />
-                        <TextField label="Category" size="small" value={String(editData.categoryId)} onChange={(e) => setEditData({ ...editData, categoryId: e.target.value })} sx={{ flex: 1 }} />
-                      </Box>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <TextField label="Amount" size="small" type="number" value={String(editData.amount)} onChange={(e) => setEditData({ ...editData, amount: parseFloat(e.target.value) || 0 })} sx={{ flex: 1 }} />
 
-                      <TextField label="Date" size="small" type="date" value={editData.date.split('T')[0]} onChange={(e) => setEditData({ ...editData, date: e.target.value })} InputLabelProps={{ shrink: true }} />
-
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button type="submit" variant="contained" fullWidth>Save</Button>
-                        <Button variant="outlined" fullWidth onClick={() => { setEditingId(null); setEditData(null); }}>Cancel</Button>
-                      </Box>
+                      <FormControl size="small" sx={{ minWidth: 160 }}>
+                        <InputLabel id="sched-cat-label">Category</InputLabel>
+                        <Select
+                          labelId="sched-cat-label"
+                          value={editData.categoryId}
+                          label="Category"
+                          onChange={(e) => setEditData({ ...editData, categoryId: e.target.value })}
+                          required
+                        >
+                          {categories.map(c => (
+                            <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Box>
-                  )
-                  : (
-                    <TransactionForm onCreate={onCreate} categories={categories} />
-                  )
-                }
-              </Paper>
-            </Grid>
+
+                    <TextField label="Date" size="small" type="date" value={editData.date.split('T')[0]} onChange={(e) => setEditData({ ...editData, date: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
+
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button type="submit" variant="contained" fullWidth>Save</Button>
+                      <Button variant="outlined" fullWidth onClick={() => { setEditingId(null); setEditData(null); }}>Cancel</Button>
+                    </Box>
+                  </Box>
+                </Paper>
+              </Grid>
+            )}
           </Grid>
         )
         : (
@@ -263,53 +277,108 @@ export default function Transactions() {
                 }
               </Paper>
             </Grid>
-
-            {/* TODO: Change to use a floating action button MUI component which will open a form using a sliding up animation for adding a new scheduled transaction */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Paper sx={{ p: 1 }}>
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="h6">Add Scheduled Transaction</Typography>
-                  <Typography color="text.secondary" variant="body2">Record a scheduled income or expense.</Typography>
-                </Box>
-
-                <Box component="form" onSubmit={(e) => { e.preventDefault(); onCreateScheduled(); }} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <TextField label="Description" value={newScheduled.source} onChange={(e) => setNewScheduled({ ...newScheduled, source: e.target.value })} placeholder="e.g., Salary, Rent, Utilities" size="small" required />
-
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <TextField label="Amount" type="number" step="0.01" sx={{ flex: 1 }} value={newScheduled.amount} onChange={(e) => setNewScheduled({ ...newScheduled, amount: e.target.value })} size="small" required />
-
-                    <FormControl size="small" sx={{ minWidth: 160 }}>
-                      <InputLabel id="sched-cat-label">Category</InputLabel>
-                      <Select labelId="sched-cat-label" value={newScheduled.category} label="Category" onChange={(e) => setNewScheduled({ ...newScheduled, category: e.target.value })} required>
-                        <MenuItem value="">Select category</MenuItem>
-                        {categories.map(c => (
-                          <MenuItem key={c.id} value={c.name}>{c.name}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Box>
-
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <FormControl size="small" sx={{ flex: 1 }}>
-                      <InputLabel id="freq-label">Frequency</InputLabel>
-                      <Select labelId="freq-label" value={newScheduled.frequency} label="Frequency" onChange={(e) => setNewScheduled({ ...newScheduled, frequency: e.target.value })} required>
-                        <MenuItem value="one-time">One-time</MenuItem>
-                        <MenuItem value="weekly">Weekly</MenuItem>
-                        <MenuItem value="bi-weekly">Bi-weekly</MenuItem>
-                        <MenuItem value="monthly">Monthly</MenuItem>
-                        <MenuItem value="yearly">Yearly</MenuItem>
-                      </Select>
-                    </FormControl>
-
-                    <TextField label="Start Date" type="date" size="small" value={newScheduled.receivedDate} onChange={(e) => setNewScheduled({ ...newScheduled, receivedDate: e.target.value })} InputLabelProps={{ shrink: true }} sx={{ flex: 1 }} required />
-                  </Box>
-
-                  <Button type="submit" variant="contained" fullWidth>Add Scheduled Transaction</Button>
-                </Box>
-              </Paper>
-            </Grid>
           </Grid>
         )}
+
+      <Drawer anchor="bottom" open={addPanel === 'transaction'} onClose={() => setAddPanel(null)}>
+        <Box sx={{ p: 3, minHeight: 360, borderRadius: '16px 16px 0 0', bgcolor: 'background.paper' }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>Add Transaction</Typography>
+          <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+            Record an income or expense.
+          </Typography>
+
+          <TransactionForm onCreate={onCreate} categories={categories} />
+        </Box>
+      </Drawer>
+
+      <Drawer anchor="bottom" open={addPanel === 'scheduled'} onClose={() => setAddPanel(null)}>
+        <Box sx={{ p: 3, minHeight: 440, borderRadius: '16px 16px 0 0', bgcolor: 'background.paper' }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>Add Scheduled Transaction</Typography>
+          <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+            Record a recurring income or expense.
+          </Typography>
+
+          <Box component="form" onSubmit={(e) => { e.preventDefault(); onCreateScheduled(); }} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label="Description"
+              value={newScheduled.source}
+              onChange={(e) => setNewScheduled({ ...newScheduled, source: e.target.value })}
+              placeholder="e.g., Salary, Rent, Utilities"
+              size="small"
+              required
+            />
+
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                label="Amount"
+                type="number"
+                sx={{ flex: 1 }}
+                value={newScheduled.amount}
+                onChange={(e) => setNewScheduled({ ...newScheduled, amount: parseFloat(e.target.value) || 0 })}
+                size="small"
+                required
+              />
+
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <InputLabel id="sched-cat-label">Category</InputLabel>
+                <Select
+                  labelId="sched-cat-label"
+                  value={newScheduled.category}
+                  label="Category"
+                  onChange={(e) => setNewScheduled({ ...newScheduled, category: e.target.value })}
+                  required
+                >
+                  {categories.map(c => (
+                    <MenuItem key={c.id} value={c.name}>{c.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <FormControl size="small" sx={{ flex: 1 }}>
+                <InputLabel id="freq-label">Frequency</InputLabel>
+                <Select
+                  labelId="freq-label"
+                  value={newScheduled.frequency}
+                  label="Frequency"
+                  onChange={(e) => setNewScheduled({ ...newScheduled, frequency: e.target.value })}
+                  required
+                >
+                  <MenuItem value="one-time">One-time</MenuItem>
+                  <MenuItem value="weekly">Weekly</MenuItem>
+                  <MenuItem value="bi-weekly">Bi-weekly</MenuItem>
+                  <MenuItem value="monthly">Monthly</MenuItem>
+                  <MenuItem value="yearly">Yearly</MenuItem>
+                </Select>
+              </FormControl>
+
+              <TextField
+                label="Start Date"
+                type="date"
+                size="small"
+                value={newScheduled.receivedDate}
+                onChange={(e) => setNewScheduled({ ...newScheduled, receivedDate: e.target.value })}
+                slotProps={{ inputLabel: { shrink: true } }}
+                sx={{ flex: 1 }}
+                required
+              />
+            </Box>
+
+            <Button type="submit" variant="contained" fullWidth>
+              Add Scheduled Transaction
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
+
+      {addPanel == null && (
+        <Box sx={{ position: 'fixed', right: 24, bottom: 72, zIndex: 1400 }}>
+          <Fab color="primary" aria-label="Add item" onClick={() => setAddPanel(activeTab === 'scheduled' ? 'scheduled' : 'transaction')}>
+            <AddIcon />
+          </Fab>
+        </Box>
+      )}
     </Box>
   );
 }

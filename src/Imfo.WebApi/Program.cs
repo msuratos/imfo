@@ -3,6 +3,7 @@ using Imfo.ApplicationCore.Services.Budgets;
 using Imfo.ApplicationCore.Services.Categories;
 using Imfo.ApplicationCore.Services.ScheduledTransactions;
 using Imfo.ApplicationCore.Services.Transactions;
+using Imfo.ApplicationCore.Services.Goals;
 using Imfo.Infrastructure.Persistance;
 using Imfo.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +16,13 @@ builder.Services.AddDbContext<ImfoDbContext>(options => options.UseInMemoryDatab
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IGoalRepository, GoalRepository>();
 builder.Services.AddScoped<IScheduledTransactionRepository, ScheduledTransactionRepository>();
 
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IScheduledTransactionService, ScheduledTransactionService>();
 builder.Services.AddControllers();
 

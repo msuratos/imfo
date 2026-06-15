@@ -44,7 +44,7 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Default />} />
-              <Route path="/budgets" element={<Budgets />} />
+              <Route path="/allocations" element={<Budgets />} />
               <Route path="/forecast" element={<Forecast />} />
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/settings" element={<SettingsLayout />}>

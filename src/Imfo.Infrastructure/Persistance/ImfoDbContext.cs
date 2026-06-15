@@ -12,6 +12,7 @@ public class ImfoDbContext : DbContext
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<ScheduledTransaction> ScheduledTransactions { get; set; } = null!;
     public DbSet<Budget> Budgets { get; set; } = null!;
+    public DbSet<Goal> Goals { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
     public DbSet<Category> Categories { get; set; } = null!;
 
@@ -35,6 +36,11 @@ public class ImfoDbContext : DbContext
         modelBuilder.Entity<Budget>(eb =>
         {
             eb.HasKey(b => b.Id);
+        });
+
+        modelBuilder.Entity<Goal>(eb =>
+        {
+            eb.HasKey(g => g.Id);
         });
 
         modelBuilder.Entity<Category>(eb =>

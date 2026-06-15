@@ -28,7 +28,6 @@ Notes
 
 ## TODO
 
-- add a goal tracking system
 - integration with banks
 - AI chatbox to ask questions
    - **should use a local LLM, no external service*

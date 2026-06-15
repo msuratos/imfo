@@ -152,10 +152,10 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
 
       <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation value={value} onChange={handleBottomNavigationClick} showLabels>
-          <BottomNavigationAction value={'/budgets'} label="Budgets" icon={<PaymentsIcon />} />
+          <BottomNavigationAction value={'/forecast'} label="Forecast" icon={<TimelineIcon />} />
           <BottomNavigationAction value={'/transactions'} label="Transactions" icon={<ReceiptIcon />} />
           <BottomNavigationAction value={'/'} label="Usages" icon={<DataUsageIcon />} />
-          <BottomNavigationAction value={'/forecast'} label="Forecast" icon={<TimelineIcon />} />
+          <BottomNavigationAction value={'/allocations'} label="Allocations" icon={<PaymentsIcon />} />
           <BottomNavigationAction value={'/settings'} label="Settings" icon={<SettingsIcon />} />
         </BottomNavigation>
       </Paper>

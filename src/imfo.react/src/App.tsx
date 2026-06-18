@@ -7,7 +7,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Layout from './components/Layout';
 import SettingsLayout from './components/SettingsLayout';
 
-import Budgets from './pages/Budgets';
+import Allocations from './pages/Allocations';
 import Callback from './pages/Callback';
 import Categories from './pages/Categories';
 import Default from './pages/Default';
@@ -44,7 +44,7 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Default />} />
-              <Route path="/allocations" element={<Budgets />} />
+              <Route path="/allocations" element={<Allocations />} />
               <Route path="/forecast" element={<Forecast />} />
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/settings" element={<SettingsLayout />}>

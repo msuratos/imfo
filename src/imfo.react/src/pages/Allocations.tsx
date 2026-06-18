@@ -28,7 +28,7 @@ import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
-export default function Budgets() {
+export default function Allocations() {
   const { isAuthenticated, getAccessToken } = useLogto();
 
   const [activeTab, setActiveTab] = useState<'budgets' | 'goals'>('budgets');

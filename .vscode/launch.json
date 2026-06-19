@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "NPM: imfo.react Debug",
+            "request": "launch",
+            "runtimeArgs": [
+                "run",
+                "dev"
+            ],
+            "cwd": "${workspaceFolder}/src/imfo.react",
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
+            "name": "C#: Imfo.WebApi Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/src/Imfo.WebApi/Imfo.WebApi.csproj"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Launch Both",
+            "configurations": ["C#: Imfo.WebApi Debug", "NPM: imfo.react Debug"]
+        }
+    ]
+}

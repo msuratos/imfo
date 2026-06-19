@@ -13,17 +13,19 @@ import Grid from '@mui/material/Grid';
 import LinearProgress from '@mui/material/LinearProgress';
 
 import { getBudgets } from '../apis/budgetApi';
+import { getGoals } from '../apis/goalsApi';
 import { getCategories } from '../apis/categoryApi';
 import { getTransactions } from '../apis/transactionApi';
 import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
 
-import { Transaction, Budget, ScheduledTransaction } from '../types'
+import { Transaction, Budget, ScheduledTransaction, Goal } from '../types'
 
 export default function Default() {
   const { getAccessToken } = useLogto();
 
   const [items, setItems] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [scheduledTransactions, setScheduledTransactions] = useState<ScheduledTransaction[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedFrequency, setSelectedFrequency] = useState<'weekly' | 'bi-weekly' | 'monthly' | 'yearly'>('monthly');
@@ -33,15 +35,17 @@ export default function Default() {
   useEffect(() => {
     async function load() {
       const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-      const [transactions, budgets, scheduledTransactions, categories] = await Promise.all([
+      const [transactions, budgets, goals, scheduledTransactions, categories] = await Promise.all([
         getTransactions(token),
         getBudgets(token),
+        getGoals(token),
         getScheduledTransactions(token),
         getCategories(token)
       ]);
 
       setItems(transactions);
       setBudgets(budgets);
+      setGoals(goals);
       setScheduledTransactions(scheduledTransactions);
       setCategories(categories || []);
     }
@@ -142,7 +146,7 @@ export default function Default() {
     <Box component="main" sx={{ p: 1 }}>
       <Paper sx={{ p: 1, mb: 1 }} elevation={1}>
         <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+          <FormControl size="small" sx={{ minWidth: 160, m: 'auto' }}>
             <Select
               id="frequency"
               value={selectedFrequency}
@@ -302,7 +306,44 @@ export default function Default() {
 
       <Paper sx={{ p: 1 }} elevation={1}>
         <Typography variant='h5' sx={{ mb: 1 }}>Goal Usage</Typography>
-        <Typography color="text.secondary">No goals set yet.</Typography>
+        {goals.length === 0
+          ? (
+            <Typography color="text.secondary">No goals set yet.</Typography>
+          )
+          : (
+            <Stack spacing={1}>
+              {goals.map(goal => {
+                const normalizedBudget = normalizeAmount(goal.amount, goal.frequency, selectedFrequency);
+                const spentByCategory: { [key: string]: number } = {};
+
+                filteredExpenses.forEach(item => {
+                  const categoryName = categories.find(c => c.id === item.categoryId)?.name || item.categoryId;
+                  spentByCategory[categoryName] = (spentByCategory[categoryName] || 0) + Math.abs(item.amount);
+                });
+
+                const spent = spentByCategory[goal.category] || 0;
+                const usageRatio = normalizedBudget !== 0 ? spent / normalizedBudget : 0;
+                const percent = usageRatio * 100;
+                const filledPercent = Math.max(0, Math.min(percent, 100));
+                const color = percent > 100 ? 'error.main' : 'success.main';
+
+                return (
+                  <Box key={goal.id} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ flex: '0 0 35%', pr: 1 }}>{goal.category}</Box>
+                    <Box sx={{ flex: '1 1 65%' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ flex: 1 }}>
+                          <LinearProgress variant="determinate" value={filledPercent} sx={{ height: 12, borderRadius: 1, bgcolor: '#f1f5f9', '& .MuiLinearProgress-bar': { backgroundColor: color } }} />
+                        </Box>
+                        <Box sx={{ minWidth: 120, fontSize: 12, fontWeight: 500 }}>{`${spent.toFixed(2)} / ${normalizedBudget.toFixed(2)} (${percent.toFixed(0)}%)`}</Box>
+                      </Box>
+                    </Box>
+                  </Box>
+                )
+              })}
+            </Stack>
+          )
+        }
       </Paper>
     </Box>
   );

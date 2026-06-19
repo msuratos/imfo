@@ -9,11 +9,13 @@ import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 import { useColorScheme } from '@mui/material/styles';
 
 import AccountCircle from '@mui/icons-material/AccountCircle';
@@ -40,7 +42,7 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
   const open = Boolean(anchorEl);
 
   useEffect(() => {
-    if (!isAuthenticated && !isLoading) 
+    if (!isAuthenticated && !isLoading)
       navigate('/login');
   }, [isAuthenticated, isLoading]);
 
@@ -66,10 +68,14 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
     <Box sx={{ position: 'relative', minHeight: '100vh', pb: 7 }}>
       <CssBaseline />
 
-      <Box component="header" sx={{ position: 'fixed', top: 0, left: 0, right: 0, display: 'flex', alignItems: 'center', px: 2, py: 1, pointerEvents: 'none', zIndex: 1200 }}>
-        <Box sx={{ flex: 1 }} />
+      <Grid container spacing={1} sx={{ pt: 1, px: 1 }}>
+        <Grid size={6}>
+          <Typography variant="h6" noWrap>
+            Imfo
+          </Typography>
+        </Grid>
 
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', pointerEvents: 'auto' }}>
+        <Grid size={6} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <IconButton size="small" onClick={() => setMode(mode === 'dark' ? 'light' : 'dark')}>
             {mode === 'dark'
               ? (
@@ -84,8 +90,8 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
           <IconButton size="small" onClick={handleAccountButtonClick}>
             <AccountCircle sx={{ width: 24, height: 24 }} />
           </IconButton>
-        </Box>
-      </Box>
+        </Grid>
+      </Grid>
 
       <Menu
         anchorEl={anchorEl}
@@ -146,10 +152,10 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
 
       <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation value={value} onChange={handleBottomNavigationClick} showLabels>
-          <BottomNavigationAction value={'/budgets'} label="Budgets" icon={<PaymentsIcon />} />
+          <BottomNavigationAction value={'/forecast'} label="Forecast" icon={<TimelineIcon />} />
           <BottomNavigationAction value={'/transactions'} label="Transactions" icon={<ReceiptIcon />} />
           <BottomNavigationAction value={'/'} label="Usages" icon={<DataUsageIcon />} />
-          <BottomNavigationAction value={'/forecast'} label="Forecast" icon={<TimelineIcon />} />
+          <BottomNavigationAction value={'/allocations'} label="Allocations" icon={<PaymentsIcon />} />
           <BottomNavigationAction value={'/settings'} label="Settings" icon={<SettingsIcon />} />
         </BottomNavigation>
       </Paper>

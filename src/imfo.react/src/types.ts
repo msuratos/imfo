@@ -14,6 +14,13 @@ export interface Budget {
   frequency: string
 }
 
+export interface Goal {
+  id: string
+  category: string
+  amount: number
+  frequency: string
+}
+
 export interface Transaction {
   id: string
   description: string

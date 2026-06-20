@@ -19,40 +19,7 @@ public class ImfoDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        modelBuilder.Entity<User>(eb =>
-        {
-            eb.HasKey(u => u.Id);
-            eb.HasMany(u => u.ScheduledTransactions).WithOne(i => i.User).HasForeignKey(i => i.UserId).OnDelete(DeleteBehavior.Cascade);
-            eb.HasMany(u => u.Budgets).WithOne(b => b.User).HasForeignKey(b => b.UserId).OnDelete(DeleteBehavior.Cascade);
-            eb.HasMany(u => u.Transactions).WithOne(t => t.User).HasForeignKey(t => t.UserId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<ScheduledTransaction>(eb =>
-        {
-            eb.HasKey(i => i.Id);
-        });
-
-        modelBuilder.Entity<Budget>(eb =>
-        {
-            eb.HasKey(b => b.Id);
-        });
-
-        modelBuilder.Entity<Goal>(eb =>
-        {
-            eb.HasKey(g => g.Id);
-        });
-
-        modelBuilder.Entity<Category>(eb =>
-        {
-            eb.HasKey(c => c.Id);
-            eb.HasOne(c => c.User).WithMany(u => u.Categories).HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<Transaction>(eb =>
-        {
-            eb.HasKey(t => t.Id);
-        });
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ImfoDbContext).Assembly);
 
         // Seed common categories (global - UserId == Guid.Empty)
         var globalUserId = Guid.Empty;

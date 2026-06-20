@@ -12,7 +12,6 @@ public class Category
     public string Name { get; set; } = string.Empty;
     public CategoryType Type { get; set; }
 
-    // EF Core: owner user
-    public Guid UserId { get; set; }
+    public Guid? UserId { get; set; }
     public User? User { get; set; }
 }

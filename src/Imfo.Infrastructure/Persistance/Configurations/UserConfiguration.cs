@@ -11,6 +11,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
 
         builder.Property(prop => prop.Id).ValueGeneratedOnAdd();
+        builder.Property(prop => prop.ExternalId).IsRequired().HasMaxLength(100);
+        builder.Property(prop => prop.Name).IsRequired().HasMaxLength(100);
+        builder.Property(prop => prop.UserName).IsRequired().HasMaxLength(100);
 
         builder.HasMany(u => u.Budgets).WithOne(b => b.User).HasForeignKey(b => b.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(u => u.Goals).WithOne(g => g.User).HasForeignKey(g => g.UserId).OnDelete(DeleteBehavior.Cascade);

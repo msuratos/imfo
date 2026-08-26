@@ -9,21 +9,26 @@ using Imfo.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Imfo.ApplicationCore.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ImfoDbContext>(options => options.UseInMemoryDatabase("ImfoDb"));
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
 builder.Services.AddScoped<IGoalRepository, GoalRepository>();
 builder.Services.AddScoped<IScheduledTransactionRepository, ScheduledTransactionRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IScheduledTransactionService, ScheduledTransactionService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -38,6 +43,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
+            NameClaimType = "name",
             ValidateIssuer = false,
             ValidateAudience = false,
             ValidateIssuerSigningKey = true

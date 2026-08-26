@@ -1,17 +1,14 @@
-export interface ScheduledTransaction {
-  id: string
-  source: string
-  amount: number
-  category?: string
-  receivedDate: string
-  frequency: string
-}
-
 export interface Budget {
   id: string
   category: string
   amount: number
   frequency: string
+}
+
+export interface Category {
+  id: string
+  name: string
+  type: 'Income' | 'Expense'
 }
 
 export interface Goal {
@@ -29,8 +26,17 @@ export interface Transaction {
   date: string
 }
 
-export interface Category {
+export interface ScheduledTransaction {
+  id: string
+  source: string
+  amount: number
+  category?: string
+  receivedDate: string
+  frequency: string
+}
+
+export interface User {
   id: string
   name: string
-  type: 'Income' | 'Expense'
+  userName: string
 }

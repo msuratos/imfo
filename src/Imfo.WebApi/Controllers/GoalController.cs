@@ -1,9 +1,9 @@
 using Imfo.ApplicationCore.Common.Entities;
 using Imfo.ApplicationCore.Services.Goals;
+using Imfo.WebApi.Extensions;
 using Imfo.WebApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Imfo.WebApi.Controllers;
 
@@ -22,14 +22,14 @@ public class GoalController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Goal>>> Get()
     {
-        var userId = GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         return Ok(await _goalService.GetAllAsync(userId));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Goal>> Get(Guid id)
     {
-        var userId = GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         var item = await _goalService.GetByIdAsync(id, userId);
 
         if (item == null) return NotFound();
@@ -39,7 +39,7 @@ public class GoalController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<GoalReadDto>> Post([FromBody] GoalCreateDto item)
     {
-        var userId = GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         var entity = new Goal
         {
             Id = Guid.NewGuid(),
@@ -66,17 +66,11 @@ public class GoalController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(Guid id)
     {
-        var userId = GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         var deleted = await _goalService.DeleteAsync(id, userId);
 
         if (!deleted) return NotFound();
 
         return NoContent();
-    }
-
-    private Guid GetCurrentUserId()
-    {
-        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Guid.TryParse(idClaim, out var id) ? id : Guid.Empty;
     }
 }

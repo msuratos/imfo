@@ -1,9 +1,9 @@
 using Imfo.ApplicationCore.Common.Entities;
 using Imfo.ApplicationCore.Services.ScheduledTransactions;
+using Imfo.WebApi.Extensions;
 using Imfo.WebApi.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Imfo.WebApi.Controllers;
 
@@ -22,14 +22,14 @@ public class ScheduledTransactionsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ScheduledTransaction>>> Get()
     {
-        var userId = GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         return Ok(await _scheduledTransactionService.GetAllAsync(userId));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<ScheduledTransaction>> Get(Guid id)
     {
-        var userId = GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         var it = await _scheduledTransactionService.GetByIdAsync(id, userId);
 
         if (it == null) return NotFound();
@@ -39,7 +39,7 @@ public class ScheduledTransactionsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ScheduledTransactionReadDto>> Post([FromBody] ScheduledTransactionCreateDto income)
     {
-        var userId = GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         var st = new ScheduledTransaction
         {
             Id = Guid.NewGuid(),
@@ -70,7 +70,7 @@ public class ScheduledTransactionsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<ScheduledTransaction>> Put(Guid id, [FromBody] ScheduledTransaction updated)
     {
-        var userId = GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         var existing = await _scheduledTransactionService.UpdateAsync(id, updated, userId);
 
         if (existing == null) return NotFound();
@@ -81,17 +81,11 @@ public class ScheduledTransactionsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete (Guid id) 
     {
-        var userId = GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         var deleted = await _scheduledTransactionService.DeleteAsync(id, userId);
 
         if (!deleted) return NotFound();
 
         return NoContent();
-    }
-
-    private Guid GetCurrentUserId()
-    {
-        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Guid.TryParse(idClaim, out var id) ? id : Guid.Empty;
     }
 }

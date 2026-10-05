@@ -1,7 +1,5 @@
-import axios from 'axios'
+import api from './apiClient'
 import { User } from '../types'
-
-const api = axios.create();
 
 export async function createUser(token: string) {
   const r = await api.post('/api/user', null, {

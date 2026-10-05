@@ -1,7 +1,5 @@
-import axios from 'axios'
+import api from './apiClient'
 import { Goal } from '../types'
-
-const api = axios.create();
 
 export async function getGoals(token: string) : Promise<Goal[]> {
   const r = await api.get('/api/goal', {

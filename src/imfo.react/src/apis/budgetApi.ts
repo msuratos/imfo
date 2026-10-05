@@ -1,7 +1,5 @@
-import axios from 'axios'
+import api from './apiClient'
 import { Budget } from '../types'
-
-const api = axios.create();
 
 export async function createBudget(item: Omit<Budget, 'id'>, token: string) {
   const r = await api.post('/api/budget', item, {

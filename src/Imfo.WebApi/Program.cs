@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Imfo.ApplicationCore.Services.Users;
+using Imfo.WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +67,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseAuthentication();
+app.UseMiddleware<CurrentUserMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

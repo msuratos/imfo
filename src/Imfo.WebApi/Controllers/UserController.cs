@@ -33,28 +33,14 @@ public class UserController : ControllerBase
     public async Task<IActionResult> CreateUser()
     {
         var externalId = User.FindFirst("userId")?.Value;
-        if (externalId == null)
-        {
-            return BadRequest("Invalid external user ID");
-        }
-
-        // check if the user already exists
-        var existingUser = await _userService.GetUserByExternalIdAsync(externalId);
-        if (existingUser != null)
-        {
-            return Conflict("User already exists");
-        }
-
-        var name = User.Identity?.Name;
-        if (name == null)
-        {
-            return BadRequest("Invalid user name");
-        }
-
         var userName = User.FindFirst("preferred_username")?.Value;
-        if (userName == null)
+        var name = User.Identity?.Name;
+
+        if (string.IsNullOrWhiteSpace(externalId) ||
+            string.IsNullOrWhiteSpace(userName) ||
+            string.IsNullOrWhiteSpace(name))
         {
-            return BadRequest("Invalid user name");
+            return BadRequest("Invalid user information");
         }
 
         var user = await _userService.CreateUserAsync(new User

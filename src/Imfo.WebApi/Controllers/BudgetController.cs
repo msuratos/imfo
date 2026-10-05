@@ -1,7 +1,7 @@
 using Imfo.ApplicationCore.Common.Entities;
 using Imfo.ApplicationCore.Services.Budgets;
 using Imfo.WebApi.Extensions;
-using Imfo.WebApi.Models.Dtos;
+using Imfo.WebApi.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

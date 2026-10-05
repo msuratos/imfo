@@ -1,7 +1,5 @@
-import axios from 'axios'
+import api from './apiClient'
 import { ScheduledTransaction } from '../types'
-
-const api = axios.create();
 
 export async function createScheduledTransaction(item: Omit<ScheduledTransaction, 'id'>, token: string) {
   const r = await api.post('/api/scheduled-transactions', item, {

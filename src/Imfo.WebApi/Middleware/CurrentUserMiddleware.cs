@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Imfo.ApplicationCore.Services.Users;
 using Imfo.WebApi.Extensions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Imfo.WebApi.Middleware;
 
@@ -21,7 +22,25 @@ public class CurrentUserMiddleware
             if (!string.IsNullOrEmpty(externalId))
             {
                 var user = await userService.GetUserByExternalIdAsync(externalId);
-                if (user != null)
+                if (user == null)
+                {
+                    var isUserCreationRequest =
+                        HttpMethods.IsPost(context.Request.Method) &&
+                        context.Request.Path.Equals("/api/user", StringComparison.OrdinalIgnoreCase);
+
+                    if (!isUserCreationRequest)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await context.Response.WriteAsJsonAsync(new ProblemDetails
+                        {
+                            Status = StatusCodes.Status401Unauthorized,
+                            Title = "Application user not found",
+                            Detail = "Please sign in again to restore your account session."
+                        });
+                        return;
+                    }
+                }
+                else
                 {
                     var appIdentity = new ClaimsIdentity();
                     appIdentity.AddClaim(new Claim(ImfoClaimTypes.AppUserId, user.Id.ToString()));

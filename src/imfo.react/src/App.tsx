@@ -15,6 +15,7 @@ import Forecast from './pages/Forecast';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Settings from './pages/Settings';
+import SessionExpired from './pages/SessionExpired';
 import Transactions from './pages/Transactions';
 
 import './styles.css';
@@ -55,6 +56,7 @@ export default function App() {
 
             <Route path="/callback" element={<Callback />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/session-expired" element={<SessionExpired />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </ThemeProvider>

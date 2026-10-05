@@ -1,7 +1,5 @@
-import axios from 'axios'
+import api from './apiClient'
 import { Category } from '../types'
-
-const api = axios.create();
 
 // Category API calls
 export async function createCategory(item: Omit<Category, 'id'>, token: string) {

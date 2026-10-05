@@ -1,7 +1,5 @@
-import axios from 'axios'
+import api from './apiClient'
 import { Transaction } from '../types'
-
-const api = axios.create();
 
 export async function createTransaction(item: Omit<Transaction, 'id'>, token: string) {
   const r = await api.post('/api/transaction', item, {

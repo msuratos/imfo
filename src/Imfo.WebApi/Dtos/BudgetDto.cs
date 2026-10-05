@@ -1,13 +1,13 @@
-namespace Imfo.WebApi.Models.Dtos;
+namespace Imfo.WebApi.Dtos;
 
-public class GoalCreateDto
+public class BudgetCreateDto
 {
     public string Category { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public string Frequency { get; set; } = string.Empty;
 }
 
-public class GoalReadDto
+public class BudgetReadDto
 {
     public Guid Id { get; set; }
     public string Category { get; set; } = string.Empty;

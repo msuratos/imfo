@@ -1,4 +1,4 @@
-namespace Imfo.WebApi.Models.Dtos;
+namespace Imfo.WebApi.Dtos;
 
 public class CategoryCreateDto
 {

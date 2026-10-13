@@ -1,25 +1,27 @@
 using Imfo.ApplicationCore.Common.Entities;
-using Imfo.ApplicationCore.Common.Interfaces.Repositories;
+using Imfo.ApplicationCore.Common.Interfaces;
 
 namespace Imfo.ApplicationCore.Services.ScheduledTransactions;
 
 public class ScheduledTransactionService : IScheduledTransactionService
 {
-    private readonly IScheduledTransactionRepository _repository;
+    private readonly IGenericRepository<ScheduledTransaction> _repository;
 
-    public ScheduledTransactionService(IScheduledTransactionRepository repository)
+    public ScheduledTransactionService(IGenericRepository<ScheduledTransaction> repository)
     {
         _repository = repository;
     }
 
     public Task<List<ScheduledTransaction>> GetAllAsync(Guid userId)
     {
-        return _repository.GetAllForUserAsync(userId);
+        return _repository.GetAllAsync(
+            transaction => transaction.UserId == userId,
+            transactions => transactions.OrderByDescending(transaction => transaction.ReceivedDate));
     }
 
     public Task<ScheduledTransaction?> GetByIdAsync(Guid id, Guid userId)
     {
-        return _repository.GetByIdAsync(id, userId);
+        return _repository.GetFirstOrDefaultAsync(transaction => transaction.Id == id && transaction.UserId == userId);
     }
 
     public Task<ScheduledTransaction> CreateAsync(ScheduledTransaction scheduledTransaction)
@@ -29,7 +31,7 @@ public class ScheduledTransactionService : IScheduledTransactionService
 
     public async Task<ScheduledTransaction?> UpdateAsync(Guid id, ScheduledTransaction updated, Guid userId)
     {
-        var existing = await _repository.GetByIdAsync(id, userId);
+        var existing = await _repository.GetFirstOrDefaultAsync(transaction => transaction.Id == id && transaction.UserId == userId);
         if (existing == null) return null;
 
         existing.Source = updated.Source;
@@ -44,7 +46,7 @@ public class ScheduledTransactionService : IScheduledTransactionService
 
     public async Task<bool> DeleteAsync(Guid id, Guid userId)
     {
-        var existing = await _repository.GetByIdAsync(id, userId);
+        var existing = await _repository.GetFirstOrDefaultAsync(transaction => transaction.Id == id && transaction.UserId == userId);
         if (existing == null) return false;
 
         await _repository.DeleteAsync(existing);

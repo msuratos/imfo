@@ -20,20 +20,21 @@ public class ScheduledTransactionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ScheduledTransaction>>> Get()
+    public async Task<ActionResult<IEnumerable<ScheduledTransactionReadDto>>> Get()
     {
         var userId = User.GetCurrentUserId();
-        return Ok(await _scheduledTransactionService.GetAllAsync(userId));
+        var items = await _scheduledTransactionService.GetAllAsync(userId);
+        return Ok(items.Select(ToReadDto));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ScheduledTransaction>> Get(Guid id)
+    public async Task<ActionResult<ScheduledTransactionReadDto>> Get(Guid id)
     {
         var userId = User.GetCurrentUserId();
         var it = await _scheduledTransactionService.GetByIdAsync(id, userId);
 
         if (it == null) return NotFound();
-        return Ok(it);
+        return Ok(ToReadDto(it));
     }
 
     [HttpPost]
@@ -68,14 +69,14 @@ public class ScheduledTransactionsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<ScheduledTransaction>> Put(Guid id, [FromBody] ScheduledTransaction updated)
+    public async Task<ActionResult<ScheduledTransactionReadDto>> Put(Guid id, [FromBody] ScheduledTransaction updated)
     {
         var userId = User.GetCurrentUserId();
         var existing = await _scheduledTransactionService.UpdateAsync(id, updated, userId);
 
         if (existing == null) return NotFound();
 
-        return Ok(existing);
+        return Ok(ToReadDto(existing));
     }
 
     [HttpDelete("{id}")]
@@ -88,4 +89,15 @@ public class ScheduledTransactionsController : ControllerBase
 
         return NoContent();
     }
+
+    private static ScheduledTransactionReadDto ToReadDto(ScheduledTransaction item) => new()
+    {
+        Id = item.Id,
+        Source = item.Source,
+        Amount = item.Amount,
+        Category = item.Category,
+        ReceivedDate = item.ReceivedDate,
+        Frequency = item.Frequency,
+        UserId = item.UserId
+    };
 }

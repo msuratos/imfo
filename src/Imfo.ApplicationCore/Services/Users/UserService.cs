@@ -1,25 +1,25 @@
 using Imfo.ApplicationCore.Common.Entities;
-using Imfo.ApplicationCore.Common.Interfaces.Repositories;
+using Imfo.ApplicationCore.Common.Interfaces;
 
 namespace Imfo.ApplicationCore.Services.Users;
 
 public class UserService : IUserService
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IGenericRepository<User> _userRepository;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IGenericRepository<User> userRepository)
     {
         _userRepository = userRepository;
     }
 
     public async Task<User?> GetUserByIdAsync(Guid id)
     {
-        return await _userRepository.GetByIdAsync(id);
+        return await _userRepository.GetFirstOrDefaultAsync(user => user.Id == id);
     }
 
     public async Task<User?> GetUserByExternalIdAsync(string externalId)
     {
-        return await _userRepository.GetByExternalIdAsync(externalId);
+        return await _userRepository.GetFirstOrDefaultAsync(user => user.ExternalId == externalId);
     }
 
     public async Task<User> CreateUserAsync(User request)

@@ -20,20 +20,35 @@ public class GoalController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Goal>>> Get()
+    public async Task<ActionResult<IEnumerable<GoalReadDto>>> Get()
     {
         var userId = User.GetCurrentUserId();
-        return Ok(await _goalService.GetAllAsync(userId));
+        var goals = await _goalService.GetAllAsync(userId);
+        return Ok(goals.Select(item => new GoalReadDto
+        {
+            Id = item.Id,
+            Category = item.Category,
+            Amount = item.Amount,
+            Frequency = item.Frequency,
+            UserId = item.UserId
+        }));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Goal>> Get(Guid id)
+    public async Task<ActionResult<GoalReadDto>> Get(Guid id)
     {
         var userId = User.GetCurrentUserId();
         var item = await _goalService.GetByIdAsync(id, userId);
 
         if (item == null) return NotFound();
-        return Ok(item);
+        return Ok(new GoalReadDto
+        {
+            Id = item.Id,
+            Category = item.Category,
+            Amount = item.Amount,
+            Frequency = item.Frequency,
+            UserId = item.UserId
+        });
     }
 
     [HttpPost]

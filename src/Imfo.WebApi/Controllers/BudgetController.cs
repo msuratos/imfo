@@ -20,20 +20,35 @@ public class BudgetController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Budget>>> Get()
+    public async Task<ActionResult<IEnumerable<BudgetReadDto>>> Get()
     {
         var userId = User.GetCurrentUserId();
-        return Ok(await _budgetService.GetAllAsync(userId));
+        var budgets = await _budgetService.GetAllAsync(userId);
+        return Ok(budgets.Select(item => new BudgetReadDto
+        {
+            Id = item.Id,
+            Category = item.Category,
+            Amount = item.Amount,
+            Frequency = item.Frequency,
+            UserId = item.UserId
+        }));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Budget>> Get(Guid id)
+    public async Task<ActionResult<BudgetReadDto>> Get(Guid id)
     {
         var userId = User.GetCurrentUserId();
         var item = await _budgetService.GetByIdAsync(id, userId);
 
         if (item == null) return NotFound();
-        return Ok(item);
+        return Ok(new BudgetReadDto
+        {
+            Id = item.Id,
+            Category = item.Category,
+            Amount = item.Amount,
+            Frequency = item.Frequency,
+            UserId = item.UserId
+        });
     }
 
     [HttpPost]

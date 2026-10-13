@@ -20,20 +20,21 @@ public class TransactionController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Transaction>>> Get()
+    public async Task<ActionResult<IEnumerable<TransactionReadDto>>> Get()
     {
         var userId = User.GetCurrentUserId();
-        return Ok(await _transactionService.GetAllAsync(userId));
+        var transactions = await _transactionService.GetAllAsync(userId);
+        return Ok(transactions.Select(ToReadDto));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Transaction>> Get(Guid id)
+    public async Task<ActionResult<TransactionReadDto>> Get(Guid id)
     {
         var userId = User.GetCurrentUserId();
         var it = await _transactionService.GetByIdAsync(id, userId);
 
         if (it == null) return NotFound();
-        return Ok(it);
+        return Ok(ToReadDto(it));
     }
 
     [HttpPost]
@@ -66,13 +67,13 @@ public class TransactionController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Transaction>> Put(Guid id, [FromBody] Transaction updated)
+    public async Task<ActionResult<TransactionReadDto>> Put(Guid id, [FromBody] Transaction updated)
     {
         var userId = User.GetCurrentUserId();
         var existing = await _transactionService.UpdateAsync(id, updated, userId);
 
         if (existing == null) return NotFound();
-        return Ok(existing);
+        return Ok(ToReadDto(existing));
     }
 
     [HttpDelete("{id}")]
@@ -84,4 +85,14 @@ public class TransactionController : ControllerBase
         if (!deleted) return NotFound();
         return NoContent();
     }
+
+    private static TransactionReadDto ToReadDto(Transaction item) => new()
+    {
+        Id = item.Id,
+        Description = item.Description,
+        Amount = item.Amount,
+        CategoryId = item.CategoryId,
+        Date = item.Date,
+        UserId = item.UserId
+    };
 }

@@ -19,18 +19,23 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetUserById(Guid id)
+    public async Task<ActionResult<UserReadDto>> GetUserById(Guid id)
     {
         var user = await _userService.GetUserByIdAsync(id);
         if (user == null)
         {
             return NotFound();
         }
-        return Ok(user);
+        return Ok(new UserReadDto
+        {
+            Id = user.Id,
+            Name = user.Name,
+            UserName = user.UserName
+        });
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateUser()
+    public async Task<ActionResult<UserReadDto>> CreateUser()
     {
         var externalId = User.FindFirst("userId")?.Value;
         var userName = User.FindFirst("preferred_username")?.Value;
@@ -50,6 +55,11 @@ public class UserController : ControllerBase
             UserName = userName
         });
 
-        return Created(nameof(GetUserById), user);
+        return Created(nameof(GetUserById), new UserReadDto
+        {
+            Id = user.Id,
+            Name = user.Name,
+            UserName = user.UserName
+        });
     }
 }

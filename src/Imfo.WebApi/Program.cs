@@ -1,4 +1,4 @@
-using Imfo.ApplicationCore.Common.Interfaces.Repositories;
+using Imfo.ApplicationCore.Common.Interfaces;
 using Imfo.ApplicationCore.Services.Budgets;
 using Imfo.ApplicationCore.Services.Categories;
 using Imfo.ApplicationCore.Services.ScheduledTransactions;
@@ -16,12 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ImfoDbContext>(options => options.UseInMemoryDatabase("ImfoDb"));
 
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
-builder.Services.AddScoped<IGoalRepository, GoalRepository>();
-builder.Services.AddScoped<IScheduledTransactionRepository, ScheduledTransactionRepository>();
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();

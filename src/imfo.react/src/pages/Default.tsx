@@ -29,8 +29,8 @@ export default function Default() {
   const [scheduledTransactions, setScheduledTransactions] = useState<ScheduledTransaction[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedFrequency, setSelectedFrequency] = useState<'weekly' | 'bi-weekly' | 'monthly' | 'yearly'>('monthly');
-  const [incomeShowScheduled, setIncomeShowScheduled] = useState(false);
-  const [expenseShowScheduled, setExpenseShowScheduled] = useState(false);
+  const [incomeShowRemaining, setIncomeShowRemaining] = useState(false);
+  const [expenseShowRemaining, setExpenseShowRemaining] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -54,13 +54,7 @@ export default function Default() {
   }, []);
 
   function getBudgetSummary() {
-    const filteredExpenses = getFilteredExpenses();
-    const spentByCategory: { [key: string]: number } = {};
-
-    filteredExpenses.forEach(item => {
-      const categoryName = categories.find(c => c.id === item.categoryId)?.name || item.categoryId;
-      spentByCategory[categoryName] = (spentByCategory[categoryName] || 0) + Math.abs(item.amount);
-    });
+    const spentByCategory = getExpensesByCategory();
 
     return budgets.map(budget => {
       const normalizedBudget = normalizeAmount(budget.amount, budget.frequency, selectedFrequency);
@@ -74,6 +68,24 @@ export default function Default() {
         remaining: normalizedBudget - spent
       };
     });
+  }
+
+  function getExpensesByCategory() {
+    const spentByCategory: { [key: string]: number } = {};
+
+    getFilteredExpenses().forEach(item => {
+      const categoryName = categories.find(c => c.id === item.categoryId)?.name || item.categoryId;
+      spentByCategory[categoryName] = (spentByCategory[categoryName] || 0) + Math.abs(item.amount);
+    });
+
+    scheduledTransactions.forEach(item => {
+      const normalizedAmount = normalizeAmount(item.amount, item.frequency, selectedFrequency);
+      if (normalizedAmount < 0 && item.category) {
+        spentByCategory[item.category] = (spentByCategory[item.category] || 0) + Math.abs(normalizedAmount);
+      }
+    });
+
+    return spentByCategory;
   }
 
   function getFilteredExpenses() {
@@ -140,7 +152,9 @@ export default function Default() {
     return normalized < 0 ? sum + Math.abs(normalized) : sum;
   }, 0);
 
-  const totalIncome = scheduledIncome;
+  const incomeRemaining = Math.max(scheduledIncome - actualIncome, 0);
+  const expenseRemaining = Math.max(scheduledExpenses - totalSpent, 0);
+  const projectedNet = actualIncome + scheduledIncome - totalSpent - scheduledExpenses;
 
   return (
     <Box component="main" sx={{ p: 1 }}>
@@ -166,7 +180,7 @@ export default function Default() {
             {(() => {
               const incomeChartData = [
                 { id: 0, value: actualIncome, label: 'Actual' },
-                { id: 1, value: Math.max(totalIncome - actualIncome, 0), label: 'Remaining' }
+                { id: 1, value: incomeRemaining, label: 'Remaining' }
               ];
               const colors = ['#10b981', '#e6eef8'];
               return (
@@ -196,16 +210,15 @@ export default function Default() {
                           direction: 'row',
                         },
                       }}
-                      onItemClick={(event) => {
-                        const index = event.dataIndex;
-                        if (index === 0) setIncomeShowScheduled(false);
-                        else setIncomeShowScheduled(true);
+                      onItemClick={(_, itemIdentifier) => {
+                        const index = itemIdentifier.dataIndex;
+                        setIncomeShowRemaining(index === 1);
                       }}
                     />
                     <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                     </Box>
                   </Box>
-                  <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(incomeShowScheduled ? totalIncome : actualIncome).toFixed(2)}</Typography>
+                  <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(incomeShowRemaining ? incomeRemaining : actualIncome).toFixed(2)}</Typography>
                 </>
               )
             })()}
@@ -213,10 +226,10 @@ export default function Default() {
 
           <Grid size={4}>
             <Box sx={{ textAlign: 'center' }}>
-              <Box sx={{ fontSize: 28, fontWeight: 700, color: (actualIncome - totalSpent) >= 0 ? 'success.main' : 'error.main' }}>
-                ${(actualIncome - totalSpent).toFixed(2)}
+              <Box sx={{ fontSize: 28, fontWeight: 700, color: projectedNet >= 0 ? 'success.main' : 'error.main' }}>
+                ${projectedNet.toFixed(2)}
               </Box>
-              <Typography variant='subtitle1'>Net</Typography>
+              <Typography variant='subtitle1'>Projected Net</Typography>
             </Box>
           </Grid>
 
@@ -226,7 +239,7 @@ export default function Default() {
               const actualExpenses = totalSpent;
               const expenseChartData = [
                 { id: 0, value: actualExpenses, label: 'Actual' },
-                { id: 1, value: Math.max(scheduledExpenses - actualExpenses, 0), label: 'Remaining' }
+                { id: 1, value: expenseRemaining, label: 'Remaining' }
               ];
               const colors = ['#ef4444', '#fdecea'];
               return (
@@ -256,14 +269,13 @@ export default function Default() {
                           direction: 'horizontal',
                         },
                       }}
-                      onItemClick={(event) => {
-                        const index = event.dataIndex;
-                        if (index === 0) setExpenseShowScheduled(false);
-                        else setExpenseShowScheduled(true);
+                      onItemClick={(_, itemIdentifier) => {
+                        const index = itemIdentifier.dataIndex;
+                        setExpenseShowRemaining(index === 1);
                       }}
                     />
                   </Box>
-                  <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(expenseShowScheduled ? scheduledExpenses : actualExpenses).toFixed(2)}</Typography>
+                  <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(expenseShowRemaining ? expenseRemaining : actualExpenses).toFixed(2)}</Typography>
                 </>
               )
             })()}
@@ -314,12 +326,7 @@ export default function Default() {
             <Stack spacing={1}>
               {goals.map(goal => {
                 const normalizedBudget = normalizeAmount(goal.amount, goal.frequency, selectedFrequency);
-                const spentByCategory: { [key: string]: number } = {};
-
-                filteredExpenses.forEach(item => {
-                  const categoryName = categories.find(c => c.id === item.categoryId)?.name || item.categoryId;
-                  spentByCategory[categoryName] = (spentByCategory[categoryName] || 0) + Math.abs(item.amount);
-                });
+                const spentByCategory = getExpensesByCategory();
 
                 const spent = spentByCategory[goal.category] || 0;
                 const usageRatio = normalizedBudget !== 0 ? spent / normalizedBudget : 0;

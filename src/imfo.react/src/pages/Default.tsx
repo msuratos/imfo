@@ -175,10 +175,10 @@ export default function Default() {
           </FormControl>
         </Box>
 
-        <Grid container spacing={2} sx={{ alignItems: 'center', justifyContent: 'center' }}>
-          <Grid size={4}>
+        <Grid container spacing={1} sx={{ alignItems: 'center' }}>
+          <Grid size={4} sx={{ textAlign: 'center' }}>
             <Typography variant='h6'>Income</Typography>
-            <Box sx={{ position: 'relative', width: 120, height: 140 }}>
+            <Box sx={{ position: 'relative', m: 'auto', width: 120, height: 140 }}>
               <MuiPieChart
                 series={[
                   {
@@ -198,7 +198,6 @@ export default function Default() {
                 ]}
                 width={120}
                 height={140}
-                margin={{ top: 0, bottom: 30, left: 0, right: 0 }}
                 colors={['#10b981', '#e6eef8']}
                 slotProps={{
                   legend: {
@@ -211,24 +210,22 @@ export default function Default() {
                   setIncomeShowRemaining(index === 1);
                 }}
               />
-              <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-              </Box>
             </Box>
-            <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(incomeShowRemaining ? incomeRemaining : actualIncome).toFixed(2)}</Typography>
+            <Typography sx={{ fontSize: '0.875rem' }}>${(incomeShowRemaining ? incomeRemaining : actualIncome).toFixed(2)}</Typography>
           </Grid>
 
-          <Grid size={4}>
-            <Box sx={{ textAlign: 'center' }}>
+          <Grid size={4} sx={{ textAlign: 'center' }}>
+            <Box>
               <Box sx={{ fontSize: 28, fontWeight: 700, color: projectedNet >= 0 ? 'success.main' : 'error.main' }}>
                 ${projectedNet.toFixed(2)}
               </Box>
-              <Typography variant='subtitle1'>Projected Net</Typography>
+              <Typography variant='subtitle1'>Net</Typography>
             </Box>
           </Grid>
 
-          <Grid size={4}>
+          <Grid size={4} sx={{ textAlign: 'center' }}>
             <Typography variant='h6'>Expenses</Typography>
-            <Box sx={{ position: 'relative', width: 120, height: 140 }}>
+            <Box sx={{ position: 'relative', m: 'auto', width: 120, height: 140 }}>
               <MuiPieChart
                 series={[
                   {
@@ -248,7 +245,6 @@ export default function Default() {
                 ]}
                 width={120}
                 height={140}
-                margin={{ top: 0, bottom: 30, left: 0, right: 0 }}
                 colors={['#ef4444', '#fdecea']}
                 slotProps={{
                   legend: {
@@ -262,7 +258,7 @@ export default function Default() {
                 }}
               />
             </Box>
-            <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(expenseShowRemaining ? expenseRemaining : actualExpenses).toFixed(2)}</Typography>
+            <Typography sx={{ fontSize: '0.875rem' }}>${(expenseShowRemaining ? expenseRemaining : actualExpenses).toFixed(2)}</Typography>
           </Grid>
         </Grid>
       </Paper>

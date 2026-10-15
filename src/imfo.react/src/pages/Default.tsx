@@ -23,7 +23,7 @@ import { Transaction, Budget, ScheduledTransaction, Goal } from '../types'
 export default function Default() {
   const { getAccessToken } = useLogto();
 
-  const [items, setItems] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [scheduledTransactions, setScheduledTransactions] = useState<ScheduledTransaction[]>([]);
@@ -43,7 +43,7 @@ export default function Default() {
         getCategories(token)
       ]);
 
-      setItems(transactions);
+      setTransactions(transactions);
       setBudgets(budgets);
       setGoals(goals);
       setScheduledTransactions(scheduledTransactions);
@@ -90,12 +90,12 @@ export default function Default() {
 
   function getFilteredExpenses() {
     const startDate = getPeriodStart(selectedFrequency);
-    return items.filter(item => item.amount < 0 && new Date(item.date) >= startDate);
+    return transactions.filter(item => item.amount < 0 && new Date(item.date) >= startDate);
   }
 
   function getFilteredIncome() {
     const startDate = getPeriodStart(selectedFrequency);
-    return items.filter(item => item.amount > 0 && new Date(item.date) >= startDate);
+    return transactions.filter(item => item.amount > 0 && new Date(item.date) >= startDate);
   }
 
   function getFrequencyMultiplier(frequency: string): number {
@@ -134,9 +134,10 @@ export default function Default() {
     return amount * (fromPeriods / toPeriods);
   }
 
-  const filteredExpenses = getFilteredExpenses();
   const budgetSummary = getBudgetSummary();
-  const totalSpent = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
+
+  const filteredExpenses = getFilteredExpenses();
+  const actualExpenses = filteredExpenses.reduce((sum, item) => sum + Math.abs(item.amount), 0);
 
   const filteredIncome = getFilteredIncome();
   const actualIncome = filteredIncome.reduce((sum, item) => sum + item.amount, 0);
@@ -153,8 +154,8 @@ export default function Default() {
   }, 0);
 
   const incomeRemaining = Math.max(scheduledIncome - actualIncome, 0);
-  const expenseRemaining = Math.max(scheduledExpenses - totalSpent, 0);
-  const projectedNet = actualIncome + scheduledIncome - totalSpent - scheduledExpenses;
+  const expenseRemaining = Math.max(scheduledExpenses - actualExpenses, 0);
+  const projectedNet = actualIncome + scheduledIncome - actualExpenses - scheduledExpenses;
 
   return (
     <Box component="main" sx={{ p: 1 }}>
@@ -177,51 +178,43 @@ export default function Default() {
         <Grid container spacing={2} sx={{ alignItems: 'center', justifyContent: 'center' }}>
           <Grid size={4}>
             <Typography variant='h6'>Income</Typography>
-            {(() => {
-              const incomeChartData = [
-                { id: 0, value: actualIncome, label: 'Actual' },
-                { id: 1, value: incomeRemaining, label: 'Remaining' }
-              ];
-              const colors = ['#10b981', '#e6eef8'];
-              return (
-                <>
-                  <Box sx={{ position: 'relative', width: 120, height: 140 }}>
-                    <MuiPieChart
-                      series={[
-                        {
-                          data: incomeChartData,
-                          innerRadius: 15,
-                          outerRadius: 35,
-                          paddingAngle: 1,
-                          startAngle: -90,
-                          endAngle: 90,
-                          valueFormatter: (value) => `$${value}`,
-                          cx: 50,
-                          cy: 50,
-                        },
-                      ]}
-                      width={120}
-                      height={140}
-                      margin={{ top: 0, bottom: 30, left: 0, right: 0 }}
-                      colors={colors}
-                      slotProps={{
-                        legend: {
-                          position: 'bottom',
-                          direction: 'row',
-                        },
-                      }}
-                      onItemClick={(_, itemIdentifier) => {
-                        const index = itemIdentifier.dataIndex;
-                        setIncomeShowRemaining(index === 1);
-                      }}
-                    />
-                    <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                    </Box>
-                  </Box>
-                  <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(incomeShowRemaining ? incomeRemaining : actualIncome).toFixed(2)}</Typography>
-                </>
-              )
-            })()}
+            <Box sx={{ position: 'relative', width: 120, height: 140 }}>
+              <MuiPieChart
+                series={[
+                  {
+                    data: [
+                      { id: 0, value: actualIncome, label: 'Actual' },
+                      { id: 1, value: incomeRemaining, label: 'Remaining' }
+                    ],
+                    innerRadius: 15,
+                    outerRadius: 35,
+                    paddingAngle: 1,
+                    startAngle: -90,
+                    endAngle: 90,
+                    valueFormatter: (value) => `$${value}`,
+                    cx: 50,
+                    cy: 50,
+                  },
+                ]}
+                width={120}
+                height={140}
+                margin={{ top: 0, bottom: 30, left: 0, right: 0 }}
+                colors={['#10b981', '#e6eef8']}
+                slotProps={{
+                  legend: {
+                    position: { vertical: 'top', horizontal: 'center' },
+                    direction: 'horizontal',
+                  },
+                }}
+                onItemClick={(_, itemIdentifier) => {
+                  const index = itemIdentifier.dataIndex;
+                  setIncomeShowRemaining(index === 1);
+                }}
+              />
+              <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+              </Box>
+            </Box>
+            <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(incomeShowRemaining ? incomeRemaining : actualIncome).toFixed(2)}</Typography>
           </Grid>
 
           <Grid size={4}>
@@ -235,50 +228,41 @@ export default function Default() {
 
           <Grid size={4}>
             <Typography variant='h6'>Expenses</Typography>
-            {(() => {
-              const actualExpenses = totalSpent;
-              const expenseChartData = [
-                { id: 0, value: actualExpenses, label: 'Actual' },
-                { id: 1, value: expenseRemaining, label: 'Remaining' }
-              ];
-              const colors = ['#ef4444', '#fdecea'];
-              return (
-                <>
-                  <Box sx={{ position: 'relative', width: 120, height: 140 }}>
-                    <MuiPieChart
-                      series={[
-                        {
-                          data: expenseChartData,
-                          innerRadius: 15,
-                          outerRadius: 35,
-                          paddingAngle: 1,
-                          startAngle: -90,
-                          endAngle: 90,
-                          valueFormatter: (value) => `$${value}`,
-                          cx: 50,
-                          cy: 50,
-                        },
-                      ]}
-                      width={120}
-                      height={140}
-                      margin={{ top: 0, bottom: 30, left: 0, right: 0 }}
-                      colors={colors}
-                      slotProps={{
-                        legend: {
-                          position: 'bottom',
-                          direction: 'horizontal',
-                        },
-                      }}
-                      onItemClick={(_, itemIdentifier) => {
-                        const index = itemIdentifier.dataIndex;
-                        setExpenseShowRemaining(index === 1);
-                      }}
-                    />
-                  </Box>
-                  <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(expenseShowRemaining ? expenseRemaining : actualExpenses).toFixed(2)}</Typography>
-                </>
-              )
-            })()}
+            <Box sx={{ position: 'relative', width: 120, height: 140 }}>
+              <MuiPieChart
+                series={[
+                  {
+                    data: [
+                      { id: 0, value: actualExpenses, label: 'Actual' },
+                      { id: 1, value: expenseRemaining, label: 'Remaining' }
+                    ],
+                    innerRadius: 15,
+                    outerRadius: 35,
+                    paddingAngle: 1,
+                    startAngle: -90,
+                    endAngle: 90,
+                    valueFormatter: (value) => `$${value}`,
+                    cx: 50,
+                    cy: 50,
+                  },
+                ]}
+                width={120}
+                height={140}
+                margin={{ top: 0, bottom: 30, left: 0, right: 0 }}
+                colors={['#ef4444', '#fdecea']}
+                slotProps={{
+                  legend: {
+                    position: { vertical: 'top', horizontal: 'center' },
+                    direction: 'horizontal',
+                  },
+                }}
+                onItemClick={(_, itemIdentifier) => {
+                  const index = itemIdentifier.dataIndex;
+                  setExpenseShowRemaining(index === 1);
+                }}
+              />
+            </Box>
+            <Typography sx={{ fontSize: '0.875rem', textAlign: 'center' }}>${(expenseShowRemaining ? expenseRemaining : actualExpenses).toFixed(2)}</Typography>
           </Grid>
         </Grid>
       </Paper>

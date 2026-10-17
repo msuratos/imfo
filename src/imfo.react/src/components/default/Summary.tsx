@@ -10,19 +10,18 @@ import Typography from '@mui/material/Typography';
 import { PieChart } from '@mui/x-charts/PieChart';
 
 import { Budget, Transaction, ScheduledTransaction } from '../../types';
-import { getPeriodStart, normalizeAmount } from './frequency';
+import { getPeriodStart, normalizeAmount } from '../../utils/frequency';
 
 export type Frequency = 'weekly' | 'bi-weekly' | 'monthly' | 'yearly';
 
 type SummaryProps = {
-  budgets: Budget[];
   transactions: Transaction[];
   scheduledTransactions: ScheduledTransaction[];
   selectedFrequency: Frequency;
   onFrequencyChange: (frequency: Frequency) => void;
 };
 
-export default function Summary({ budgets, transactions, scheduledTransactions, selectedFrequency, onFrequencyChange}: SummaryProps) {
+export default function Summary({ transactions, scheduledTransactions, selectedFrequency, onFrequencyChange}: SummaryProps) {
   const [incomeShowRemaining, setIncomeShowRemaining] = useState(false);
   const [expenseShowRemaining, setExpenseShowRemaining] = useState(false);
 
@@ -34,50 +33,20 @@ export default function Summary({ budgets, transactions, scheduledTransactions, 
   const actualIncome = transactions
     .filter(item => item.amount > 0 && new Date(item.date) >= startDate)
     .reduce((sum, item) => sum + item.amount, 0);
+    
+  const scheduledExpense = scheduledTransactions.reduce((sum, item) => {
+    const normalized = normalizeAmount(item.amount, item.frequency, selectedFrequency);
+    return normalized < 0 ? sum + Math.abs(normalized) : sum;
+  }, 0);
 
-  // Scheduled transactions may be positive (income) or negative (expense).
   const scheduledIncome = scheduledTransactions.reduce((sum, item) => {
     const normalized = normalizeAmount(item.amount, item.frequency, selectedFrequency);
     return normalized > 0 ? sum + normalized : sum;
   }, 0);
-
-  const budgetedExpensesByCategory = budgets.reduce((totals, budget) => {
-    const amount = normalizeAmount(budget.amount, budget.frequency, selectedFrequency);
-    totals.set(budget.category, (totals.get(budget.category) || 0) + amount);
-    return totals;
-  }, new Map<string, number>());
-
-  const scheduledExpensesByCategory = new Map<string, number>();
-  let uncategorizedScheduledExpenses = 0;
-  scheduledTransactions.forEach(item => {
-    const normalized = normalizeAmount(item.amount, item.frequency, selectedFrequency);
-    if (normalized >= 0) return;
-
-    const amount = Math.abs(normalized);
-    if (item.category) {
-      scheduledExpensesByCategory.set(
-        item.category,
-        (scheduledExpensesByCategory.get(item.category) || 0) + amount
-      );
-    } else {
-      uncategorizedScheduledExpenses += amount;
-    }
-  });
-  
-  const expenseCategories = new Set([
-    ...budgetedExpensesByCategory.keys(),
-    ...scheduledExpensesByCategory.keys()
-  ]);
-  const plannedExpenses = Array.from(expenseCategories).reduce((sum, category) => {
-    return sum + Math.max(
-      budgetedExpensesByCategory.get(category) || 0,
-      scheduledExpensesByCategory.get(category) || 0
-    );
-  }, uncategorizedScheduledExpenses);
   
   const incomeRemaining = Math.max(scheduledIncome - actualIncome, 0);
-  const expenseRemaining = Math.max(plannedExpenses - actualExpenses, 0);
-  const projectedNet = actualIncome + incomeRemaining - actualExpenses - expenseRemaining;
+  const expenseRemaining = Math.max(scheduledExpense - actualExpenses, 0);
+  const projectedNet = actualIncome - actualExpenses;
 
   return (
     <Paper sx={{ p: 1, mb: 1 }} elevation={1}>
@@ -141,7 +110,7 @@ export default function Summary({ budgets, transactions, scheduledTransactions, 
             <Box sx={{ fontSize: 28, fontWeight: 700, color: projectedNet >= 0 ? 'success.main' : 'error.main' }}>
               ${projectedNet.toFixed(2)}
             </Box>
-            <Typography variant="subtitle1">Net</Typography>
+            <Typography variant="subtitle1">Actual Net</Typography>
           </Box>
         </Grid>
 

@@ -14,7 +14,7 @@ import { getTransactions } from '../apis/transactionApi';
 import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
 
 import { Transaction, Budget, Category, ScheduledTransaction, Goal } from '../types';
-import { getPeriodStart, normalizeAmount } from '../components/default/frequency';
+import { getPeriodStart, normalizeAmount } from '../utils/frequency';
 
 export default function Default() {
   const { getAccessToken } = useLogto();
@@ -71,7 +71,6 @@ export default function Default() {
   return (
     <Box component="main" sx={{ p: 1 }}>
       <Summary
-        budgets={budgets}
         transactions={transactions}
         scheduledTransactions={scheduledTransactions}
         selectedFrequency={selectedFrequency}

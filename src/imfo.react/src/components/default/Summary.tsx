@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
@@ -6,20 +7,22 @@ import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import Typography from '@mui/material/Typography';
-import { PieChart as MuiPieChart } from '@mui/x-charts/PieChart';
-import { Transaction, ScheduledTransaction } from '../../types';
+import { PieChart } from '@mui/x-charts/PieChart';
+
+import { Budget, Transaction, ScheduledTransaction } from '../../types';
 import { getPeriodStart, normalizeAmount } from './frequency';
 
 export type Frequency = 'weekly' | 'bi-weekly' | 'monthly' | 'yearly';
 
 type SummaryProps = {
+  budgets: Budget[];
   transactions: Transaction[];
   scheduledTransactions: ScheduledTransaction[];
   selectedFrequency: Frequency;
   onFrequencyChange: (frequency: Frequency) => void;
 };
 
-export default function Summary({ transactions, scheduledTransactions, selectedFrequency, onFrequencyChange}: SummaryProps) {
+export default function Summary({ budgets, transactions, scheduledTransactions, selectedFrequency, onFrequencyChange}: SummaryProps) {
   const [incomeShowRemaining, setIncomeShowRemaining] = useState(false);
   const [expenseShowRemaining, setExpenseShowRemaining] = useState(false);
 
@@ -38,14 +41,43 @@ export default function Summary({ transactions, scheduledTransactions, selectedF
     return normalized > 0 ? sum + normalized : sum;
   }, 0);
 
-  const scheduledExpenses = scheduledTransactions.reduce((sum, item) => {
+  const budgetedExpensesByCategory = budgets.reduce((totals, budget) => {
+    const amount = normalizeAmount(budget.amount, budget.frequency, selectedFrequency);
+    totals.set(budget.category, (totals.get(budget.category) || 0) + amount);
+    return totals;
+  }, new Map<string, number>());
+
+  const scheduledExpensesByCategory = new Map<string, number>();
+  let uncategorizedScheduledExpenses = 0;
+  scheduledTransactions.forEach(item => {
     const normalized = normalizeAmount(item.amount, item.frequency, selectedFrequency);
-    return normalized < 0 ? sum + Math.abs(normalized) : sum;
-  }, 0);
+    if (normalized >= 0) return;
+
+    const amount = Math.abs(normalized);
+    if (item.category) {
+      scheduledExpensesByCategory.set(
+        item.category,
+        (scheduledExpensesByCategory.get(item.category) || 0) + amount
+      );
+    } else {
+      uncategorizedScheduledExpenses += amount;
+    }
+  });
+  
+  const expenseCategories = new Set([
+    ...budgetedExpensesByCategory.keys(),
+    ...scheduledExpensesByCategory.keys()
+  ]);
+  const plannedExpenses = Array.from(expenseCategories).reduce((sum, category) => {
+    return sum + Math.max(
+      budgetedExpensesByCategory.get(category) || 0,
+      scheduledExpensesByCategory.get(category) || 0
+    );
+  }, uncategorizedScheduledExpenses);
   
   const incomeRemaining = Math.max(scheduledIncome - actualIncome, 0);
-  const expenseRemaining = Math.max(scheduledExpenses - actualExpenses, 0);
-  const projectedNet = actualIncome + scheduledIncome - actualExpenses - scheduledExpenses;
+  const expenseRemaining = Math.max(plannedExpenses - actualExpenses, 0);
+  const projectedNet = actualIncome + incomeRemaining - actualExpenses - expenseRemaining;
 
   return (
     <Paper sx={{ p: 1, mb: 1 }} elevation={1}>
@@ -68,7 +100,7 @@ export default function Summary({ transactions, scheduledTransactions, selectedF
         <Grid size={4} sx={{ textAlign: 'center' }}>
           <Typography variant="h6">Income</Typography>
           <Box sx={{ position: 'relative', m: 'auto', width: 120, height: 140 }}>
-            <MuiPieChart
+            <PieChart
               series={[
                 {
                   data: [
@@ -116,7 +148,7 @@ export default function Summary({ transactions, scheduledTransactions, selectedF
         <Grid size={4} sx={{ textAlign: 'center' }}>
           <Typography variant="h6">Expenses</Typography>
           <Box sx={{ position: 'relative', m: 'auto', width: 120, height: 140 }}>
-            <MuiPieChart
+            <PieChart
               series={[
                 {
                   data: [

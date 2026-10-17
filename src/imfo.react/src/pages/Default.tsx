@@ -71,6 +71,7 @@ export default function Default() {
   return (
     <Box component="main" sx={{ p: 1 }}>
       <Summary
+        budgets={budgets}
         transactions={transactions}
         scheduledTransactions={scheduledTransactions}
         selectedFrequency={selectedFrequency}

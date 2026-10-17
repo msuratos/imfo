@@ -6,13 +6,13 @@ import Typography from '@mui/material/Typography';
 import { Goal } from '../../types';
 import { normalizeAmount } from './frequency';
 
-type GoalUsageSectionProps = {
+type GoalUsageProps = {
   goals: Goal[];
   spentByCategory: { [category: string]: number };
   selectedFrequency: string;
 };
 
-export default function GoalUsageSection({ goals, spentByCategory, selectedFrequency }: GoalUsageSectionProps) {
+export default function GoalUsage({ goals, spentByCategory, selectedFrequency }: GoalUsageProps) {
   const goalUsage = goals.map(goal => ({
     id: goal.id,
     category: goal.category,

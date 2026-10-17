@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react';
 import { useLogto } from '@logto/react';
 import Box from '@mui/material/Box';
 
+import BudgetUsage from '../components/default/BudgetUsage';
+import GoalUsage from '../components/default/GoalUsage';
+import Summary, { Frequency } from '../components/default/Summary';
+
 import { getBudgets } from '../apis/budgetApi';
 import { getGoals } from '../apis/goalsApi';
 import { getCategories } from '../apis/categoryApi';
@@ -11,9 +15,6 @@ import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
 
 import { Transaction, Budget, Category, ScheduledTransaction, Goal } from '../types';
 import { getPeriodStart, normalizeAmount } from '../components/default/frequency';
-import BudgetUsageSection from '../components/default/BudgetUsageSection';
-import GoalUsageSection from '../components/default/GoalUsageSection';
-import SummarySection, { Frequency } from '../components/default/SummarySection';
 
 export default function Default() {
   const { getAccessToken } = useLogto();
@@ -69,14 +70,14 @@ export default function Default() {
 
   return (
     <Box component="main" sx={{ p: 1 }}>
-      <SummarySection
+      <Summary
         transactions={transactions}
         scheduledTransactions={scheduledTransactions}
         selectedFrequency={selectedFrequency}
         onFrequencyChange={setSelectedFrequency}
       />
-      <BudgetUsageSection budgets={budgets} spentByCategory={spentByCategory} selectedFrequency={selectedFrequency} />
-      <GoalUsageSection goals={goals} spentByCategory={spentByCategory} selectedFrequency={selectedFrequency} />
+      <BudgetUsage budgets={budgets} spentByCategory={spentByCategory} selectedFrequency={selectedFrequency} />
+      <GoalUsage goals={goals} spentByCategory={spentByCategory} selectedFrequency={selectedFrequency} />
     </Box>
   );
 }

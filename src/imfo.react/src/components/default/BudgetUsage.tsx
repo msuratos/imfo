@@ -6,13 +6,13 @@ import Typography from '@mui/material/Typography';
 import { Budget } from '../../types';
 import { normalizeAmount } from './frequency';
 
-type BudgetUsageSectionProps = {
+type BudgetUsageProps = {
   budgets: Budget[];
   spentByCategory: { [category: string]: number };
   selectedFrequency: string;
 };
 
-export default function BudgetUsageSection({ budgets, spentByCategory, selectedFrequency }: BudgetUsageSectionProps) {
+export default function BudgetUsage({ budgets, spentByCategory, selectedFrequency }: BudgetUsageProps) {
   const budgetUsage = budgets.map(budget => ({
     category: budget.category,
     normalizedBudget: normalizeAmount(budget.amount, budget.frequency, selectedFrequency),

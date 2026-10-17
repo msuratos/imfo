@@ -12,37 +12,37 @@ import { getPeriodStart, normalizeAmount } from './frequency';
 
 export type Frequency = 'weekly' | 'bi-weekly' | 'monthly' | 'yearly';
 
-type SummarySectionProps = {
+type SummaryProps = {
   transactions: Transaction[];
   scheduledTransactions: ScheduledTransaction[];
   selectedFrequency: Frequency;
   onFrequencyChange: (frequency: Frequency) => void;
 };
 
-export default function SummarySection({
-  transactions,
-  scheduledTransactions,
-  selectedFrequency,
-  onFrequencyChange
-}: SummarySectionProps) {
+export default function Summary({ transactions, scheduledTransactions, selectedFrequency, onFrequencyChange}: SummaryProps) {
   const [incomeShowRemaining, setIncomeShowRemaining] = useState(false);
   const [expenseShowRemaining, setExpenseShowRemaining] = useState(false);
+
   const startDate = getPeriodStart(selectedFrequency);
   const actualExpenses = transactions
     .filter(item => item.amount < 0 && new Date(item.date) >= startDate)
     .reduce((sum, item) => sum + Math.abs(item.amount), 0);
+
   const actualIncome = transactions
     .filter(item => item.amount > 0 && new Date(item.date) >= startDate)
     .reduce((sum, item) => sum + item.amount, 0);
+
   // Scheduled transactions may be positive (income) or negative (expense).
   const scheduledIncome = scheduledTransactions.reduce((sum, item) => {
     const normalized = normalizeAmount(item.amount, item.frequency, selectedFrequency);
     return normalized > 0 ? sum + normalized : sum;
   }, 0);
+
   const scheduledExpenses = scheduledTransactions.reduce((sum, item) => {
     const normalized = normalizeAmount(item.amount, item.frequency, selectedFrequency);
     return normalized < 0 ? sum + Math.abs(normalized) : sum;
   }, 0);
+  
   const incomeRemaining = Math.max(scheduledIncome - actualIncome, 0);
   const expenseRemaining = Math.max(scheduledExpenses - actualExpenses, 0);
   const projectedNet = actualIncome + scheduledIncome - actualExpenses - scheduledExpenses;

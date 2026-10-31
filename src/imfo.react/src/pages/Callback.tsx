@@ -18,7 +18,7 @@ export default function Callback() {
 
   const { isLoading } = useHandleSignInCallback(async () => {
     // Create user in the backend when sign-in is successful
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL) ?? '';
     await createUser(token);
 
     // Navigate to root path when finished

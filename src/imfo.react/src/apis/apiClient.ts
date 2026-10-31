@@ -2,6 +2,8 @@ import axios from 'axios';
 
 const api = axios.create();
 
+// TODO: add the auth token to the request headers if it exists by using logto-react package
+
 api.interceptors.response.use(
   response => response,
   error => {

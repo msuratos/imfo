@@ -9,7 +9,7 @@ import Select from '@mui/material/Select';
 import Typography from '@mui/material/Typography';
 import { PieChart } from '@mui/x-charts/PieChart';
 
-import { Budget, Transaction, ScheduledTransaction } from '../../types';
+import { Budget, Goal, Transaction, ScheduledTransaction  } from '../../types';
 import { getPeriodStart, normalizeAmount } from '../../utils/frequency';
 
 export type Frequency = 'weekly' | 'bi-weekly' | 'monthly' | 'yearly';
@@ -21,11 +21,14 @@ type SummaryProps = {
   onFrequencyChange: (frequency: Frequency) => void;
 };
 
-export default function Summary({ transactions, scheduledTransactions, selectedFrequency, onFrequencyChange}: SummaryProps) {
+export default function Summary(props: SummaryProps) {
+  const { transactions, scheduledTransactions, selectedFrequency, onFrequencyChange } = props;
+
   const [incomeShowRemaining, setIncomeShowRemaining] = useState(false);
   const [expenseShowRemaining, setExpenseShowRemaining] = useState(false);
 
   const startDate = getPeriodStart(selectedFrequency);
+
   const actualExpenses = transactions
     .filter(item => item.amount < 0 && new Date(item.date) >= startDate)
     .reduce((sum, item) => sum + Math.abs(item.amount), 0);
@@ -33,19 +36,19 @@ export default function Summary({ transactions, scheduledTransactions, selectedF
   const actualIncome = transactions
     .filter(item => item.amount > 0 && new Date(item.date) >= startDate)
     .reduce((sum, item) => sum + item.amount, 0);
-    
-  const scheduledExpense = scheduledTransactions.reduce((sum, item) => {
+
+  const scheduledExpenses = scheduledTransactions.reduce((sum, item) => {
     const normalized = normalizeAmount(item.amount, item.frequency, selectedFrequency);
-    return normalized < 0 ? sum + Math.abs(normalized) : sum;
+    return sum + (normalized < 0 ? Math.abs(normalized) : 0);
   }, 0);
 
-  const scheduledIncome = scheduledTransactions.reduce((sum, item) => {
+  const scheduledIncomes = scheduledTransactions.reduce((sum, item) => {
     const normalized = normalizeAmount(item.amount, item.frequency, selectedFrequency);
-    return normalized > 0 ? sum + normalized : sum;
+    return sum + (normalized > 0 ? normalized : 0);
   }, 0);
   
-  const incomeRemaining = Math.max(scheduledIncome - actualIncome, 0);
-  const expenseRemaining = Math.max(scheduledExpense - actualExpenses, 0);
+  const incomeRemaining = scheduledIncomes - actualIncome;
+  const expenseRemaining = scheduledExpenses - actualExpenses;
   const projectedNet = actualIncome - actualExpenses;
 
   return (

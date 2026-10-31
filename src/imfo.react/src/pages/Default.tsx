@@ -28,8 +28,11 @@ export default function Default() {
 
   useEffect(() => {
     async function load() {
-      const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
+      const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL) ?? '';
       const [transactions, budgets, goals, scheduledTransactions, categories] = await Promise.all([
+        // TODO:  change the API endpoints to accept a filter parameter for the date range,
+        //        so we can fetch only the relevant data for the selected frequency.
+        //        For now, we fetch all data and filter it on the client side.
         getTransactions(token),
         getBudgets(token),
         getGoals(token),
@@ -66,7 +69,27 @@ export default function Default() {
     return spentByCategory;
   }
 
+  function getIncomesByCategory() {
+    const spentByCategory: { [key: string]: number } = {};
+    const startDate = getPeriodStart(selectedFrequency);
+
+    transactions.filter(item => item.amount > 0 && new Date(item.date) >= startDate).forEach(item => {
+      const categoryName = categories.find(c => c.id === item.categoryId)?.name || item.categoryId;
+      spentByCategory[categoryName] = (spentByCategory[categoryName] || 0) + Math.abs(item.amount);
+    });
+
+    scheduledTransactions.forEach(item => {
+      const normalizedAmount = normalizeAmount(item.amount, item.frequency, selectedFrequency);
+      if (normalizedAmount > 0 && item.category) {
+        spentByCategory[item.category] = (spentByCategory[item.category] || 0) + Math.abs(normalizedAmount);
+      }
+    });
+
+    return spentByCategory;
+  }
+
   const spentByCategory = getExpensesByCategory();
+  const incomeByCategory = getIncomesByCategory();
 
   return (
     <Box component="main" sx={{ p: 1 }}>
@@ -77,7 +100,7 @@ export default function Default() {
         onFrequencyChange={setSelectedFrequency}
       />
       <BudgetUsage budgets={budgets} spentByCategory={spentByCategory} selectedFrequency={selectedFrequency} />
-      <GoalUsage goals={goals} spentByCategory={spentByCategory} selectedFrequency={selectedFrequency} />
+      <GoalUsage goals={goals} spentByCategory={incomeByCategory} selectedFrequency={selectedFrequency} />
     </Box>
   );
 }

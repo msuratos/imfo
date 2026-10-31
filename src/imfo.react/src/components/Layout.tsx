@@ -46,18 +46,18 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
       navigate('/login');
   }, [isAuthenticated, isLoading]);
 
-  useEffect(() => {
-    let signingOut = false;
-    const handleSessionExpired = () => {
-      if (signingOut) return;
+  // useEffect(() => {
+  //   let signingOut = false;
+  //   const handleSessionExpired = () => {
+  //     if (signingOut) return;
 
-      signingOut = true;
-      navigate('/session-expired', { replace: true });
-    };
+  //     signingOut = true;
+  //     navigate('/session-expired', { replace: true });
+  //   };
 
-    window.addEventListener('imfo:session-expired', handleSessionExpired);
-    return () => window.removeEventListener('imfo:session-expired', handleSessionExpired);
-  }, [navigate]);
+  //   window.addEventListener('imfo:session-expired', handleSessionExpired);
+  //   return () => window.removeEventListener('imfo:session-expired', handleSessionExpired);
+  // }, [navigate]);
 
   function handleAccountButtonClick(event: React.MouseEvent<HTMLElement>) {
     // toggle menu: if already open, close it; otherwise open anchored to the button

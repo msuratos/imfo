@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { useHandleSignInCallback, useLogto } from '@logto/react';
+import { useHandleSignInCallback } from '@logto/react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -12,14 +12,12 @@ import { useTheme } from '@mui/material/styles';
 import { createUser } from '../apis/userApi';
 
 export default function Callback() {
-  const { getAccessToken } = useLogto();
   const navigate = useNavigate();
   const theme = useTheme();
 
   const { isLoading } = useHandleSignInCallback(async () => {
     // Create user in the backend when sign-in is successful
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL) ?? '';
-    await createUser(token);
+    await createUser();
 
     // Navigate to root path when finished
     navigate('/');

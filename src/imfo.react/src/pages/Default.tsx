@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { useLogto } from '@logto/react';
 import Box from '@mui/material/Box';
 
 import BudgetUsage from '../components/default/BudgetUsage';
@@ -17,8 +16,6 @@ import { Transaction, Budget, Category, ScheduledTransaction, Goal } from '../ty
 import { getPeriodStart, normalizeAmount } from '../utils/frequency';
 
 export default function Default() {
-  const { getAccessToken } = useLogto();
-
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -28,16 +25,15 @@ export default function Default() {
 
   useEffect(() => {
     async function load() {
-      const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL) ?? '';
       const [transactions, budgets, goals, scheduledTransactions, categories] = await Promise.all([
         // TODO:  change the API endpoints to accept a filter parameter for the date range,
         //        so we can fetch only the relevant data for the selected frequency.
         //        For now, we fetch all data and filter it on the client side.
-        getTransactions(token),
-        getBudgets(token),
-        getGoals(token),
-        getScheduledTransactions(token),
-        getCategories(token)
+        getTransactions(),
+        getBudgets(),
+        getGoals(),
+        getScheduledTransactions(),
+        getCategories()
       ]);
 
       setTransactions(transactions);

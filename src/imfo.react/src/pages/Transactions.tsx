@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useLogto } from '@logto/react';
 
 import { getCategories } from '../apis/categoryApi';
 import { getScheduledTransactions, createScheduledTransaction, deleteScheduledTransaction } from '../apis/scheduledTransactionApi';
@@ -16,8 +15,6 @@ import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 
 export default function Transactions() {
-  const { getAccessToken } = useLogto();
-
   const [activeTab, setActiveTab] = useState<'transactions' | 'scheduled'>('transactions');
 
   // transactions
@@ -33,15 +30,14 @@ export default function Transactions() {
   }, []);
 
   async function load() {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
     const [txns, scheds] = await Promise.all([
-      getTransactions(token),
-      getScheduledTransactions(token)
+      getTransactions(),
+      getScheduledTransactions()
     ]);
     setItems(txns);
     setScheduledItems(scheds);
     try {
-      const cats = await getCategories(token);
+      const cats = await getCategories();
       setCategories(cats || []);
     } catch {
       setCategories([]);
@@ -50,20 +46,17 @@ export default function Transactions() {
 
   // transaction handlers
   async function onCreate(item: Omit<Transaction, 'id'>) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await createTransaction(item, token);
+    await createTransaction(item);
     await load();
   }
 
   async function onDeleteTransaction(id: string) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await deleteTransaction(id, token);
+    await deleteTransaction(id);
     await load();
   }
 
   async function onUpdateTransaction(id: string, data: Omit<Transaction, 'id'>) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await updateTransaction(id, data, token);
+    await updateTransaction(id, data);
     await load();
   }
 
@@ -74,14 +67,12 @@ export default function Transactions() {
       alert('Please provide a category for expenses');
       return;
     }
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await createScheduledTransaction(item, token);
+    await createScheduledTransaction(item);
     await load();
   }
 
   async function onDeleteScheduled(id: string) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await deleteScheduledTransaction(id, token);
+    await deleteScheduledTransaction(id);
     await load();
   }
 

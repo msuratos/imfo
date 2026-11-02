@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useLogto } from '@logto/react';
 import { BarChart } from '@mui/x-charts';
 
 import { getCategories } from '../apis/categoryApi';
@@ -156,7 +155,6 @@ function generateForecast(transactions: Transaction[], scheduled: ScheduledTrans
 }
 
 export default function Forecast() {
-  const { getAccessToken } = useLogto();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [scheduled, setScheduled] = useState<ScheduledTransaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -171,11 +169,10 @@ export default function Forecast() {
 
   useEffect(() => {
     async function load() {
-      const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
       const [txs, sched, cats] = await Promise.all([
-        getTransactions(token),
-        getScheduledTransactions(token),
-        (async () => { try { return await getCategories(token); } catch { return []; } })()
+        getTransactions(),
+        getScheduledTransactions(),
+        (async () => { try { return await getCategories(); } catch { return []; } })()
       ]);
       setTransactions(txs);
       setScheduled(sched);

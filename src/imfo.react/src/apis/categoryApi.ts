@@ -2,21 +2,13 @@ import api from './apiClient'
 import { Category } from '../types'
 
 // Category API calls
-export async function createCategory(item: Omit<Category, 'id'>, token: string) {
-  const r = await api.post('/api/category', item, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
+export async function createCategory(item: Omit<Category, 'id'>) {
+  const r = await api.post('/api/category', item)
   return r.data
 }
 
-export async function getCategories(token: string): Promise<Category[]> {
-  const r = await api.get('/api/category', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
+export async function getCategories(): Promise<Category[]> {
+  const r = await api.get('/api/category')
   // Normalize type: backend may return numeric enum values or string labels
   const data = r.data as any[];
   return data.map(d => {

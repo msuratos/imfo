@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from "react-router";
 
-import { LogtoProvider, LogtoConfig } from '@logto/react';
+import { LogtoProvider, LogtoConfig, useLogto } from '@logto/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+
+import { setAccessTokenProvider } from './apis/apiClient';
 
 import Layout from './components/Layout';
 import SettingsLayout from './components/SettingsLayout';
@@ -37,29 +39,41 @@ const theme = createTheme({
   },
 });
 
+function AppShell() {
+  const { getAccessToken } = useLogto();
+
+  useEffect(() => {
+    setAccessTokenProvider(() => getAccessToken(import.meta.env.VITE_LOGTO_API_URL));
+  }, [getAccessToken]);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Default />} />
+          <Route path="/allocations" element={<Allocations />} />
+          <Route path="/forecast" element={<Forecast />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/settings" element={<SettingsLayout />}>
+            <Route index element={<Settings />} />
+            <Route path="categories" element={<Categories />} />
+          </Route>
+        </Route>
+
+        <Route path="/callback" element={<Callback />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/session-expired" element={<SessionExpired />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </ThemeProvider>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <LogtoProvider config={config}>
-        <ThemeProvider theme={theme}>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Default />} />
-              <Route path="/allocations" element={<Allocations />} />
-              <Route path="/forecast" element={<Forecast />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/settings" element={<SettingsLayout />}>
-                <Route index element={<Settings />} />
-                <Route path="categories" element={<Categories />} />
-              </Route>
-            </Route>
-
-            <Route path="/callback" element={<Callback />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/session-expired" element={<SessionExpired />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </ThemeProvider>
+        <AppShell />
       </LogtoProvider>
     </BrowserRouter>
   )

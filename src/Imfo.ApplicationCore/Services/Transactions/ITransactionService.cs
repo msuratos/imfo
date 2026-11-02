@@ -4,7 +4,7 @@ namespace Imfo.ApplicationCore.Services.Transactions;
 
 public interface ITransactionService
 {
-    Task<List<Transaction>> GetAllAsync(Guid userId);
+    Task<List<Transaction>> GetAllAsync(Guid userId, DateTime? from = null, DateTime? to = null);
     Task<Transaction?> GetByIdAsync(Guid id, Guid userId);
     Task<Transaction> CreateAsync(Transaction transaction);
     Task<Transaction?> UpdateAsync(Guid id, Transaction updated, Guid userId);

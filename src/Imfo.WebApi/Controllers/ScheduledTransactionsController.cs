@@ -20,10 +20,10 @@ public class ScheduledTransactionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ScheduledTransactionReadDto>>> Get()
+    public async Task<ActionResult<IEnumerable<ScheduledTransactionReadDto>>> Get([FromQuery] DateTime? from, [FromQuery] DateTime? to)
     {
         var userId = User.GetCurrentUserId();
-        var items = await _scheduledTransactionService.GetAllAsync(userId);
+        var items = await _scheduledTransactionService.GetAllAsync(userId, from, to);
         return Ok(items.Select(ToReadDto));
     }
 

@@ -12,10 +12,15 @@ public class ScheduledTransactionService : IScheduledTransactionService
         _repository = repository;
     }
 
-    public Task<List<ScheduledTransaction>> GetAllAsync(Guid userId)
+    public Task<List<ScheduledTransaction>> GetAllAsync(Guid userId, DateTime? from = null, DateTime? to = null)
     {
+        var fromDate = from ?? DateTime.MinValue;
+        var toDate = to ?? DateTime.MaxValue;
+
         return _repository.GetAllAsync(
-            transaction => transaction.UserId == userId,
+            transaction => transaction.UserId == userId
+                && transaction.ReceivedDate >= fromDate
+                && transaction.ReceivedDate <= toDate,
             transactions => transactions.OrderByDescending(transaction => transaction.ReceivedDate));
     }
 

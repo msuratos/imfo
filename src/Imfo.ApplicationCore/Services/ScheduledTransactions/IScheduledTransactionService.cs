@@ -4,7 +4,7 @@ namespace Imfo.ApplicationCore.Services.ScheduledTransactions;
 
 public interface IScheduledTransactionService
 {
-    Task<List<ScheduledTransaction>> GetAllAsync(Guid userId);
+    Task<List<ScheduledTransaction>> GetAllAsync(Guid userId, DateTime? from = null, DateTime? to = null);
     Task<ScheduledTransaction?> GetByIdAsync(Guid id, Guid userId);
     Task<ScheduledTransaction> CreateAsync(ScheduledTransaction scheduledTransaction);
     Task<ScheduledTransaction?> UpdateAsync(Guid id, ScheduledTransaction updated, Guid userId);

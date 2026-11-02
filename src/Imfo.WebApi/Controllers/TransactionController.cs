@@ -20,10 +20,10 @@ public class TransactionController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TransactionReadDto>>> Get()
+    public async Task<ActionResult<IEnumerable<TransactionReadDto>>> Get([FromQuery] DateTime? from, [FromQuery] DateTime? to)
     {
         var userId = User.GetCurrentUserId();
-        var transactions = await _transactionService.GetAllAsync(userId);
+        var transactions = await _transactionService.GetAllAsync(userId, from, to);
         return Ok(transactions.Select(ToReadDto));
     }
 

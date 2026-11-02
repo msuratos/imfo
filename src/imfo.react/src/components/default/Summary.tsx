@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import { PieChart } from '@mui/x-charts/PieChart';
 
 import { Budget, Goal, Transaction, ScheduledTransaction  } from '../../types';
-import { getPeriodStart, normalizeAmount } from '../../utils/frequency';
+import { getPeriodRange, normalizeAmount } from '../../utils/frequency';
 
 export type Frequency = 'weekly' | 'bi-weekly' | 'monthly' | 'yearly';
 
@@ -27,7 +27,8 @@ export default function Summary(props: SummaryProps) {
   const [incomeShowRemaining, setIncomeShowRemaining] = useState(false);
   const [expenseShowRemaining, setExpenseShowRemaining] = useState(false);
 
-  const startDate = getPeriodStart(selectedFrequency);
+  const { start: startDate } = getPeriodRange(selectedFrequency);
+
 
   const actualExpenses = transactions
     .filter(item => item.amount < 0 && new Date(item.date) >= startDate)

@@ -12,10 +12,15 @@ public class TransactionService : ITransactionService
         _repository = repository;
     }
 
-    public Task<List<Transaction>> GetAllAsync(Guid userId)
+    public Task<List<Transaction>> GetAllAsync(Guid userId, DateTime? from = null, DateTime? to = null)
     {
+        var fromDate = from ?? DateTime.MinValue;
+        var toDate = to ?? DateTime.MaxValue;
+
         return _repository.GetAllAsync(
-            transaction => transaction.UserId == userId,
+            transaction => transaction.UserId == userId
+                && transaction.Date >= fromDate
+                && transaction.Date <= toDate,
             transactions => transactions.OrderByDescending(transaction => transaction.Date));
     }
 

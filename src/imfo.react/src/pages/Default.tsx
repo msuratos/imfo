@@ -13,7 +13,7 @@ import { getTransactions } from '../apis/transactionApi';
 import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
 
 import { Transaction, Budget, Category, ScheduledTransaction, Goal } from '../types';
-import { getPeriodStart, normalizeAmount } from '../utils/frequency';
+import { getPeriodRange, getPeriodStart, normalizeAmount } from '../utils/frequency';
 
 export default function Default() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -25,15 +25,14 @@ export default function Default() {
 
   useEffect(() => {
     async function load() {
-      const [transactions, budgets, goals, scheduledTransactions, categories] = await Promise.all([
-        // TODO:  change the API endpoints to accept a filter parameter for the date range,
-        //        so we can fetch only the relevant data for the selected frequency.
-        //        For now, we fetch all data and filter it on the client side.
-        getTransactions(),
+      const { start: startDate, end: endDate } = getPeriodRange(selectedFrequency);
+
+      const [budgets, goals, categories, transactions, scheduledTransactions] = await Promise.all([
         getBudgets(),
         getGoals(),
-        getScheduledTransactions(),
-        getCategories()
+        getCategories(),
+        getTransactions({ from: startDate.toISOString(), to: endDate.toISOString() }),
+        getScheduledTransactions({ from: startDate.toISOString(), to: endDate.toISOString() })
       ]);
 
       setTransactions(transactions);
@@ -44,7 +43,7 @@ export default function Default() {
     }
 
     load();
-  }, []);
+  }, [selectedFrequency]);
 
   function getExpensesByCategory() {
     const spentByCategory: { [key: string]: number } = {};

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useLogto } from '@logto/react'
 
 import { getCategories, createCategory } from '../apis/categoryApi'
 import { Category } from '../types'
@@ -18,8 +17,6 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 
 export default function Categories() {
-  const { getAccessToken } = useLogto();
-
   const [items, setItems] = useState<Category[]>([]);
   const [name, setName] = useState('');
   const [type, setType] = useState<'Income' | 'Expense'>('Expense');
@@ -29,16 +26,14 @@ export default function Categories() {
   }, []);
 
   async function load() {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    const cats = await getCategories(token);
+    const cats = await getCategories();
     setItems(cats || []);
   }
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
 
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await createCategory({ name, type }, token);
+    await createCategory({ name, type });
 
     setName('');
     load();

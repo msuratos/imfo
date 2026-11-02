@@ -1,29 +1,17 @@
 import api from './apiClient'
 import { ScheduledTransaction } from '../types'
 
-export async function createScheduledTransaction(item: Omit<ScheduledTransaction, 'id'>, token: string) {
-  const r = await api.post('/api/scheduled-transactions', item, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
+export async function createScheduledTransaction(item: Omit<ScheduledTransaction, 'id'>) {
+  const r = await api.post('/api/scheduled-transactions', item)
   return r.data
 }
 
-export async function getScheduledTransactions(token: string): Promise<ScheduledTransaction[]> {
-  const r = await api.get('/api/scheduled-transactions', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
+export async function getScheduledTransactions(): Promise<ScheduledTransaction[]> {
+  const r = await api.get('/api/scheduled-transactions')
   return r.data
 }
 
-export async function deleteScheduledTransaction(id: string, token: string) {
-  const r = await api.delete(`/api/scheduled-transactions/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
+export async function deleteScheduledTransaction(id: string) {
+  const r = await api.delete(`/api/scheduled-transactions/${id}`)
   return r.data
 }

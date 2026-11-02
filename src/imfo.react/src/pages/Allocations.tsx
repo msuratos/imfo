@@ -15,7 +15,7 @@ import BudgetAllocations from '../components/allocations/Budget';
 import GoalAllocations from '../components/allocations/Goal';
 
 export default function Allocations() {
-  const { isAuthenticated, getAccessToken } = useLogto();
+  const { isAuthenticated } = useLogto();
 
   const [activeTab, setActiveTab] = useState<'budgets' | 'goals'>('budgets');
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -30,15 +30,14 @@ export default function Allocations() {
   }, [isAuthenticated]);
 
   async function load() {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
     const [budgetsData, goalsData] = await Promise.all([
-      getBudgets(token),
-      getGoals(token)
+      getBudgets(),
+      getGoals()
     ]);
     setBudgets(budgetsData);
     setGoals(goalsData);
     try {
-      const cats = await getCategories(token);
+      const cats = await getCategories();
       setCategories(cats || []);
     } catch {
       setCategories([]);
@@ -46,26 +45,22 @@ export default function Allocations() {
   }
 
   async function handleCreateBudget(item: Omit<Budget, 'id'>) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await createBudget(item, token);
+    await createBudget(item);
     load();
   }
 
   async function handleDeleteBudget(id: string) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await deleteBudget(id, token);
+    await deleteBudget(id);
     load();
   }
 
   async function handleCreateGoal(item: Omit<Goal, 'id'>) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await createGoal(item, token);
+    await createGoal(item);
     load();
   }
 
   async function handleDeleteGoal(id: string) {
-    const token = await getAccessToken(import.meta.env.VITE_LOGTO_API_URL);
-    await deleteGoal(id, token);
+    await deleteGoal(id);
     load();
   }
 

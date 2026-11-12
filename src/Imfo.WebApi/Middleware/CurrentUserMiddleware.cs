@@ -16,29 +16,27 @@ public class CurrentUserMiddleware
 
     public async Task InvokeAsync(HttpContext context, IUserService userService)
     {
-        if (context.User.Identity?.IsAuthenticated == true)
+        // if the request is not a post to /api/user and the user is authenticated,
+        // check if the user exists in the application database
+        if (!(context.Request.Path.Equals("/api/user", StringComparison.OrdinalIgnoreCase) && HttpMethods.IsPost(context.Request.Method))
+            && context.User.Identity?.IsAuthenticated == true)
         {
             var externalId = context.User.FindFirst("userId")?.Value;
             if (!string.IsNullOrEmpty(externalId))
             {
                 var user = await userService.GetUserByExternalIdAsync(externalId);
+
+                // if we can't find the user by their external ID, return a 401 Unauthorized response
                 if (user == null)
                 {
-                    var isUserCreationRequest =
-                        HttpMethods.IsPost(context.Request.Method) &&
-                        context.Request.Path.Equals("/api/user", StringComparison.OrdinalIgnoreCase);
-
-                    if (!isUserCreationRequest)
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    await context.Response.WriteAsJsonAsync(new ProblemDetails
                     {
-                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                        await context.Response.WriteAsJsonAsync(new ProblemDetails
-                        {
-                            Status = StatusCodes.Status401Unauthorized,
-                            Title = "Application user not found",
-                            Detail = "Please sign in again to restore your account session."
-                        });
-                        return;
-                    }
+                        Status = StatusCodes.Status401Unauthorized,
+                        Title = "Application user not found",
+                        Detail = "Please sign in again to restore your account session."
+                    });
+                    return;
                 }
                 else
                 {

@@ -12,9 +12,11 @@ public class CategoryService : ICategoryService
         _repository = repository;
     }
 
-    public Task<List<Category>> GetAllAsync(Guid userId)
+    public Task<List<Category>> GetAllAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return _repository.GetAllAsync(category => category.UserId == userId || category.UserId == Guid.Empty);
+        return _repository.GetAllAsync(
+            category => category.UserId == userId || category.UserId == Guid.Empty,
+            cancellationToken: cancellationToken);
     }
 
     public Task<Category> CreateAsync(Category category)

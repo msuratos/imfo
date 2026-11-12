@@ -12,7 +12,7 @@ public class ScheduledTransactionService : IScheduledTransactionService
         _repository = repository;
     }
 
-    public Task<List<ScheduledTransaction>> GetAllAsync(Guid userId, DateTime? from = null, DateTime? to = null)
+    public Task<List<ScheduledTransaction>> GetAllAsync(Guid userId, DateTime? from = null, DateTime? to = null, CancellationToken cancellationToken = default)
     {
         var fromDate = from ?? DateTime.MinValue;
         var toDate = to ?? DateTime.MaxValue;
@@ -21,7 +21,8 @@ public class ScheduledTransactionService : IScheduledTransactionService
             transaction => transaction.UserId == userId
                 && transaction.ReceivedDate >= fromDate
                 && transaction.ReceivedDate <= toDate,
-            transactions => transactions.OrderByDescending(transaction => transaction.ReceivedDate));
+            transactions => transactions.OrderByDescending(transaction => transaction.ReceivedDate),
+            cancellationToken);
     }
 
     public Task<ScheduledTransaction?> GetByIdAsync(Guid id, Guid userId)

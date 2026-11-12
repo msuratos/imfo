@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Imfo.ApplicationCore.Services.Users;
+using Imfo.ApplicationCore.Services.Forecasting;
 using Imfo.WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,7 @@ builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IScheduledTransactionService, ScheduledTransactionService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IForecastService, ForecastService>();
 
 builder.Services.AddControllers();
 

@@ -16,7 +16,8 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
 
     public Task<List<TEntity>> GetAllAsync(
         Expression<Func<TEntity, bool>> predicate,
-        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null)
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+        CancellationToken cancellationToken = default)
     {
         IQueryable<TEntity> query = _db.Set<TEntity>().Where(predicate);
         if (orderBy != null)
@@ -24,7 +25,7 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
             query = orderBy(query);
         }
 
-        return query.ToListAsync();
+        return query.ToListAsync(cancellationToken);
     }
 
     public Task<TEntity?> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)

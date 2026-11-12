@@ -12,7 +12,7 @@ public class TransactionService : ITransactionService
         _repository = repository;
     }
 
-    public Task<List<Transaction>> GetAllAsync(Guid userId, DateTime? from = null, DateTime? to = null)
+    public Task<List<Transaction>> GetAllAsync(Guid userId, DateTime? from = null, DateTime? to = null, CancellationToken cancellationToken = default)
     {
         var fromDate = from ?? DateTime.MinValue;
         var toDate = to ?? DateTime.MaxValue;
@@ -21,7 +21,8 @@ public class TransactionService : ITransactionService
             transaction => transaction.UserId == userId
                 && transaction.Date >= fromDate
                 && transaction.Date <= toDate,
-            transactions => transactions.OrderByDescending(transaction => transaction.Date));
+            transactions => transactions.OrderByDescending(transaction => transaction.Date),
+            cancellationToken);
     }
 
     public Task<Transaction?> GetByIdAsync(Guid id, Guid userId)

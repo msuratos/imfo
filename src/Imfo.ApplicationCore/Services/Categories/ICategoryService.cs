@@ -4,6 +4,6 @@ namespace Imfo.ApplicationCore.Services.Categories;
 
 public interface ICategoryService
 {
-    Task<List<Category>> GetAllAsync(Guid userId);
+    Task<List<Category>> GetAllAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<Category> CreateAsync(Category category);
 }

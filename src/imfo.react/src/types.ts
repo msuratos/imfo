@@ -21,7 +21,7 @@ export interface Goal {
 export interface Transaction {
   id: string
   description: string
-  amount: number // Positive = Expense, Negative = Income
+  amount: number // positive = income, negative = expense
   categoryId: string
   date: string
 }

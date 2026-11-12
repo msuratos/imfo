@@ -5,6 +5,7 @@ import { getCategories } from '../apis/categoryApi';
 import { getScheduledTransactions } from '../apis/scheduledTransactionApi';
 import { getTransactions } from '../apis/transactionApi';
 import { ScheduledTransaction, Transaction, Category } from '../types'
+import { normalizeAmount } from '../utils/frequency';
 
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -13,23 +14,6 @@ import Stack from '@mui/material/Stack';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-
-function getFrequencyMultiplier(frequency: string): number {
-  switch (frequency.toLowerCase()) {
-    case 'weekly': return 52;
-    case 'bi-weekly': return 26;
-    case 'monthly': return 12;
-    case 'yearly': return 1;
-    case 'one-time': return 1;
-    default: return 1;
-  }
-}
-
-function normalizeAmount(amount: number, fromFrequency: string, toFrequency: string) {
-  const fromPeriods = getFrequencyMultiplier(fromFrequency);
-  const toPeriods = getFrequencyMultiplier(toFrequency);
-  return amount * (fromPeriods / toPeriods);
-}
 
 function linearRegression(values: number[]) {
   const n = values.length;

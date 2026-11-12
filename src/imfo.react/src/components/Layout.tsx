@@ -42,22 +42,25 @@ export default function Layout({ children }: PropsWithChildren<Props>) {
   const open = Boolean(anchorEl);
 
   useEffect(() => {
-    if (!isAuthenticated && !isLoading)
-      navigate('/login');
-  }, [isAuthenticated, isLoading]);
+    // Redirect to login page if the user is not authenticated and not loading
+    if (!isAuthenticated && !isLoading) navigate('/login');
 
-  // useEffect(() => {
-  //   let signingOut = false;
-  //   const handleSessionExpired = () => {
-  //     if (signingOut) return;
+    // Redirect to root path if the user is authenticated and not loading, and the current path is /login
+    else if (isAuthenticated && !isLoading && location.pathname === '/login') navigate('/');
+    
+    // Redirect to session-expired page if the user is authenticated and not loading, and the session has expired
+    else if (isAuthenticated && !isLoading) {
+      let signingOut = false;
+      const handleSessionExpired = () => {
+        if (signingOut) return;
 
-  //     signingOut = true;
-  //     navigate('/session-expired', { replace: true });
-  //   };
+        signingOut = true;
+        navigate('/session-expired', { replace: true });
+      };
 
-  //   window.addEventListener('imfo:session-expired', handleSessionExpired);
-  //   return () => window.removeEventListener('imfo:session-expired', handleSessionExpired);
-  // }, [navigate]);
+      window.addEventListener('imfo:session-expired', handleSessionExpired);
+    }
+  }, [isAuthenticated, isLoading, navigate, location.pathname]);
 
   function handleAccountButtonClick(event: React.MouseEvent<HTMLElement>) {
     // toggle menu: if already open, close it; otherwise open anchored to the button
